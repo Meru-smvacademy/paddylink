@@ -479,9 +479,9 @@ document.getElementById('LF').addEventListener('submit',async function(e){
   var btn=document.getElementById('SB');btn.disabled=true;btn.textContent='Submitting...';
   try{
     var mob=document.getElementById('mb').value.trim();
-    var ex=await db.from('farmers').select('id').eq('mobile',mob);
+    var existingId=await db.rpc('check_farmer_exists',{p_mobile:mob});
     var fid;
-    if(ex.data&&ex.data.length>0){fid=ex.data[0].id;}
+    if(existingId.data){fid=existingId.data;}
     else{
       var nf=await db.from('farmers').insert({name:document.getElementById('fn').value.trim(),mobile:mob,village:document.getElementById('vl').value.trim(),taluka:document.getElementById('tk').value}).select('id');
       if(nf.error)throw nf.error;
@@ -525,6 +525,7 @@ async function buyerLogin(){
   showPage('buyerDash');
 }
 
+var revealedNumbers={};
 async function loadBuyerDash(){
   var {data:tokens}=await db.from('buyer_tokens').select('*').eq('buyer_id',currentBuyer.id).single();
   tokenData=tokens;
@@ -532,7 +533,7 @@ async function loadBuyerDash(){
   var {data:reveals}=await db.from('reveals').select('listing_id').eq('buyer_id',currentBuyer.id);
   myReveals={};
   if(reveals)reveals.forEach(function(r){myReveals[r.listing_id]=true;});
-  var {data:listings}=await db.from('listings').select('*,farmers(name,mobile,village,taluka)').eq('status','ready_for_sale').eq('approved_by_admin',true).order('created_at',{ascending:false});
+  var {data:listings}=await db.from('public_farmer_listings').select('*').eq('status','ready_for_sale').eq('approved_by_admin',true).order('created_at',{ascending:false});
   var area=document.getElementById('listingsArea');
   if(!listings||listings.length===0){area.innerHTML='<div class="alert alert-info">No listings available yet. Check back during harvest season.</div>';return;}
   var html='';
@@ -543,12 +544,12 @@ async function loadBuyerDash(){
     html+='<div class="listing-card'+(sold?' ':'')+'"><div class="lc-top"><span class="lc-variety">'+l.variety+'</span>';
     if(l.grade)html+='<span class="badge badge-'+l.grade.toLowerCase()+'">Grade '+l.grade+'</span>';
     html+='<span class="badge badge-'+(sold?'sold':'ready')+'">'+(sold?'SOLD':'Ready')+'</span></div>';
-    html+='<div class="lc-detail"><span>📦 '+l.quantity+' '+l.unit+'</span><span>📍 '+(l.farmers&&l.farmers.taluka?l.farmers.taluka:'—')+'</span>';
+    html+='<div class="lc-detail"><span>📦 '+l.quantity+' '+l.unit+'</span><span>📍 '+(l.taluka||'—')+'</span>';
     if(l.moisture_pct)html+='<span>💧 '+l.moisture_pct+'%</span>';
     html+='<span>🗓 '+l.harvest_month+'</span></div>';
-    html+='<div class="reveal-area">';
+    html+='<div class="reveal-area" id="reveal-'+l.id+'">';
     if(sold){html+='<div class="locked">🔒 Sold — no longer available</div>';}
-    else if(revealed){html+='<div style="font-size:11px;color:var(--paper-dim);margin-bottom:6px;">📞 Contact</div><div class="phone-revealed">'+(l.farmers?l.farmers.mobile:'—')+'</div>';}
+    else if(revealed){html+='<div style="font-size:11px;color:var(--paper-dim);margin-bottom:6px;">📞 Contact</div><div class="phone-revealed">'+(revealedNumbers[l.id]||'Tap to view again')+'</div>';if(!revealedNumbers[l.id])html+='<button class="btn-reveal" onclick="revealContact(\''+l.id+'\')" style="margin-top:6px;">Show Number Again</button>';}
     else if(toks<=0){html+='<div class="locked">🔒 No tokens — recharge to reveal</div><button class="btn-recharge" onclick="showPage(\'recharge\')">Recharge ₹799 for 50 contacts</button>';}
     else{html+='<button class="btn-reveal" onclick="revealContact(\''+l.id+'\')">Reveal Contact ('+toks+' tokens left) · ಸಂಪರ್ಕ ತೋರಿಸಿ</button>';}
     html+='</div></div>';
@@ -557,15 +558,24 @@ async function loadBuyerDash(){
 }
 
 async function revealContact(listingId){
-  if(!confirm('Use 1 token to reveal this contact?\n1 ಟೋಕನ್ ಬಳಸಿ ಸಂಪರ್ಕ ತೋರಿಸಿ?'))return;
-  var {data:t}=await db.from('buyer_tokens').select('tokens_remaining').eq('buyer_id',currentBuyer.id).single();
-  if(!t||t.tokens_remaining<=0){alert('No tokens. Please recharge.');return;}
-  await db.from('buyer_tokens').update({tokens_remaining:t.tokens_remaining-1}).eq('buyer_id',currentBuyer.id);
-  await db.from('reveals').insert({buyer_id:currentBuyer.id,listing_id:listingId,followup_status:'pending'});
-  myReveals[listingId]=true;
-  if(tokenData)tokenData.tokens_remaining=t.tokens_remaining-1;
-  document.getElementById('tokCount').textContent=t.tokens_remaining-1;
-  loadBuyerDash();
+  if(!revealedNumbers[listingId]){
+    if(!confirm('Use 1 token to reveal this contact?\n1 ಟೋಕನ್ ಬಳಸಿ ಸಂಪರ್ಕ ತೋರಿಸಿ?'))return;
+  }
+  try{
+    var res=await db.rpc('reveal_farmer_contact',{p_listing_id:listingId,p_buyer_id:currentBuyer.id});
+    if(res.error)throw res.error;
+    if(!res.data||res.data.length===0){alert('This listing is no longer available.');loadBuyerDash();return;}
+    var mobile=res.data[0].mobile;
+    revealedNumbers[listingId]=mobile;
+    myReveals[listingId]=true;
+    var {data:t}=await db.from('buyer_tokens').select('tokens_remaining').eq('buyer_id',currentBuyer.id).single();
+    tokenData=t;
+    document.getElementById('tokCount').textContent=t?t.tokens_remaining:0;
+    var revealEl=document.getElementById('reveal-'+listingId);
+    if(revealEl)revealEl.innerHTML='<div style="font-size:11px;color:var(--paper-dim);margin-bottom:6px;">📞 Contact</div><div class="phone-revealed">'+mobile+'</div>';
+  }catch(err){
+    alert('Error: '+err.message);
+  }
 }
 
 async function buyerRegister(){
