@@ -362,12 +362,25 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
     </div>
     <div class="tabs">
       <div class="tab active" onclick="adminTab('approve')">✓ Approve</div>
+      <div class="tab" onclick="adminTab('allfarmers')">📋 All Farmers</div>
       <div class="tab" onclick="adminTab('buyers')">👤 Buyers</div>
       <div class="tab" onclick="adminTab('followup')">📞 Follow-Up</div>
       <div class="tab" onclick="adminTab('growing')">🌱 Growing</div>
       <div class="tab" onclick="adminTab('content')">🎨 Site Content</div>
     </div>
     <div id="atApprove" class="tab-panel active"><div class="loading">Loading...</div></div>
+    <div id="atAllfarmers" class="tab-panel">
+      <div class="filter-bar" style="margin-bottom:16px;">
+        <select id="afStatusFilter" onchange="loadAllFarmers()">
+          <option value="">All Statuses</option>
+          <option value="growing">Growing</option>
+          <option value="ready_for_sale">Ready for Sale</option>
+          <option value="sold">Sold</option>
+        </select>
+        <input type="text" id="afSearch" placeholder="Search name, mobile, village..." oninput="loadAllFarmers()">
+      </div>
+      <div id="allFarmersList"><div class="loading">Loading...</div></div>
+    </div>
     <div id="atBuyers" class="tab-panel"><div class="loading">Loading...</div></div>
     <div id="atFollowup" class="tab-panel"><div class="loading">Loading...</div></div>
     <div id="atGrowing" class="tab-panel"><div class="loading">Loading...</div></div>
@@ -652,14 +665,44 @@ async function loadAdminStats(){
 function adminTab(name){
   document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
-  var tabs=['approve','buyers','followup','growing','content'];
+  var tabs=['approve','allfarmers','buyers','followup','growing','content'];
   document.querySelectorAll('.tab')[tabs.indexOf(name)].classList.add('active');
   document.getElementById('at'+name.charAt(0).toUpperCase()+name.slice(1)).classList.add('active');
   if(name==='approve')loadAdminApprove();
+  else if(name==='allfarmers')loadAllFarmers();
   else if(name==='buyers')loadAdminBuyers();
   else if(name==='followup')loadAdminFollowup();
   else if(name==='growing')loadAdminGrowing();
   else if(name==='content'){loadGalleryManage();loadWishManage();loadProgramManage();}
+}
+
+async function loadAllFarmers(){
+  var el=document.getElementById('allFarmersList');
+  var statusFilter=document.getElementById('afStatusFilter').value;
+  var search=document.getElementById('afSearch').value.trim().toLowerCase();
+  var query=db.from('listings').select('*,farmers(name,mobile,village,taluka)').order('created_at',{ascending:false});
+  if(statusFilter)query=query.eq('status',statusFilter);
+  var {data,error}=await query;
+  if(error){el.innerHTML='<div class="alert alert-error">'+error.message+'</div>';return;}
+  if(!data||data.length===0){el.innerHTML='<div class="alert alert-info">No farmer listings yet.</div>';return;}
+  if(search){
+    data=data.filter(function(l){
+      var f=l.farmers||{};
+      var hay=(f.name||'')+' '+(f.mobile||'')+' '+(f.village||'')+' '+(f.taluka||'')+' '+(l.variety||'');
+      return hay.toLowerCase().indexOf(search)!==-1;
+    });
+  }
+  if(data.length===0){el.innerHTML='<div class="alert alert-info">No matches found.</div>';return;}
+  var html='<table class="dt"><thead><tr><th>Name</th><th>Mobile</th><th>Village / Taluka</th><th>Variety</th><th>Qty</th><th>Status</th><th>Listed On</th></tr></thead><tbody>';
+  data.forEach(function(l){
+    var f=l.farmers||{};
+    var statusBadge=l.status==='growing'?'<span class="badge badge-growing" style="background:rgba(40,115,46,0.18);color:#7ECC82;border:1px solid var(--green);">Growing</span>'
+      :l.status==='ready_for_sale'?'<span class="badge badge-ready">Ready</span>'
+      :l.status==='sold'?'<span class="badge badge-sold">Sold</span>':l.status;
+    html+='<tr><td><strong>'+(f.name||'—')+'</strong></td><td style="font-family:\'JetBrains Mono\',monospace;color:var(--gold-bright);">'+(f.mobile||'—')+'</td><td>'+(f.village||'—')+', '+(f.taluka||'—')+'</td><td>'+l.variety+'</td><td>'+l.quantity+' '+l.unit+'</td><td>'+statusBadge+'</td><td style="font-size:11px;">'+new Date(l.created_at).toLocaleDateString('en-IN')+'</td></tr>';
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
 }
 async function loadAdminApprove(){
   var {data}=await db.from('listings').select('*,farmers(name,mobile,village,taluka)').eq('status','ready_for_sale').eq('approved_by_admin',false);
