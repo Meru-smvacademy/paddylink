@@ -179,7 +179,7 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
       <form id="LF">
         <input type="text" id="hp_website" name="website" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="off">
         <div class="field"><label>Full Name</label><span class="kl">ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು</span><input type="text" id="fn" placeholder="e.g. Hanumanthappa" required></div>
-        <div class="field"><label>Mobile Number</label><span class="kl">ಮೊಬೈಲ್ ಸಂಖ್ಯೆ</span><input type="tel" id="mb" placeholder="10-digit number" maxlength="10" required></div>
+        <div class="field"><label>Mobile Number</label><span class="kl">ಮೊಬೈಲ್ ಸಂಖ್ಯೆ</span><input type="tel" id="mb" placeholder="10-digit number" maxlength="10" required><div id="mbCheckMsg" style="font-size:12px;margin-top:6px;"></div></div>
         <div class="field"><label>Village / Field Location</label><span class="kl">ಗ್ರಾಮ / ಜಮೀನು ಸ್ಥಳ</span><input type="text" id="vl" placeholder="e.g. Lingasugur, near canal" required></div>
         <div class="field"><label>Taluka</label><span class="kl">ತಾಲೂಕ</span>
           <select id="tk" required>
@@ -456,6 +456,21 @@ function showPage(name) {
 // ===== MONTH GRID =====
 var ML=['Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'];
 var MK=['ಜೂ','ಜು','ಆ','ಸೆ','ಅ','ನ','ಡಿ','ಜ','ಫೆ','ಮಾ','ಏ','ಮೇ'];
+document.getElementById('mb').addEventListener('blur',async function(){
+  var mob=this.value.trim();
+  var msgEl=document.getElementById('mbCheckMsg');
+  msgEl.innerHTML='';
+  if(mob.length!==10)return;
+  try{
+    var res=await db.rpc('check_farmer_exists',{p_mobile:mob});
+    if(res.data){
+      var {data:active}=await db.from('listings').select('reference,status').eq('farmer_id',res.data).in('status',['growing','ready_for_sale']).limit(1);
+      if(active&&active.length>0){
+        msgEl.innerHTML='<span style="color:var(--warn);">⚠ This number already has an active listing (Ref: '+(active[0].reference||'—')+'). · ಈ ಸಂಖ್ಯೆ ಈಗಾಗಲೇ ಸಕ್ರಿಯ ಪಟ್ಟಿ ಹೊಂದಿದೆ.</span>';
+      }
+    }
+  }catch(e){}
+});
 ML.forEach(function(m,i){
   var b=document.createElement('div');
   b.className='mb';
@@ -481,7 +496,17 @@ document.getElementById('LF').addEventListener('submit',async function(e){
     var mob=document.getElementById('mb').value.trim();
     var existingId=await db.rpc('check_farmer_exists',{p_mobile:mob});
     var fid;
-    if(existingId.data){fid=existingId.data;}
+    if(existingId.data){
+      fid=existingId.data;
+      // Check if this farmer already has an active listing this season
+      var {data:activeListings}=await db.from('listings').select('reference,status').eq('farmer_id',fid).in('status',['growing','ready_for_sale']).limit(1);
+      if(activeListings&&activeListings.length>0){
+        var existingRef=activeListings[0].reference||'—';
+        al('listAlert','You already have an active listing this season (Reference: '+existingRef+'). Once it is sold, you can list again. To update your existing listing, please contact our team.<br><span style="font-family:\'Noto Sans Kannada\',sans-serif;font-size:12px;">ಈ ಋತುವಿನಲ್ಲಿ ನೀವು ಈಗಾಗಲೇ ಸಕ್ರಿಯ ಪಟ್ಟಿಯನ್ನು ಹೊಂದಿದ್ದೀರಿ (ಉಲ್ಲೇಖ: '+existingRef+'). ಅದು ಮಾರಾಟವಾದ ನಂತರ ನೀವು ಮತ್ತೆ ಪಟ್ಟಿ ಮಾಡಬಹುದು.</span>','info');
+        btn.disabled=false;btn.textContent='Submit Listing · ಪಟ್ಟಿ ಸಲ್ಲಿಸಿ';
+        return;
+      }
+    }
     else{
       var nf=await db.from('farmers').insert({name:document.getElementById('fn').value.trim(),mobile:mob,village:document.getElementById('vl').value.trim(),taluka:document.getElementById('tk').value}).select('id');
       if(nf.error)throw nf.error;
