@@ -397,11 +397,11 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
     <div id="atContent" class="tab-panel">
       <h3 style="font-family:'Fraunces',serif;font-size:16px;margin-bottom:14px;color:var(--gold-bright);">Logo</h3>
       <div id="csAlert"></div>
-      <div class="field"><label>Upload New Logo</label><input type="file" id="csLogoFile" accept="image/*"></div>
+      <div class="field"><label>Upload New Logo</label><input type="file" id="csLogoFile" accept="image/*"><div style="font-size:11px;color:var(--paper-dim);margin-top:5px;">📐 Best size: 500 × 500 px (square), PNG format, under 2MB</div></div>
       <button class="btn-primary" style="margin-bottom:26px;" onclick="uploadLogo()">Update Logo</button>
 
       <h3 style="font-family:'Fraunces',serif;font-size:16px;margin-bottom:14px;color:var(--gold-bright);">Add Gallery Photo</h3>
-      <div class="field"><label>Photo</label><input type="file" id="galFile" accept="image/*"></div>
+      <div class="field"><label>Photo</label><input type="file" id="galFile" accept="image/*"><div style="font-size:11px;color:var(--paper-dim);margin-top:5px;">📐 Best size: 1080 × 1350 px (portrait), JPG or PNG, under 2MB</div></div>
       <div class="field"><label>Caption</label><input type="text" id="galCaption" placeholder="e.g. Harvest verification at Lingasugur"></div>
       <button class="btn-primary" style="margin-bottom:10px;" onclick="addGalleryPhoto()">Add to Gallery</button>
       <div id="galManageList" style="margin-bottom:26px;"></div>
