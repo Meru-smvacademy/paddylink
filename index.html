@@ -165,9 +165,9 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
     </div>
   </div>
   <div class="promise">
-    <p><strong>Farmer listing is always free.</strong> Buyers pay ₹799 for 50 farmer contacts — no monthly charges. PaddyLink never sets prices or holds money.<span class="k">ರೈತರಿಗೆ ಯಾವಾಗಲೂ ಉಚಿತ. ಖರೀದಿದಾರರು ₹799 ಕೊಟ್ಟರೆ 50 ಸಂಪರ್ಕಗಳು.</span></p>
+    <p><strong>Farmer listing is always free — every stage, forever.</strong> PaddyLink never sets prices or holds money.<span class="k">ರೈತರ ಪಟ್ಟಿ ಯಾವಾಗಲೂ ಸಂಪೂರ್ಣ ಉಚಿತ. ಪ್ಯಾಡಿಲಿಂಕ್ ಬೆಲೆ ನಿಗದಿ ಮಾಡುವುದಿಲ್ಲ, ಹಣ ಇಟ್ಟುಕೊಳ್ಳುವುದಿಲ್ಲ.</span></p>
   </div>
-  <footer class="footer"><strong>PaddyLink</strong> · Kalbantt Tech OPC Pvt Ltd · Unit 101, Oxford Towers, 139/88 Old Airport Road, Kodihalli, Bangalore, Karnataka 560008 · paddylink.in<br>📞 Need help? Call/WhatsApp: <strong>9108540960</strong> · ಸಹಾಯ ಬೇಕೇ? ಕರೆ ಮಾಡಿ: 9108540960</footer>
+  <footer class="footer"><strong>PaddyLink</strong> · Kalbantt Tech OPC Pvt Ltd · CIN: U85500KA2026OPC224772<br>Unit 101, Oxford Towers, 139/88 Old Airport Road, Kodihalli, Bangalore, Karnataka 560008 · paddylink.in<br>📞 Need help? Call/WhatsApp: <strong>9108540960</strong> · ಸಹಾಯ ಬೇಕೇ? ಕರೆ ಮಾಡಿ: 9108540960</footer>
 </div>
 
 <!-- ===== PAGE: FARMER LIST PADDY ===== -->
@@ -191,7 +191,7 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
         <div class="field"><label>Paddy Variety</label><span class="kl">ಭತ್ತದ ತಳಿ</span>
           <select id="vr" required>
             <option value="">Select Variety · ತಳಿ ಆಯ್ಕೆ</option>
-            <option value="Sona Masuri">Sona Masuri</option><option value="BPT 5204">BPT 5204</option><option value="IR 64">IR 64</option><option value="Common">Common</option><option value="Other">Other</option>
+            <option value="Sona Masuri">Sona Masuri · ಸೋನಾ ಮಸೂರಿ</option><option value="BPT 5204">BPT 5204 · ಬಿಪಿಟಿ 5204</option><option value="IR 64">IR 64 · ಐಆರ್ 64</option><option value="Common">Common · ಸಾಮಾನ್ಯ</option><option value="Other">Other · ಇತರೆ</option>
           </select>
         </div>
         <div class="field"><label>Approximate Quantity</label><span class="kl">ಅಂದಾಜು ಪ್ರಮಾಣ</span>
@@ -275,6 +275,9 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
         <button class="btn-recharge" style="width:auto;padding:9px 16px;" onclick="showPage('recharge')">+ Recharge</button>
       </div>
     </div>
+    <div style="background:rgba(218,163,26,0.06);border:1px solid rgba(218,163,26,0.25);border-radius:8px;padding:9px 14px;margin-bottom:16px;font-size:12px;color:var(--paper-dim);text-align:center;">
+      💰 <strong style="color:var(--gold-bright);">₹799 = 50 contacts</strong> — one-time, no monthly charges · ಫಾರ್ಮರ್ ಪಟ್ಟಿ ಯಾವಾಗಲೂ ಉಚಿತ
+    </div>
     <div id="listingsArea"><div class="loading">Loading listings...</div></div>
     <button class="btn-secondary" style="margin-top:20px;" onclick="buyerLogout()">Logout</button>
   </div>
@@ -343,7 +346,7 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
         <div class="field"><label>Paddy Variety</label><span class="kl">ಭತ್ತದ ತಳಿ</span>
           <select id="elVr" required>
             <option value="">Select Variety</option>
-            <option value="Sona Masuri">Sona Masuri</option><option value="BPT 5204">BPT 5204</option><option value="IR 64">IR 64</option><option value="Common">Common</option><option value="Other">Other</option>
+            <option value="Sona Masuri">Sona Masuri · ಸೋನಾ ಮಸೂರಿ</option><option value="BPT 5204">BPT 5204 · ಬಿಪಿಟಿ 5204</option><option value="IR 64">IR 64 · ಐಆರ್ 64</option><option value="Common">Common · ಸಾಮಾನ್ಯ</option><option value="Other">Other · ಇತರೆ</option>
           </select>
         </div>
         <div class="field"><label>Approximate Quantity</label><span class="kl">ಅಂದಾಜು ಪ್ರಮಾಣ</span>
@@ -483,6 +486,7 @@ body{background:var(--navy);color:var(--paper);font-family:'Inter','Noto Sans Ka
   <div class="wrap" style="max-width:720px;">
     <h1 class="page-title" style="margin-top:20px;">Terms and <em>Conditions</em></h1>
     <div class="page-kan">ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳು</div>
+    <div style="font-size:11px;color:var(--paper-muted);margin-bottom:16px;">Kalbantt Tech OPC Pvt Ltd · CIN: U85500KA2026OPC224772</div>
 
     <div class="alert alert-info">You must read and accept these terms before listing paddy, registering as a buyer, or logging in.<br><span style="font-family:'Noto Sans Kannada',sans-serif;">ಪಟ್ಟಿ ಮಾಡುವ ಅಥವಾ ನೋಂದಣಿ ಮಾಡುವ ಮೊದಲು ಈ ನಿಯಮಗಳನ್ನು ಓದಿ ಒಪ್ಪಿಕೊಳ್ಳಬೇಕು.</span></div>
 
