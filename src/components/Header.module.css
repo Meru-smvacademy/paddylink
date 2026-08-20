@@ -115,3 +115,32 @@
   color: #ffffff;
   box-shadow: 0 1px 6px rgba(201, 150, 58, 0.3);
 }
+
+/* --- Login button ---
+   Outlined in the brand emerald; shares the toggle's pill radius and
+   UI font so the two controls read as a set. 44px min touch target. */
+.login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--emerald-900);
+  border-radius: 22px;
+  color: var(--emerald-900);
+  background: transparent;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.login:hover,
+.login:focus-visible {
+  background: var(--emerald-900);
+  color: var(--cream);
+  box-shadow: 0 1px 6px rgba(42, 122, 59, 0.3);
+}

@@ -6,6 +6,8 @@ import {
   Noto_Serif_Kannada,
   Noto_Sans_Kannada,
 } from 'next/font/google';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { LanguageProvider, DEFAULT_LANG } from '@/lib/language';
 import Header from '@/components/Header';
 import './globals.css';
@@ -58,6 +60,12 @@ const fontVars = [
   notoSansKannada.variable,
 ].join(' ');
 
+/* Resolved at build time on the server. Until the crescent PNG is added to
+   public/brand/, the header renders no <img> rather than a broken image. */
+const hasCrescent = existsSync(
+  join(process.cwd(), 'public', 'brand', 'paddy-crescent.png'),
+);
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -65,7 +73,7 @@ export default function RootLayout({
     <html lang={DEFAULT_LANG} className={fontVars}>
       <body>
         <LanguageProvider>
-          <Header />
+          <Header hasCrescent={hasCrescent} />
           {children}
         </LanguageProvider>
       </body>
