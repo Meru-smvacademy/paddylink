@@ -1,0 +1,18 @@
+/* PaddyLink design tokens.
+   Values are PROVISIONAL — exact hex/typography arrive with the Figma exports.
+   Font families resolve through next/font/google variables set in app/layout.tsx;
+   the literal family names are kept as fallbacks so the intent stays readable. */
+
+:root {
+  /* Colour */
+  --cream: #F6EFDA;
+  --emerald-900: #1E5B45;
+  --emerald-950: #12362A;
+  --gold-500: #C9A84C;
+  --gold-300: #E3CE8C;
+  --ink: #23283B;
+
+  /* Type */
+  --serif: var(--font-noto-serif), var(--font-noto-serif-kannada), 'Noto Serif', 'Noto Serif Kannada', Georgia, serif;
+  --sans: var(--font-noto-sans-kannada), 'Noto Sans Kannada', system-ui, sans-serif;
+}
