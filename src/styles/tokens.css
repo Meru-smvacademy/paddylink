@@ -1,18 +1,50 @@
 /* PaddyLink design tokens.
-   Values are PROVISIONAL — exact hex/typography arrive with the Figma exports.
-   Font families resolve through next/font/google variables set in app/layout.tsx;
-   the literal family names are kept as fallbacks so the intent stays readable. */
+   Values extracted from the Figma header design (Make file vfgAppGDsfwuOsPU28zyFK).
+   These replace the provisional Step 1 values. */
 
 :root {
-  /* Colour */
-  --cream: #F6EFDA;
-  --emerald-900: #1E5B45;
-  --emerald-950: #12362A;
-  --gold-500: #C9A84C;
-  --gold-300: #E3CE8C;
-  --ink: #23283B;
+  /* --- Surfaces --- */
+  --page-bg: #f5f4f0;          /* body background */
+  --cream: #fdf6e3;            /* header background */
 
-  /* Type */
-  --serif: var(--font-noto-serif), var(--font-noto-serif-kannada), 'Noto Serif', 'Noto Serif Kannada', Georgia, serif;
-  --sans: var(--font-noto-sans-kannada), 'Noto Sans Kannada', system-ui, sans-serif;
+  /* --- Brand green --- */
+  --emerald-900: #2a7a3b;      /* wordmark */
+
+  /* --- Gold scale --- */
+  --gold-300: #e2b96a;
+  --gold-500: #c9963a;         /* accent, active toggle pill start */
+  --gold-600: #a97c2c;         /* active toggle pill end */
+  --gold-700: #b07d2a;         /* nav link rest state */
+
+  /* --- Navy scale --- */
+  --navy-700: #1a3360;
+  --navy-800: #132849;
+  --navy-900: #0d1f3c;
+  --navy-950: #07152b;
+
+  /* --- Ink --- */
+  --ink: #1e2837;              /* rgb(30,40,55) */
+  --ink-50: rgba(30, 40, 55, 0.5);
+  --ink-18: rgba(30, 40, 55, 0.18);
+
+  /* --- Lines & shadows --- */
+  --hairline: rgba(0, 0, 0, 0.08);
+  --control-border: rgba(0, 0, 0, 0.12);
+  --control-bg: rgba(0, 0, 0, 0.04);
+  --header-shadow: 0 1px 12px rgba(0, 0, 0, 0.07);
+  --gold-glow: rgba(201, 150, 58, 0.45);
+  --gold-tint: rgba(201, 150, 58, 0.08);
+  --gold-focus: rgba(201, 150, 58, 0.5);
+
+  /* --- Type ---
+     Latin faces carry no Kannada glyphs, so a Noto Kannada face follows in
+     every stack; Kannada strings fall through to it automatically. */
+  --serif: var(--font-fraunces), var(--font-noto-serif-kannada), 'Fraunces', Georgia, serif;
+  --sans: var(--font-jakarta), var(--font-noto-sans-kannada), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-nav: var(--font-poppins), var(--font-noto-sans-kannada), 'Poppins', system-ui, sans-serif;
+
+  /* --- Header metrics --- */
+  --header-height: 114px;
+  --shell-max: 1280px;
+  --shell-pad: 32px;
 }
