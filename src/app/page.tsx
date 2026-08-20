@@ -1,4 +1,9 @@
-// Placeholder. Renders nothing below the header until the hero arrives.
+import Hero from '@/components/Hero';
+
 export default function HomePage() {
-  return <main />;
+  return (
+    <main>
+      <Hero />
+    </main>
+  );
 }

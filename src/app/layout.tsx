@@ -5,6 +5,8 @@ import {
   Plus_Jakarta_Sans,
   Noto_Serif_Kannada,
   Noto_Sans_Kannada,
+  Tiro_Kannada,
+  Inter,
 } from 'next/font/google';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -47,6 +49,20 @@ const notoSansKannada = Noto_Sans_Kannada({
   variable: '--font-noto-sans-kannada',
 });
 
+/* Hero design fonts (Figma frame Vq0BfMfMUhkvcu9bKxXhDy). */
+const tiroKannada = Tiro_Kannada({
+  subsets: ['kannada'],
+  weight: ['400'],
+  display: 'swap',
+  variable: '--font-tiro-kannada',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
 export const metadata: Metadata = {
   title: 'PaddyLink',
   description: 'Connecting paddy farmers in Karnataka with verified buyers.',
@@ -58,6 +74,8 @@ const fontVars = [
   jakarta.variable,
   notoSerifKannada.variable,
   notoSansKannada.variable,
+  tiroKannada.variable,
+  inter.variable,
 ].join(' ');
 
 /* Resolved at build time on the server. Until the crescent PNG is added to

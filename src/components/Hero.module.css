@@ -1,0 +1,304 @@
+/* Hero — ported from Figma Make frame Vq0BfMfMUhkvcu9bKxXhDy.
+   Values are the frame's, verbatim. Desktop-first at 1440px. */
+
+.hero {
+  position: relative;
+  /* Frame value is 100vh, which assumed the frame's own FIXED overlapping
+     header. Ours is a separate bar above, so the design's intent (hero fills
+     the first screen) is height minus the header. */
+  /* -1px accounts for the header's 1px border-bottom, which sits outside
+     --header-height; without it the page overflows by exactly 1px. */
+  height: calc(100vh - var(--header-height) - 1px);
+  min-height: 700px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.photo {
+  object-fit: cover;
+  object-position: 50% 48%;
+}
+
+/* --- Overlay stack, in the frame's order --- */
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scrimLeft {
+  background: linear-gradient(
+    to right,
+    rgba(10, 22, 40, 0.96) 0%,
+    rgba(10, 22, 40, 0.88) 22%,
+    rgba(10, 22, 40, 0.5) 42%,
+    rgba(10, 22, 40, 0.1) 58%,
+    transparent 72%
+  );
+}
+
+.skyAmplifier {
+  background: linear-gradient(
+    to bottom,
+    rgba(200, 80, 10, 0.55) 0%,
+    rgba(230, 120, 10, 0.35) 18%,
+    rgba(220, 140, 20, 0.15) 38%,
+    transparent 58%
+  );
+  mix-blend-mode: multiply;
+}
+
+.goldenGlow {
+  background: radial-gradient(
+    ellipse at 65% 35%,
+    rgba(255, 150, 20, 0.4) 0%,
+    rgba(220, 100, 10, 0.2) 40%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+}
+
+.horizonBurn {
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    rgba(200, 90, 10, 0.3) 48%,
+    rgba(180, 70, 5, 0.15) 58%,
+    transparent 72%
+  );
+}
+
+.hillLight {
+  background: radial-gradient(
+    ellipse 18% 14% at 82% 42%,
+    rgba(255, 200, 100, 0.38) 0%,
+    rgba(240, 150, 30, 0.18) 50%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+}
+
+.bottomVignette {
+  background: linear-gradient(
+    to top,
+    rgba(10, 22, 40, 0.55) 0%,
+    transparent 28%
+  );
+}
+
+.headerFade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 130px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 22, 40, 0.65) 0%,
+    transparent 100%
+  );
+}
+
+/* --- Content --- */
+.content {
+  position: relative;
+  z-index: 10;
+  padding-left: clamp(40px, 5vw, 88px);
+  padding-top: 76px;
+  width: 48%;
+  max-width: 620px;
+}
+
+.textScrim {
+  position: absolute;
+  inset: -24px -32px -24px -48px;
+  background: radial-gradient(
+    ellipse at 30% 50%,
+    rgba(10, 22, 40, 0.55) 0%,
+    rgba(10, 22, 40, 0.2) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.headline {
+  font-family: var(--tiro);
+  font-size: clamp(50px, 5.4vw, 82px);
+  font-weight: 400;
+  line-height: 1.2;
+  color: #faf6ee;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.005em;
+}
+
+.headlineAccent {
+  color: #f0b429;
+  display: inline-block;
+}
+
+.subline {
+  font-family: var(--tiro);
+  font-size: clamp(17px, 1.7vw, 21px);
+  color: rgba(250, 246, 238, 0.76);
+  margin: 0 0 10px 0;
+  line-height: 1.6;
+  font-weight: 400;
+  max-width: 480px;
+}
+
+.caption {
+  font-family: var(--inter);
+  font-size: 14.5px;
+  color: rgba(250, 246, 238, 0.44);
+  margin: 0 0 48px 0;
+  line-height: 1.65;
+  max-width: 400px;
+}
+
+/* --- CTAs --- */
+.ctaRow {
+  margin-bottom: 60px;
+  padding-left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ctaFarmer {
+  background: linear-gradient(135deg, #1e6b2e 0%, #27883c 100%);
+  color: #ffffff;
+  font-family: var(--tiro);
+  font-size: 22px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  -webkit-font-smoothing: antialiased;
+  padding: 20px 56px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 36px rgba(30, 107, 46, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  display: block;
+  text-decoration: none;
+}
+
+.ctaFarmer:hover,
+.ctaFarmer:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 48px rgba(30, 107, 46, 0.7), 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.ctaBuyer {
+  background: transparent;
+  color: rgba(250, 246, 238, 0.88);
+  font-family: var(--tiro);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 20px 28px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(250, 246, 238, 0.3);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s;
+  line-height: 1.4;
+  text-align: center;
+  text-decoration: none;
+}
+
+.ctaBuyer:hover,
+.ctaBuyer:focus-visible {
+  border-color: rgba(240, 180, 41, 0.6);
+  color: #f0b429;
+}
+
+.ctaBuyerSub {
+  font-size: 11px;
+  opacity: 0.6;
+  font-family: var(--inter);
+}
+
+/* --- Voice listing (non-functional, as designed) --- */
+.voiceWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.voiceButton {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(
+    145deg,
+    rgba(30, 107, 46, 0.7) 0%,
+    rgba(20, 80, 35, 0.8) 100%
+  );
+  border: 2.5px solid rgba(63, 173, 85, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(30, 107, 46, 0.45), 0 0 0 6px rgba(63, 173, 85, 0.12);
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+}
+
+.voiceButton:hover,
+.voiceButton:focus-visible {
+  background: linear-gradient(
+    145deg,
+    rgba(39, 136, 60, 0.9) 0%,
+    rgba(30, 107, 46, 0.95) 100%
+  );
+  border-color: rgba(63, 173, 85, 1);
+  box-shadow: 0 8px 40px rgba(30, 107, 46, 0.7), 0 0 0 8px rgba(63, 173, 85, 0.2);
+  transform: scale(1.08);
+}
+
+.voiceBadge {
+  position: absolute;
+  top: -8px;
+  right: -14px;
+  background: linear-gradient(135deg, #c8870a, #f0b429);
+  border-radius: 20px;
+  padding: 3px 8px;
+  font-size: 9px;
+  font-family: var(--inter);
+  font-weight: 700;
+  color: #0a1628;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 8px rgba(212, 144, 10, 0.5);
+  line-height: 1.5;
+}
+
+.voiceLabel {
+  font-family: var(--tiro);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaFarmer,
+  .voiceButton {
+    transition: none;
+  }
+  .ctaFarmer:hover,
+  .ctaFarmer:focus-visible,
+  .voiceButton:hover,
+  .voiceButton:focus-visible {
+    transform: none;
+  }
+}

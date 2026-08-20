@@ -48,3 +48,11 @@
   --shell-max: 1280px;
   --shell-pad: 32px;
 }
+
+/* --- Hero design fonts (Figma frame Vq0BfMfMUhkvcu9bKxXhDy) ---
+   The hero is typeset in Tiro Kannada + Inter, which differ from the
+   header's stack. Ported as designed. */
+:root {
+  --tiro: var(--font-tiro-kannada), 'Tiro Kannada', Georgia, serif;
+  --inter: var(--font-inter), 'Inter', system-ui, sans-serif;
+}
