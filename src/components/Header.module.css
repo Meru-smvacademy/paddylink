@@ -144,3 +144,194 @@
   color: var(--cream);
   box-shadow: 0 1px 6px rgba(42, 122, 59, 0.3);
 }
+
+/* --- Hamburger: mobile only (hidden at 768px and up) --- */
+.hamburger {
+  display: none;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--control-border);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.hamburger:hover,
+.hamburger:focus-visible {
+  border-color: var(--gold-focus);
+}
+
+/* Three bars drawn in CSS — this control is not in the Figma file, which
+   only covers desktop, so there is no exported asset to reproduce. */
+.bars,
+.bars::before,
+.bars::after {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--emerald-900);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.bars {
+  position: relative;
+}
+
+.bars::before,
+.bars::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+
+.bars::before { top: -6px; }
+.bars::after  { top: 6px; }
+
+.barsOpen { background: transparent; }
+.barsOpen::before { transform: translateY(6px) rotate(45deg); }
+.barsOpen::after  { transform: translateY(-6px) rotate(-45deg); }
+
+/* ============================ TABLET ============================
+   768–1023px. Desktop (1024px+) is untouched. */
+@media (max-width: 1023px) {
+  .shell {
+    height: 90px;
+    padding: 0 16px;
+    gap: 6px;
+  }
+
+  .crescent { width: 56px; height: 56px; }
+
+  .wordmark { font-size: 30px; }
+
+  .brand { gap: 6px; }
+
+  .nav { gap: 0; }
+
+  .navLink {
+    font-size: 15px;
+    padding: 6px 3px;
+  }
+
+  .controls { gap: 6px; }
+
+  .login {
+    padding: 0 8px;
+    font-size: 13.5px;
+  }
+}
+
+/* ============================ MOBILE ============================
+   Below 768px. Nav and the inline Login move into the drawer. */
+@media (max-width: 767px) {
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .shell {
+    height: 64px;
+    padding: 0 16px;
+    gap: 12px;
+    position: relative;
+  }
+
+  .crescent { width: 40px; height: 40px; }
+
+  .wordmark { font-size: 22px; padding-top: 2px; }
+
+  .brand { gap: 8px; }
+
+  /* Moved into the drawer. display:none also drops them from the a11y tree. */
+  .nav { display: none; }
+  .login { display: none; }
+
+  .hamburger { display: inline-flex; }
+
+  .controls { gap: 8px; }
+
+  .drawer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--cream);
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    box-shadow: var(--header-shadow);
+    padding: 8px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    animation: drawerIn 0.18s ease;
+  }
+
+  .drawerNav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .drawerLink {
+    display: flex;
+    align-items: center;
+    height: 52px;
+    padding: 0 4px;
+    color: var(--gold-700);
+    font-family: var(--font-nav);
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .drawerLink:hover,
+  .drawerLink:focus-visible {
+    color: var(--gold-500);
+    background: var(--gold-tint);
+  }
+
+  .drawerLogin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+    padding: 0 20px;
+    border: 1px solid var(--emerald-900);
+    border-radius: 22px;
+    color: var(--emerald-900);
+    background: transparent;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .drawerLogin:hover,
+  .drawerLogin:focus-visible {
+    background: var(--emerald-900);
+    color: var(--cream);
+  }
+}
+
+@keyframes drawerIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawer { animation: none; }
+  .bars,
+  .bars::before,
+  .bars::after { transition: none; }
+}
