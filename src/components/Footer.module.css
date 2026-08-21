@@ -1,0 +1,172 @@
+/* Footer — ported from Figma Make frame b7llkwYtWHD4leB751w7HN.
+   Values are the frame's, verbatim. Only the footer block is in scope;
+   the About page above it in that file is untouched. */
+
+.footer {
+  background-color: var(--emerald-deep);
+  color: var(--footer-text);
+}
+
+.columns {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2.5rem 3.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 3rem;
+}
+
+/* --- Col 1: brand --- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+}
+
+.wordmark {
+  font-family: var(--lora);
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--cream-brand);
+  letter-spacing: 0.02em;
+}
+
+.tagline {
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  color: var(--footer-kn);
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+/* --- Column headings --- */
+.heading {
+  font-family: var(--noto-kannada);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-heading);
+  margin-bottom: 1.125rem;
+}
+
+.headingSub {
+  font-family: var(--inter);
+  color: var(--footer-sub);
+  font-size: 0.75rem;
+}
+
+/* --- Link lists --- */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.listInfo { gap: 0.625rem; }
+.listLegal { gap: 0.75rem; }
+
+.link {
+  color: var(--footer-link);
+  text-decoration: none;
+  font-family: var(--inter);
+  font-size: 1rem;
+  line-height: 1.65;
+  transition: color 0.15s ease;
+  display: block;
+}
+
+.knLabel {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  color: var(--footer-kn);
+  line-height: 1.45;
+  transition: color 0.15s ease;
+}
+
+.enLabel {
+  font-size: 0.875rem;
+  color: inherit;
+  line-height: 1.5;
+}
+
+.note {
+  display: block;
+  font-family: var(--inter);
+  font-size: 0.75rem;
+  color: var(--footer-muted);
+  line-height: 1.5;
+  margin-top: 0.2rem;
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--gold-hover);
+}
+
+.link:hover .knLabel,
+.link:focus-visible .knLabel {
+  color: var(--gold-hover);
+}
+
+/* --- Col 4: contact --- */
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.phone {
+  display: block;
+  font-family: var(--inter);
+  font-size: 1.0625rem;
+  color: var(--gold-hover);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.hours {
+  font-family: var(--inter);
+  font-size: 0.875rem;
+  color: var(--footer-kn);
+  line-height: 1.6;
+}
+
+.email {
+  font-family: var(--inter);
+  font-size: 1rem;
+  color: var(--footer-link);
+}
+
+/* --- Bottom bar --- */
+.bottomBar {
+  border-top: 1px solid var(--emerald-mid);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.75rem 2.5rem;
+}
+
+.legalText {
+  font-family: var(--inter);
+  font-size: 0.8125rem;
+  color: var(--footer-muted);
+  line-height: 1.9;
+  margin: 0;
+}
+
+.legalKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.8125rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link,
+  .knLabel {
+    transition: none;
+  }
+}

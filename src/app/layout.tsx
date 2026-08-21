@@ -7,11 +7,13 @@ import {
   Noto_Sans_Kannada,
   Tiro_Kannada,
   Inter,
+  Lora,
 } from 'next/font/google';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { LanguageProvider, DEFAULT_LANG } from '@/lib/language';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import './globals.css';
 
 /* Latin faces from the Figma design. */
@@ -63,6 +65,14 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+/* Footer design font (Figma frame b7llkwYtWHD4leB751w7HN). */
+const lora = Lora({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
+  variable: '--font-lora',
+});
+
 export const metadata: Metadata = {
   title: 'PaddyLink',
   description: 'Connecting paddy farmers in Karnataka with verified buyers.',
@@ -76,6 +86,7 @@ const fontVars = [
   notoSansKannada.variable,
   tiroKannada.variable,
   inter.variable,
+  lora.variable,
 ].join(' ');
 
 /* Resolved at build time on the server. Until the crescent PNG is added to
@@ -93,6 +104,7 @@ export default function RootLayout({
         <LanguageProvider>
           <Header hasCrescent={hasCrescent} />
           {children}
+          <Footer />
         </LanguageProvider>
       </body>
     </html>

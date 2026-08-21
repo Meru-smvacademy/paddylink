@@ -56,3 +56,20 @@
   --tiro: var(--font-tiro-kannada), 'Tiro Kannada', Georgia, serif;
   --inter: var(--font-inter), 'Inter', system-ui, sans-serif;
 }
+
+/* --- Footer design tokens (Figma frame b7llkwYtWHD4leB751w7HN) --- */
+:root {
+  --lora: var(--font-lora), 'Lora', Georgia, serif;
+  --noto-kannada: var(--font-noto-sans-kannada), 'Noto Sans Kannada', 'Noto Sans', sans-serif;
+
+  --emerald-deep: #1B3F2F;
+  --emerald-mid: #2A5C42;
+  --footer-text: #D4E8DB;
+  --footer-link: #C8DDD0;
+  --footer-kn: #8DB59E;
+  --footer-muted: #6A9A7A;
+  --footer-sub: #4A8A62;
+  --gold-heading: #C5963A;
+  --gold-hover: #D9B26A;
+  --cream-brand: #F4EDD8;
+}
