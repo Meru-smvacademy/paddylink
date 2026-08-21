@@ -74,7 +74,7 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: 'PaddyLink',
+  title: 'PaddyLink — ಭತ್ತ ಬೆಳೆಗಾರರು ಮತ್ತು ಪರಿಶೀಲಿತ ಖರೀದಿದಾರರ ನೇರ ಸಂಪರ್ಕ',
   description: 'Connecting paddy farmers in Karnataka with verified buyers.',
 };
 
