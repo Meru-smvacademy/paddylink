@@ -10,13 +10,20 @@ import styles from './HowItWorks.module.css';
  *
  * Every string below is copied character-for-character from that source,
  * including the Kannada numerals ೦೧–೦೭ and ೧–೪, the "✓" inside step ೦೨'s
- * body, and the curly-free ASCII quotes the frame uses around
+ * body, and the ASCII quotes the frame uses around
  * "ಗುಣಮಟ್ಟ ಪರಿಶೀಲಿತ ✓" / "Quality Checked ✓".
  *
- * Bilingual pairs: the frame prints Kannada and English simultaneously —
- * a large Kannada line over a small English one. That stack is preserved, and
- * <T> swaps which half is primary: Kannada leads in kn (identical to the
- * frame), English leads in en. Nothing is ever hidden by the toggle.
+ * LANGUAGE: this page is bilingual-always, exactly as the frame. Kannada is
+ * the large primary line and English the small secondary line, and the ಕ|EN
+ * toggle does NOT flip that hierarchy here — both toggle states render the
+ * identical stack. Following the Hero.tsx precedent, each slot still goes
+ * through <T> with the same string in both slots, so the "does not vary by
+ * language" intent is explicit and greppable at every site rather than
+ * implied by the absence of <T>.
+ *
+ * The two English sentences that carry the brand name set it in Latin
+ * ("PaddyLink") rather than the frame's ಪ್ಯಾಡಿಲಿಂಕ್ — the agreed
+ * Latin-brand-name treatment. Marked LATIN-BRAND below.
  *
  * The frame's own header and footer are ignored; this mounts between the
  * approved site header and footer.
@@ -38,9 +45,8 @@ type Step = {
   body: string;
   bodyEn: string;
   image: ImageKey;
-  /** Step ೦೨ only. The frame stores one bilingual string joined by " / ". */
-  footnoteKn?: string;
-  footnoteEn?: string;
+  /** Step ೦೨ only. One bilingual string, joined by " / " in the frame. */
+  footnote?: string;
 };
 
 const steps: Step[] = [
@@ -61,8 +67,8 @@ const steps: Step[] = [
     bodyEn:
       'Our team visits your field, measures moisture — your listing earns the "Quality Checked ✓" badge with the value',
     image: 'agent',
-    footnoteKn: 'ಪರಿಶೀಲನೆ ದಿನಾಂಕದ ಮೌಲ್ಯ — ಸಂಗ್ರಹದಿಂದ ಬದಲಾಗಬಹುದು',
-    footnoteEn: 'Measured at check date; changes with storage',
+    footnote:
+      'ಪರಿಶೀಲನೆ ದಿನಾಂಕದ ಮೌಲ್ಯ — ಸಂಗ್ರಹದಿಂದ ಬದಲಾಗಬಹುದು / Measured at check date; changes with storage',
   },
   {
     num: '೦೩',
@@ -123,7 +129,8 @@ const PHOTOS: Record<
   },
   agent: {
     file: 'step-02-quality-check.webp',
-    alt: 'ಪ್ಯಾಡಿಲಿಂಕ್ agent checking moisture of paddy with farmer',
+    // LATIN-BRAND: frame reads "ಪ್ಯಾಡಿಲಿಂಕ್ agent checking moisture…".
+    alt: 'PaddyLink agent checking moisture of paddy with farmer',
     focus: 'center 30%',
   },
   harvest: {
@@ -249,46 +256,44 @@ function StepRow({
         {step.image === 'payment-panel' && (
           <div className={styles.payOverlay}>
             <p className={styles.payLine}>
-              <T kn="ಹಣ ಮೊದಲು." en="Money first." />{' '}
+              <T kn="ಹಣ ಮೊದಲು." en="ಹಣ ಮೊದಲು." />{' '}
               <span className={styles.payAccent}>
-                <T kn="ಭತ್ತ ನಂತರ." en="Paddy after." />
+                <T kn="ಭತ್ತ ನಂತರ." en="ಭತ್ತ ನಂತರ." />
               </span>
             </p>
             <p className={styles.paySub}>
               <T
                 kn="Money first. Paddy after."
-                en="ಹಣ ಮೊದಲು. ಭತ್ತ ನಂತರ."
+                en="Money first. Paddy after."
               />
             </p>
           </div>
         )}
       </div>
 
-      {/* Text side */}
+      {/* Text side — Kannada primary, English secondary, in both toggle states. */}
       <div className={styles.copy} style={{ '--step-bg': stepBg } as React.CSSProperties}>
         <div className={styles.stepNum}>{step.num}</div>
 
         <h3 className={styles.stepTitle}>
-          <T kn={step.kn} en={step.en} />
+          <T kn={step.kn} en={step.kn} />
         </h3>
         <p className={styles.stepTitleSub}>
-          <T kn={step.en} en={step.kn} />
+          <T kn={step.en} en={step.en} />
         </p>
 
         <div className={styles.stepDivider} />
 
         <p className={styles.stepBody}>
-          <T kn={step.body} en={step.bodyEn} />
+          <T kn={step.body} en={step.body} />
         </p>
         <p className={styles.stepBodySub}>
-          <T kn={step.bodyEn} en={step.body} />
+          <T kn={step.bodyEn} en={step.bodyEn} />
         </p>
 
-        {step.footnoteKn && step.footnoteEn && (
+        {step.footnote && (
           <p className={styles.footnote}>
-            <T kn={step.footnoteKn} en={step.footnoteEn} />
-            {' / '}
-            <T kn={step.footnoteEn} en={step.footnoteKn} />
+            <T kn={step.footnote} en={step.footnote} />
           </p>
         )}
       </div>
@@ -312,22 +317,23 @@ function SafeDealing() {
         </div>
 
         <h2 className={styles.safeTitle}>
-          <T kn="ಸುರಕ್ಷಿತ ವ್ಯವಹಾರ ಕ್ರಮ" en="The Safe Dealing Way" />
+          <T kn="ಸುರಕ್ಷಿತ ವ್ಯವಹಾರ ಕ್ರಮ" en="ಸುರಕ್ಷಿತ ವ್ಯವಹಾರ ಕ್ರಮ" />
         </h2>
         <p className={styles.safeTitleSub}>
-          <T kn="The Safe Dealing Way" en="ಸುರಕ್ಷಿತ ವ್ಯವಹಾರ ಕ್ರಮ" />
+          <T kn="The Safe Dealing Way" en="The Safe Dealing Way" />
         </p>
 
         <p className={styles.safeLede}>
           <T
             kn="ಪ್ಯಾಡಿಲಿಂಕ್ ಶಿಫಾರಸು — ಪ್ರತಿ ವ್ಯವಹಾರದಲ್ಲಿ ಈ ಕ್ರಮ ಪಾಲಿಸಿ"
-            en="ಪ್ಯಾಡಿಲಿಂಕ್ recommends this sequence in every deal"
+            en="ಪ್ಯಾಡಿಲಿಂಕ್ ಶಿಫಾರಸು — ಪ್ರತಿ ವ್ಯವಹಾರದಲ್ಲಿ ಈ ಕ್ರಮ ಪಾಲಿಸಿ"
           />
           <span className={styles.safeLedeSub}>
             {' / '}
+            {/* LATIN-BRAND: frame reads "ಪ್ಯಾಡಿಲಿಂಕ್ recommends this sequence…". */}
             <T
-              kn="ಪ್ಯಾಡಿಲಿಂಕ್ recommends this sequence in every deal"
-              en="ಪ್ಯಾಡಿಲಿಂಕ್ ಶಿಫಾರಸು — ಪ್ರತಿ ವ್ಯವಹಾರದಲ್ಲಿ ಈ ಕ್ರಮ ಪಾಲಿಸಿ"
+              kn="PaddyLink recommends this sequence in every deal"
+              en="PaddyLink recommends this sequence in every deal"
             />
           </span>
         </p>
@@ -340,10 +346,10 @@ function SafeDealing() {
               </div>
               <div>
                 <p className={styles.pointKn}>
-                  <T kn={p.kn} en={p.en} />
+                  <T kn={p.kn} en={p.kn} />
                 </p>
                 <p className={styles.pointEn}>
-                  <T kn={p.en} en={p.kn} />
+                  <T kn={p.en} en={p.en} />
                 </p>
               </div>
             </div>
@@ -354,13 +360,13 @@ function SafeDealing() {
           <p className={styles.closingKn}>
             <T
               kn="ಪ್ಯಾಡಿಲಿಂಕ್ ಹಣ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ — ಆದರೆ ಸರಿಯಾದ ಕ್ರಮ ಎಲ್ಲರಿಗೂ ಗೊತ್ತಿರಬೇಕು"
-              en="PaddyLink never handles the money — but everyone should know the right way."
+              en="ಪ್ಯಾಡಿಲಿಂಕ್ ಹಣ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ — ಆದರೆ ಸರಿಯಾದ ಕ್ರಮ ಎಲ್ಲರಿಗೂ ಗೊತ್ತಿರಬೇಕು"
             />
           </p>
           <p className={styles.closingEn}>
             <T
               kn="PaddyLink never handles the money — but everyone should know the right way."
-              en="ಪ್ಯಾಡಿಲಿಂಕ್ ಹಣ ನಿರ್ವಹಿಸುವುದಿಲ್ಲ — ಆದರೆ ಸರಿಯಾದ ಕ್ರಮ ಎಲ್ಲರಿಗೂ ಗೊತ್ತಿರಬೇಕು"
+              en="PaddyLink never handles the money — but everyone should know the right way."
             />
           </p>
         </div>
@@ -389,8 +395,6 @@ export default function HowItWorks({
         ref={headRef}
         className={`${styles.head} ${styles.reveal} ${headInView ? styles.revealIn : ''}`}
       >
-        {/* The frame gives this section no Kannada kicker and no English
-            headline, so both states carry the frame's single string. */}
         <p className={styles.eyebrow}>
           <T kn="How It Works" en="How It Works" />
         </p>
