@@ -124,3 +124,16 @@
 :root {
   --nunito: var(--font-nunito), var(--font-noto-sans-kannada), 'Nunito', system-ui, sans-serif;
 }
+
+/* --- Support design fonts (Figma Make file 2KsuDwFRfn6OesS3QKd6pN) ---
+   The frame sets four faces. Two already have tokens (--noto-kannada for
+   the Kannada body, --lora for the phone numbers and the officer name);
+   the other two are added here:
+     'Noto Serif Kannada' — the page h1. Already loaded as the Kannada half
+       of --serif, but the heading needs it on its own, so it gets a token
+       rather than the raw font variable being reached into.
+     'Source Sans 3' — every Latin line on the page. New face. */
+:root {
+  --noto-serif-kannada: var(--font-noto-serif-kannada), 'Noto Serif Kannada', Georgia, serif;
+  --source-sans: var(--font-source-sans-3), var(--font-noto-sans-kannada), 'Source Sans 3', system-ui, sans-serif;
+}

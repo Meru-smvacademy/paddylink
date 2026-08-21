@@ -10,6 +10,7 @@ import {
   Lora,
   Outfit,
   Nunito,
+  Source_Sans_3,
 } from 'next/font/google';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -83,6 +84,14 @@ const nunito = Nunito({
   variable: '--font-nunito',
 });
 
+/* Support design font (Figma Make file 2KsuDwFRfn6OesS3QKd6pN). */
+const sourceSans3 = Source_Sans_3({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-source-sans-3',
+});
+
 /* Footer design font (Figma frame b7llkwYtWHD4leB751w7HN). */
 const lora = Lora({
   subsets: ['latin'],
@@ -107,6 +116,7 @@ const fontVars = [
   lora.variable,
   outfit.variable,
   nunito.variable,
+  sourceSans3.variable,
 ].join(' ');
 
 /* Resolved at build time on the server. Until the crescent PNG is added to

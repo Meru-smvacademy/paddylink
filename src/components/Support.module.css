@@ -1,0 +1,539 @@
+/* Support — ported from Figma Make file 2KsuDwFRfn6OesS3QKd6pN (src/App.tsx).
+   Values are the frame's, verbatim. Desktop-first at 1440px.
+
+   Every colour in the frame is already in the brand ramp, so each is used as
+   its token with no literals:
+     #FDF6E3 -> --hottu-50    #F6EFDA -> --hottu-100   #EDE1C2 -> --hottu-200
+     #0B2418 -> --gadde-950   #12352A -> --gadde-900   #1E5B3A -> --gadde-700
+     #2A7A3B -> --gadde-600   #9CC4A8 -> --gadde-300
+     #F0B429 -> --bhatta-400  #C9963A -> --bhatta-600  #F3DFA6 -> --bhatta-200
+     #14241B -> --masi-900
+
+   Two deviations from the frame, both CEO-approved and flagged:
+   - the grain texture is absolute within this page wrapper rather than fixed
+     across the viewport, so it does not wash over the site header and footer;
+   - the frame's own closing "PaddyLink · Kalbantt Tech OPC Pvt Ltd" mark is
+     dropped, since the real site footer directly below repeats it. */
+
+.page {
+  position: relative;
+  width: 100%;
+  background-color: var(--hottu-50);
+}
+
+/* Frame's SVG feTurbulence noise, scoped to this page (see note above). */
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+.shell {
+  position: relative;
+  z-index: 10;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 5rem 1rem;
+}
+
+/* ── Heading ────────────────────────────────────────────────────────── */
+
+.header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.goldRule {
+  margin: 0 auto 1.5rem;
+  height: 1px;
+  width: 4rem;
+  background-color: var(--bhatta-400);
+}
+
+.goldRuleBelow {
+  margin: 1.5rem auto 0;
+  height: 1px;
+  width: 4rem;
+  background-color: var(--bhatta-400);
+}
+
+.title {
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  font-family: var(--noto-serif-kannada);
+  color: var(--gadde-950);
+  margin: 0;
+}
+
+.subtitle {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-family: var(--source-sans);
+  color: var(--gadde-600);
+}
+
+/* ── Contact card ───────────────────────────────────────────────────── */
+
+.contactSection {
+  margin-bottom: 2.5rem;
+}
+
+.contactCard {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background-color: var(--gadde-900);
+  border: 1px solid var(--gadde-700);
+}
+
+.contactRow {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.contactRowDivided {
+  border-bottom: 1px solid var(--gadde-700);
+}
+
+.contactEmoji {
+  font-size: 1.875rem;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.contactRow:hover .contactEmoji,
+.contactRow:focus-visible .contactEmoji {
+  transform: scale(1.1);
+}
+
+.contactBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.contactLabel {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 0.125rem;
+  font-family: var(--source-sans);
+  color: var(--gadde-300);
+}
+
+.contactNumber {
+  display: block;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  font-family: var(--lora);
+  transition: opacity 0.2s;
+}
+
+.contactRow:hover .contactNumber,
+.contactRow:focus-visible .contactNumber {
+  opacity: 0.9;
+}
+
+.numberCall {
+  color: var(--bhatta-400);
+}
+
+.numberWhatsApp {
+  color: var(--bhatta-200);
+}
+
+.contactArrow {
+  flex-shrink: 0;
+  font-size: 1.125rem;
+  transition: transform 0.2s;
+}
+
+.contactRow:hover .contactArrow,
+.contactRow:focus-visible .contactArrow {
+  transform: translateX(0.25rem);
+}
+
+.arrowCall {
+  color: var(--bhatta-400);
+}
+
+.arrowWhatsApp {
+  color: var(--gadde-300);
+}
+
+.hoursStrip {
+  padding: 1rem 1.75rem;
+  background-color: var(--gadde-950);
+  border-top: 1px solid var(--gadde-700);
+}
+
+.hoursKn {
+  font-size: 0.9rem;
+  line-height: 1.375;
+  margin: 0 0 0.25rem;
+  font-family: var(--noto-kannada);
+  color: var(--gadde-300);
+}
+
+.hoursEn {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--source-sans);
+  color: var(--gadde-600);
+}
+
+.languageKn {
+  font-size: 0.88rem;
+  line-height: 1.375;
+  margin: 0;
+  font-family: var(--noto-kannada);
+  color: var(--bhatta-200);
+}
+
+.languageEn {
+  font-size: 0.74rem;
+  font-family: var(--source-sans);
+  color: var(--gadde-300);
+  font-style: italic;
+}
+
+/* ── FAQ ────────────────────────────────────────────────────────────── */
+
+.faqSection {
+  margin-bottom: 2.5rem;
+}
+
+.faqHead {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.faqHeadRule {
+  height: 1px;
+  flex: 1;
+  background-color: var(--hottu-200);
+}
+
+.faqHeadText {
+  text-align: center;
+}
+
+.faqHeadKn {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+  margin: 0;
+  font-family: var(--noto-kannada);
+  color: var(--gadde-700);
+}
+
+.faqHeadEn {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 0.125rem;
+  font-family: var(--source-sans);
+  color: var(--bhatta-600);
+}
+
+.faqList {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background-color: var(--hottu-50);
+  border: 1px solid var(--hottu-200);
+}
+
+.faqRow {
+  border-bottom: 1px solid var(--hottu-200);
+  transition: background-color 0.2s;
+  background: transparent;
+}
+
+.faqRow:last-child {
+  border-bottom: none;
+}
+
+.faqRow:hover {
+  background-color: color-mix(in srgb, var(--hottu-100) 60%, transparent);
+}
+
+.faqRowOpen,
+.faqRowOpen:hover {
+  background-color: var(--hottu-100);
+}
+
+.faqButton {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+}
+
+.faqQuestion {
+  flex: 1;
+}
+
+.faqQuestionKn {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.375;
+  font-family: var(--noto-kannada);
+  color: var(--gadde-700);
+}
+
+.faqQuestionEn {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 0.125rem;
+  font-family: var(--source-sans);
+  color: var(--gadde-600);
+  letter-spacing: 0.02em;
+}
+
+/* The frame's indicator: a "+" that rotates 45deg into a "×". */
+.faqIndicator {
+  margin-top: 0.25rem;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1;
+  color: var(--bhatta-400);
+  transform: rotate(0deg);
+  transition: transform 0.3s;
+}
+
+.faqIndicatorOpen {
+  transform: rotate(45deg);
+}
+
+.faqPanel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faqPanelOpen {
+  max-height: 240px;
+}
+
+.faqAnswer {
+  padding: 0 1.5rem 1.25rem;
+}
+
+.faqAnswerKn {
+  font-size: 1rem;
+  line-height: 1.625;
+  margin: 0 0 0.25rem;
+  font-family: var(--noto-kannada);
+  color: var(--gadde-900);
+}
+
+.faqAnswerEn {
+  font-size: 0.82rem;
+  line-height: 1.625;
+  margin: 0;
+  font-family: var(--source-sans);
+  color: var(--gadde-600);
+  letter-spacing: 0.01em;
+}
+
+/* ── Grievance ──────────────────────────────────────────────────────── */
+
+.grievanceSection {
+  margin-bottom: 4rem;
+  /* Offset so the footer's /support#grievance link does not tuck the card
+     under the sticky site header. */
+  scroll-margin-top: calc(var(--header-height) + 16px);
+}
+
+.grievanceCard {
+  border-radius: 1rem;
+  overflow: hidden;
+  background-color: var(--gadde-950);
+  border: 1px solid var(--gadde-700);
+}
+
+.grievanceHead {
+  padding: 1.5rem 1.75rem 1rem;
+  border-bottom: 1px solid var(--gadde-700);
+}
+
+.grievanceEyebrow {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.25rem;
+  font-family: var(--source-sans);
+  color: var(--bhatta-400);
+}
+
+.grievanceTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1.375;
+  margin: 0;
+  font-family: var(--noto-kannada);
+  color: var(--bhatta-200);
+}
+
+.grievanceBody {
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.officerName {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+  font-family: var(--lora);
+  color: var(--hottu-100);
+}
+
+.officerOrg {
+  font-size: 0.82rem;
+  margin: 0.125rem 0 0;
+  font-family: var(--source-sans);
+  color: var(--gadde-300);
+}
+
+.grievanceEmail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--source-sans);
+  color: var(--bhatta-400);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--bhatta-600);
+  transition: opacity 0.2s;
+}
+
+.grievanceEmail:hover,
+.grievanceEmail:focus-visible {
+  opacity: 0.8;
+}
+
+.timelineBox {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--gadde-900);
+}
+
+.timelineKn {
+  font-size: 0.88rem;
+  line-height: 1.625;
+  margin: 0;
+  font-family: var(--noto-kannada);
+  color: var(--gadde-300);
+}
+
+.timelineEn {
+  font-size: 0.75rem;
+  line-height: 1.625;
+  margin: 0.25rem 0 0;
+  font-family: var(--source-sans);
+  color: var(--gadde-600);
+  font-style: italic;
+}
+
+.warning {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--masi-900);
+  border: 1px solid var(--gadde-700);
+}
+
+.warningIcon {
+  flex-shrink: 0;
+  font-size: 1rem;
+  margin-top: 0.125rem;
+  color: var(--bhatta-400);
+}
+
+.warningKn {
+  font-size: 0.88rem;
+  line-height: 1.625;
+  margin: 0;
+  font-family: var(--noto-kannada);
+  color: var(--bhatta-200);
+}
+
+.warningEn {
+  font-size: 0.75rem;
+  line-height: 1.625;
+  margin: 0.25rem 0 0;
+  font-family: var(--source-sans);
+  color: var(--gadde-300);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contactRow,
+  .contactEmoji,
+  .contactNumber,
+  .contactArrow,
+  .faqRow,
+  .faqIndicator,
+  .faqPanel,
+  .grievanceEmail {
+    transition: none;
+  }
+  .contactRow:hover .contactEmoji,
+  .contactRow:hover .contactArrow {
+    transform: none;
+  }
+}
+
+/* ── Below the frame's md breakpoint (Tailwind 768px) ────────────────
+   The frame carries three responsive steps: text-[2.6rem] md:text-[3.2rem]
+   on the h1, py-12 md:py-20 on the shell, and text-[1.9rem] md:text-[2.2rem]
+   on the contact numbers. Expressed desktop-first, matching globals.css. */
+
+@media (max-width: 767px) {
+  .shell {
+    padding: 3rem 1rem;
+  }
+
+  .title {
+    font-size: 2.6rem;
+  }
+
+  .contactNumber {
+    font-size: 1.9rem;
+  }
+}
