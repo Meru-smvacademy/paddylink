@@ -1,0 +1,597 @@
+/* For Buyers — ported from Figma Make file dwUpFDpmFHZ0oKQpQtmmtE
+   (src/App.tsx). Values are the frame's, verbatim. Desktop-first at 1440px.
+
+   The frame opens with a comment calling its palette "permanent, exhaustive,
+   no other hex allowed", and every value in it is already in the site ramp,
+   so each is re-pointed at its token here and the frame's 8-digit hex alphas
+   become color-mix() against the same token:
+     #0B2418 -> --gadde-950   #12352A -> --gadde-900   #1E5B3A -> --gadde-700
+     #2A7A3B -> --gadde-600   #9CC4A8 -> --gadde-300   #F0B429 -> --bhatta-400
+     #C9963A -> --bhatta-600  #F3DFA6 -> --bhatta-200  #FDF6E3 -> --hottu-50
+     #F6EFDA -> --hottu-100   #EDE1C2 -> --hottu-200   #A4472D -> --kemmannu-600
+     #14241B -> --masi-900    #54665B -> --masi-500
+
+   The frame's own header and footer chrome are dropped for the site header
+   and footer; its four value-prop pillars are page content and are kept. */
+
+.page {
+  background: var(--hottu-50);
+  font-family: var(--inter);
+}
+
+/* ── Hero strip ─────────────────────────────────────────────────────── */
+
+.hero {
+  background: linear-gradient(to bottom, var(--gadde-900), var(--gadde-950));
+  padding: 60px 24px 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--bhatta-400) 9%, transparent);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--bhatta-400) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bhatta-400) 27%, transparent);
+  border-radius: 30px;
+  padding: 6px 18px;
+  margin-bottom: 24px;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bhatta-400);
+  flex-shrink: 0;
+}
+
+.badgeText {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bhatta-400);
+  letter-spacing: 0.5px;
+}
+
+.heroTitle {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: clamp(30px, 5vw, 54px);
+  color: var(--hottu-50);
+  margin: 0 0 14px;
+  line-height: 1.15;
+}
+
+.heroSub {
+  font-size: 16px;
+  color: var(--gadde-300);
+  margin: 0 0 36px;
+  font-weight: 400;
+}
+
+/* ── CTA button ─────────────────────────────────────────────────────── */
+
+.ctaWrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #1e6b2e, #27883c);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 32px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 4px 6px color-mix(in srgb, var(--gadde-950) 13%, transparent),
+    0 12px 32px rgba(30, 107, 46, 0.33), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.ctaLarge {
+  border-radius: 14px;
+  padding: 18px 44px;
+}
+
+.cta:hover,
+.cta:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 12px color-mix(in srgb, var(--gadde-950) 19%, transparent),
+    0 20px 48px rgba(30, 107, 46, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.13);
+}
+
+.ctaLabel {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--hottu-50);
+  line-height: 1;
+}
+
+.ctaLarge .ctaLabel {
+  font-size: 20px;
+}
+
+.ctaDisc {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.13);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ctaLarge .ctaDisc {
+  width: 32px;
+  height: 32px;
+}
+
+.ctaSub {
+  font-size: 12px;
+  color: var(--gadde-300);
+  letter-spacing: 0.3px;
+}
+
+/* ── Timeline ───────────────────────────────────────────────────────── */
+
+.timeline {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.centerLine {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--bhatta-600) 40%, transparent),
+    color-mix(in srgb, var(--bhatta-600) 27%, transparent),
+    color-mix(in srgb, var(--bhatta-600) 40%, transparent),
+    transparent
+  );
+  z-index: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 90px 1fr;
+  align-items: center;
+  padding: 72px 0;
+  gap: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.rowLeft {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 32px;
+}
+
+.rowRight {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 32px;
+}
+
+.node {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nodeDisc {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bhatta-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--bhatta-400) 33%, transparent),
+    0 0 0 6px color-mix(in srgb, var(--bhatta-400) 13%, transparent);
+}
+
+.nodeNum {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: 26px;
+  color: var(--gadde-950);
+}
+
+/* ── Text side ──────────────────────────────────────────────────────── */
+
+.textSide {
+  max-width: 400px;
+}
+
+.stepKn {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--masi-900);
+  font-family: var(--nunito);
+  line-height: 1.2;
+}
+
+.stepEn {
+  font-family: var(--inter);
+  font-weight: 500;
+  font-size: 16px;
+  color: var(--masi-500);
+  margin: 0 0 28px;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--hottu-200);
+  padding-bottom: 16px;
+}
+
+.bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.bullet {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.bulletDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bhatta-600);
+  flex-shrink: 0;
+  margin-top: 9px;
+}
+
+.bulletKn {
+  font-size: 20px;
+  color: var(--masi-900);
+  font-weight: 800;
+  display: block;
+  font-family: var(--nunito);
+}
+
+.bulletEn {
+  font-size: 13px;
+  color: var(--masi-500);
+  font-weight: 400;
+}
+
+/* ── Illustration card ──────────────────────────────────────────────── */
+
+.illoCard {
+  max-width: 440px;
+  width: 100%;
+  background: var(--hottu-50);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--gadde-950) 4%, transparent),
+    0 12px 40px color-mix(in srgb, var(--gadde-950) 7%, transparent);
+  border: 1px solid var(--hottu-200);
+}
+
+.illo {
+  width: 100%;
+  display: block;
+}
+
+/* ── Mid-page CTA band ──────────────────────────────────────────────── */
+
+.midCta {
+  position: relative;
+  z-index: 2;
+  margin: 0 -24px;
+  padding: 48px 32px;
+  background: var(--hottu-100);
+  border-top: 1px solid var(--hottu-200);
+  border-bottom: 1px solid var(--hottu-200);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.midKicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--masi-500);
+}
+
+.midTitle {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: 26px;
+  color: var(--masi-900);
+  margin: 0 0 4px;
+}
+
+.midSub {
+  font-size: 14px;
+  color: var(--masi-500);
+  margin: 0;
+}
+
+/* ── Fair Dealing Code ──────────────────────────────────────────────── */
+
+.fair {
+  background: linear-gradient(to bottom, var(--gadde-900), var(--gadde-950));
+  padding: 72px 24px;
+}
+
+.fairInner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.fairHead {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.fairBadgeText {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bhatta-400);
+  letter-spacing: 0.5px;
+}
+
+.fairTitle {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: clamp(24px, 4vw, 42px);
+  color: var(--hottu-50);
+  margin: 0 0 12px;
+}
+
+.fairSub {
+  font-size: 15px;
+  color: var(--gadde-300);
+  margin: 0 0 8px;
+}
+
+.fairLede {
+  font-size: 13px;
+  color: var(--gadde-300);
+  margin: 0 auto;
+  max-width: 560px;
+  line-height: 1.7;
+}
+
+.fairGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.fairCard {
+  background: color-mix(in srgb, var(--hottu-50) 3%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bhatta-600) 16%, transparent);
+  border-radius: 14px;
+  padding: 28px 24px;
+  border-top: 3px solid var(--bhatta-400);
+}
+
+.fairNum {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bhatta-400) 13%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--bhatta-400);
+}
+
+.fairCardKn {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--hottu-50);
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.fairCardEn {
+  font-size: 12px;
+  color: var(--gadde-300);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.fairClose {
+  margin-top: 40px;
+  text-align: center;
+  padding: 24px 32px;
+  background: color-mix(in srgb, var(--bhatta-400) 5%, transparent);
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--bhatta-600) 19%, transparent);
+}
+
+.fairCloseKn {
+  font-family: var(--nunito);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--bhatta-400);
+  margin: 0 0 8px;
+}
+
+.fairCloseEn {
+  font-size: 14px;
+  color: var(--gadde-300);
+  margin: 0;
+  line-height: 1.7;
+}
+
+.fairCloseStrong {
+  color: var(--bhatta-200);
+}
+
+/* ── Bottom CTA ─────────────────────────────────────────────────────── */
+
+.bottomCta {
+  background: linear-gradient(to bottom, var(--gadde-900), var(--gadde-950));
+  padding: 64px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.bottomTitle {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: clamp(22px, 4vw, 40px);
+  color: var(--hottu-50);
+  margin: 0 0 8px;
+}
+
+.bottomSub {
+  font-size: 15px;
+  color: var(--gadde-300);
+  margin: 0 0 36px;
+}
+
+/* ── Value-prop pillars ─────────────────────────────────────────────── */
+
+.pillars {
+  background: var(--hottu-50);
+  border-top: 2px solid var(--hottu-200);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+}
+
+.pillar {
+  flex: 1 1 180px;
+  padding: 36px 24px;
+  text-align: center;
+  border-right: 1px solid var(--hottu-200);
+  border-bottom: 1px solid var(--hottu-200);
+}
+
+.pillar:last-child {
+  border-right: none;
+}
+
+.pillarRule {
+  width: 36px;
+  height: 3px;
+  background: var(--bhatta-600);
+  border-radius: 2px;
+  margin: 0 auto 14px;
+}
+
+.pillarKn {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: 22px;
+  color: var(--masi-900);
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.pillarEn {
+  font-family: var(--nunito);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--bhatta-600);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pillarSub {
+  font-size: 12px;
+  color: var(--masi-500);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── Sticky register button — /buyers only ──────────────────────────── */
+
+.sticky {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 999;
+}
+
+.stickyBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #1e6b2e, #27883c);
+  border: none;
+  border-radius: 50px;
+  padding: 14px 24px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 8px 32px rgba(30, 107, 46, 0.53),
+    0 2px 8px color-mix(in srgb, var(--gadde-950) 20%, transparent);
+}
+
+.stickyLabel {
+  font-family: var(--nunito);
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--hottu-50);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+  .cta:hover,
+  .cta:focus-visible {
+    transform: none;
+  }
+}

@@ -9,6 +9,7 @@ import {
   Inter,
   Lora,
   Outfit,
+  Nunito,
 } from 'next/font/google';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -74,6 +75,14 @@ const outfit = Outfit({
   variable: '--font-outfit',
 });
 
+/* For Buyers design font (Figma Make file dwUpFDpmFHZ0oKQpQtmmtE). */
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['700', '800', '900'],
+  display: 'swap',
+  variable: '--font-nunito',
+});
+
 /* Footer design font (Figma frame b7llkwYtWHD4leB751w7HN). */
 const lora = Lora({
   subsets: ['latin'],
@@ -97,6 +106,7 @@ const fontVars = [
   inter.variable,
   lora.variable,
   outfit.variable,
+  nunito.variable,
 ].join(' ');
 
 /* Resolved at build time on the server. Until the crescent PNG is added to

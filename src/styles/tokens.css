@@ -123,3 +123,12 @@
 :root {
   --outfit: var(--font-outfit), var(--font-noto-sans-kannada), 'Outfit', system-ui, sans-serif;
 }
+
+/* --- For Buyers design font (Figma Make file dwUpFDpmFHZ0oKQpQtmmtE) ---
+   The frame sets 'Nunito' (700/800/900) on every Kannada heading, bullet
+   lead and CTA label, with 'Inter' for the English support text. Inter is
+   already loaded for the hero; Nunito is added here on the same pattern,
+   with Noto Sans Kannada trailing so Kannada strings fall through to it. */
+:root {
+  --nunito: var(--font-nunito), var(--font-noto-sans-kannada), 'Nunito', system-ui, sans-serif;
+}
