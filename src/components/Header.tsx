@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLanguage } from '@/lib/language';
 import styles from './Header.module.css';
@@ -17,6 +18,12 @@ const NAV: NavItem[] = [
 
 const MOBILE_MAX = 767;
 
+/* Distance scrolled before the home-route header trades its transparent
+   overlay for the cream bar. The frame does not specify a threshold — it has
+   no scroll state at all — so this is the one judgement call in the port;
+   24px is far enough not to flicker on trackpad jitter. */
+const SCROLL_SWAP = 24;
+
 /** `hasCrescent` is resolved on the server; when false no <img> is rendered
  *  at all, so no broken-image icon appears. */
 export default function Header({ hasCrescent }: { hasCrescent: boolean }) {
@@ -25,6 +32,22 @@ export default function Header({ hasCrescent }: { hasCrescent: boolean }) {
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const wasOpen = useRef(false);
+
+  /* The header is a transparent fixed overlay across the top of the home
+     hero, and the cream bar everywhere else — including on home once the
+     hero has been scrolled past. */
+  const isHome = usePathname() === '/';
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!isHome) return;
+    const onScroll = () => setScrolled(window.scrollY > SCROLL_SWAP);
+    onScroll(); // a reload part-way down the page must not start transparent
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isHome]);
+
+  const overHero = isHome && !scrolled && !open;
 
   const t = (en: string, kn: string) => (lang === 'en' ? en : kn);
   const close = useCallback(() => setOpen(false), []);
@@ -117,7 +140,15 @@ export default function Header({ hasCrescent }: { hasCrescent: boolean }) {
   );
 
   return (
-    <header className={styles.header}>
+    <header
+      className={[
+        styles.header,
+        isHome ? styles.overlay : '',
+        overHero ? styles.transparent : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div className={styles.shell}>
         <Link href="/" className={styles.brand}>
           {hasCrescent && (

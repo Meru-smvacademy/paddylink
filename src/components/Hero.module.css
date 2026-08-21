@@ -1,14 +1,24 @@
-/* Hero — ported from Figma Make frame Vq0BfMfMUhkvcu9bKxXhDy.
-   Values are the frame's, verbatim. Desktop-first at 1440px. */
+/* Home hero — ported fresh from Figma Make file Vq0BfMfMUhkvcu9bKxXhDy
+   (src/App.tsx). Values are the frame's, verbatim. Desktop-first at 1440px.
+
+   This replaces an earlier port of an OLDER revision of the same frame,
+   which used the retired navy scale (rgba(10,22,40,…)) and a green CTA.
+   The current frame is gadde-950 throughout with a gold CTA.
+
+   The frame's four brand colours all exist in the ramp and are used as
+   tokens here; the frame's rgba() alphas become color-mix() against them:
+     #0B2418 -> --gadde-950    #F0B429 -> --bhatta-400
+     #FDF6E3 -> --hottu-50     #9CC4A8 -> --gadde-300
+   The sunset-grade oranges (#c8870a, #e8a820, rgba(200,80,10)…) are
+   photographic light effects with no brand-ramp equivalent and stay literal,
+   exactly as the frame writes them. */
 
 .hero {
   position: relative;
-  /* Frame value is 100vh, which assumed the frame's own FIXED overlapping
-     header. Ours is a separate bar above, so the design's intent (hero fills
-     the first screen) is height minus the header. */
-  /* -1px accounts for the header's 1px border-bottom, which sits outside
-     --header-height; without it the page overflows by exactly 1px. */
-  height: calc(100vh - var(--header-height) - 1px);
+  /* Frame value. The site header is a transparent fixed overlay on the home
+     route, matching the frame's own fixed header, so the hero owns the full
+     first screen rather than height-minus-header. */
+  height: 100vh;
   min-height: 700px;
   overflow: hidden;
   display: flex;
@@ -27,48 +37,78 @@
   pointer-events: none;
 }
 
+/* 1. Horizontal scrim */
 .scrimLeft {
   background: linear-gradient(
     to right,
-    rgba(10, 22, 40, 0.96) 0%,
-    rgba(10, 22, 40, 0.88) 22%,
-    rgba(10, 22, 40, 0.5) 42%,
-    rgba(10, 22, 40, 0.1) 58%,
-    transparent 72%
+    color-mix(in srgb, var(--gadde-950) 92%, transparent) 0%,
+    color-mix(in srgb, var(--gadde-950) 82%, transparent) 25%,
+    color-mix(in srgb, var(--gadde-950) 42%, transparent) 48%,
+    color-mix(in srgb, var(--gadde-950) 8%, transparent) 65%,
+    transparent 75%
   );
 }
 
+/* 2. Bottom-up scrim */
+.bottomVignette {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--gadde-950) 60%, transparent) 0%,
+    color-mix(in srgb, var(--gadde-950) 18%, transparent) 22%,
+    transparent 42%
+  );
+}
+
+/* 3. Top header fade — 150px, not full-bleed */
+.headerFade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--gadde-950) 68%, transparent) 0%,
+    transparent 100%
+  );
+}
+
+/* 4. Sunset sky amplifier */
 .skyAmplifier {
   background: linear-gradient(
     to bottom,
-    rgba(200, 80, 10, 0.55) 0%,
-    rgba(230, 120, 10, 0.35) 18%,
-    rgba(220, 140, 20, 0.15) 38%,
-    transparent 58%
+    rgba(200, 80, 10, 0.52) 0%,
+    rgba(230, 120, 10, 0.32) 18%,
+    rgba(220, 140, 20, 0.12) 38%,
+    transparent 56%
   );
   mix-blend-mode: multiply;
 }
 
+/* 5. Golden field glow */
 .goldenGlow {
   background: radial-gradient(
     ellipse at 65% 35%,
-    rgba(255, 150, 20, 0.4) 0%,
-    rgba(220, 100, 10, 0.2) 40%,
+    rgba(255, 150, 20, 0.38) 0%,
+    rgba(220, 100, 10, 0.18) 40%,
     transparent 70%
   );
   mix-blend-mode: screen;
 }
 
+/* 6. Horizon burn */
 .horizonBurn {
   background: linear-gradient(
     to bottom,
     transparent 30%,
-    rgba(200, 90, 10, 0.3) 48%,
-    rgba(180, 70, 5, 0.15) 58%,
+    rgba(200, 90, 10, 0.28) 48%,
+    rgba(180, 70, 5, 0.12) 58%,
     transparent 72%
   );
 }
 
+/* 7. Distant hill warm glow */
 .hillLight {
   background: radial-gradient(
     ellipse 18% 14% at 82% 42%,
@@ -79,49 +119,15 @@
   mix-blend-mode: screen;
 }
 
-.bottomVignette {
-  background: linear-gradient(
-    to top,
-    rgba(10, 22, 40, 0.55) 0%,
-    transparent 28%
-  );
-}
-
-.headerFade {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 130px;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(10, 22, 40, 0.65) 0%,
-    transparent 100%
-  );
-}
-
 /* --- Content --- */
 .content {
   position: relative;
   z-index: 10;
   padding-left: clamp(40px, 5vw, 88px);
   padding-top: 76px;
-  width: 48%;
-  max-width: 620px;
-}
-
-.textScrim {
-  position: absolute;
-  inset: -24px -32px -24px -48px;
-  background: radial-gradient(
-    ellipse at 30% 50%,
-    rgba(10, 22, 40, 0.55) 0%,
-    rgba(10, 22, 40, 0.2) 65%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: -1;
+  padding-bottom: 80px;
+  width: 50%;
+  max-width: 640px;
 }
 
 .headline {
@@ -129,20 +135,19 @@
   font-size: clamp(50px, 5.4vw, 82px);
   font-weight: 400;
   line-height: 1.2;
-  color: #faf6ee;
-  margin: 0 0 6px 0;
+  color: var(--hottu-50);
+  margin: 0 0 8px 0;
   letter-spacing: -0.005em;
 }
 
 .headlineAccent {
-  color: #f0b429;
-  display: inline-block;
+  color: var(--bhatta-400);
 }
 
 .subline {
   font-family: var(--tiro);
   font-size: clamp(17px, 1.7vw, 21px);
-  color: rgba(250, 246, 238, 0.76);
+  color: color-mix(in srgb, var(--hottu-50) 80%, transparent);
   margin: 0 0 10px 0;
   line-height: 1.6;
   font-weight: 400;
@@ -152,35 +157,32 @@
 .caption {
   font-family: var(--inter);
   font-size: 14.5px;
-  color: rgba(250, 246, 238, 0.44);
-  margin: 0 0 48px 0;
+  color: var(--gadde-300);
+  margin: 0 0 44px 0;
   line-height: 1.65;
   max-width: 400px;
 }
 
-/* --- CTAs --- */
+/* --- CTA row --- */
 .ctaRow {
-  margin-bottom: 60px;
-  padding-left: 24px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .ctaFarmer {
-  background: linear-gradient(135deg, #1e6b2e 0%, #27883c 100%);
-  color: #ffffff;
+  background: linear-gradient(135deg, #c8870a 0%, var(--bhatta-400) 60%, #e8a820 100%);
+  color: var(--gadde-950);
   font-family: var(--tiro);
   font-size: 22px;
   font-weight: 700;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--gadde-950) 20%, transparent);
   -webkit-font-smoothing: antialiased;
-  padding: 20px 56px;
+  padding: 20px 52px;
   border-radius: 12px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 6px 36px rgba(30, 107, 46, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 36px rgba(200, 135, 10, 0.5), 0 2px 6px rgba(0, 0, 0, 0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -191,46 +193,14 @@
 .ctaFarmer:hover,
 .ctaFarmer:focus-visible {
   transform: translateY(-3px);
-  box-shadow: 0 12px 48px rgba(30, 107, 46, 0.7), 0 4px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 48px rgba(200, 135, 10, 0.7), 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
-.ctaBuyer {
-  background: transparent;
-  color: rgba(250, 246, 238, 0.88);
-  font-family: var(--tiro);
-  font-size: 15px;
-  font-weight: 600;
-  padding: 20px 28px;
-  border-radius: 12px;
-  border: 1.5px solid rgba(250, 246, 238, 0.3);
-  cursor: pointer;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  transition: border-color 0.2s, color 0.2s;
-  line-height: 1.4;
-  text-align: center;
-  text-decoration: none;
-}
-
-.ctaBuyer:hover,
-.ctaBuyer:focus-visible {
-  border-color: rgba(240, 180, 41, 0.6);
-  color: #f0b429;
-}
-
-.ctaBuyerSub {
-  font-size: 11px;
-  opacity: 0.6;
-  font-family: var(--inter);
-}
-
-/* --- Voice listing (non-functional, as designed) --- */
+/* --- Voice listing: mic + caption to its right (non-functional, as designed) --- */
 .voiceWrap {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  position: relative;
+  gap: 12px;
 }
 
 .voiceButton {
@@ -239,55 +209,83 @@
   border-radius: 50%;
   background: linear-gradient(
     145deg,
-    rgba(30, 107, 46, 0.7) 0%,
-    rgba(20, 80, 35, 0.8) 100%
+    color-mix(in srgb, var(--gadde-950) 75%, transparent) 0%,
+    color-mix(in srgb, var(--gadde-950) 88%, transparent) 100%
   );
-  border: 2.5px solid rgba(63, 173, 85, 0.6);
+  border: 2.5px solid color-mix(in srgb, var(--bhatta-400) 55%, transparent);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(12px);
-  box-shadow: 0 4px 24px rgba(30, 107, 46, 0.45), 0 0 0 6px rgba(63, 173, 85, 0.12);
+  box-shadow: 0 4px 24px rgba(200, 135, 10, 0.3),
+    0 0 0 6px color-mix(in srgb, var(--bhatta-400) 10%, transparent);
   transition: all 0.25s ease;
   flex-shrink: 0;
+  padding: 0;
 }
 
 .voiceButton:hover,
 .voiceButton:focus-visible {
-  background: linear-gradient(
-    145deg,
-    rgba(39, 136, 60, 0.9) 0%,
-    rgba(30, 107, 46, 0.95) 100%
-  );
-  border-color: rgba(63, 173, 85, 1);
-  box-shadow: 0 8px 40px rgba(30, 107, 46, 0.7), 0 0 0 8px rgba(63, 173, 85, 0.2);
   transform: scale(1.08);
+  box-shadow: 0 8px 40px rgba(200, 135, 10, 0.5),
+    0 0 0 8px color-mix(in srgb, var(--bhatta-400) 18%, transparent);
 }
 
-.voiceBadge {
-  position: absolute;
-  top: -8px;
-  right: -14px;
-  background: linear-gradient(135deg, #c8870a, #f0b429);
-  border-radius: 20px;
-  padding: 3px 8px;
-  font-size: 9px;
-  font-family: var(--inter);
-  font-weight: 700;
-  color: #0a1628;
-  white-space: nowrap;
-  letter-spacing: 0.04em;
-  box-shadow: 0 2px 8px rgba(212, 144, 10, 0.5);
-  line-height: 1.5;
+.voiceCaption {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .voiceLabel {
   font-family: var(--tiro);
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 14px;
+  color: var(--hottu-50);
+  line-height: 1.4;
+  font-weight: 400;
   white-space: nowrap;
-  letter-spacing: 0.02em;
+}
+
+.voiceSoon {
+  font-family: var(--tiro);
+  font-size: 12px;
+  color: var(--gadde-300);
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* --- Trust strip, pinned to the hero's bottom edge --- */
+.trust {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  background: color-mix(in srgb, var(--gadde-950) 90%, transparent);
+  backdrop-filter: blur(10px);
+  padding: 15px 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+}
+
+.trustText {
+  font-family: var(--tiro);
+  font-size: 13px;
+  color: color-mix(in srgb, var(--hottu-50) 72%, transparent);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.grain {
+  margin: 0 22px;
+  flex-shrink: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
