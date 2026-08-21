@@ -8,6 +8,7 @@ import {
   Tiro_Kannada,
   Inter,
   Lora,
+  Outfit,
 } from 'next/font/google';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -65,6 +66,14 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+/* How It Works design font (Figma Make file ggE1oxd0J45ec9RUdrAWFi). */
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-outfit',
+});
+
 /* Footer design font (Figma frame b7llkwYtWHD4leB751w7HN). */
 const lora = Lora({
   subsets: ['latin'],
@@ -87,6 +96,7 @@ const fontVars = [
   tiroKannada.variable,
   inter.variable,
   lora.variable,
+  outfit.variable,
 ].join(' ');
 
 /* Resolved at build time on the server. Until the crescent PNG is added to

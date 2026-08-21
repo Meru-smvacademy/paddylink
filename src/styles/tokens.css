@@ -112,3 +112,14 @@
   --gold-hover: #D9B26A;
   --cream-brand: #F4EDD8;
 }
+
+/* --- How It Works design fonts (Figma Make file ggE1oxd0J45ec9RUdrAWFi) ---
+   The frame's @theme declares three faces:
+     --font-display  'Fraunces'           -> already the site's --serif
+     --font-body     'Outfit'             -> new; added here as --outfit
+     --font-kannada  'Noto Sans Kannada'  -> already the site's --noto-kannada
+   Noto Sans Kannada trails the Latin stack so Kannada strings set in the
+   body face fall through to it, matching the convention above. */
+:root {
+  --outfit: var(--font-outfit), var(--font-noto-sans-kannada), 'Outfit', system-ui, sans-serif;
+}

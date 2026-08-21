@@ -1,0 +1,425 @@
+/* How It Works — ported from Figma Make file ggE1oxd0J45ec9RUdrAWFi (src/App.tsx).
+
+   The frame hard-codes its palette in a local `C` object that mirrors its own
+   @theme block. Every one of those values already exists in the site's brand
+   ramp, so each is re-pointed at the token here rather than re-declared:
+
+     C.gadde950 #0B2418 -> --gadde-950     C.hottu50  #FDF6E3 -> --hottu-50
+     C.bhatta400 #F0B429 -> --bhatta-400   C.hottu100 #F6EFDA -> --hottu-100
+     C.bhatta600 #C9963A -> --bhatta-600   C.hottu200 #EDE1C2 -> --hottu-200
+     C.masi900  #14241B -> --masi-900
+
+   The frame's rgba() helpers (masi/bhatta6/bhatta4/gadde95) become color-mix()
+   against the same tokens, so no literal channel values are restated.
+
+   Desktop-first, matching globals.css. The frame's single `lg:` breakpoint
+   (Tailwind's 1024px) is kept as the stack-to-column point. */
+
+/* ── Section header ─────────────────────────────────────────────────── */
+
+.page {
+  background: var(--hottu-50);
+}
+
+.head {
+  padding: 5rem 2rem 3rem;
+  text-align: center;
+  background: var(--hottu-50);
+}
+
+.eyebrow {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--bhatta-600);
+  margin: 0 0 1rem;
+}
+
+.headTitle {
+  font-family: var(--noto-kannada);
+  font-size: clamp(2.2rem, 6vw, 3.8rem);
+  font-weight: 700;
+  color: var(--masi-900);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.headRuleWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.headRule {
+  height: 2px;
+  width: 3.5rem;
+  background: var(--bhatta-600);
+}
+
+/* ── Steps ──────────────────────────────────────────────────────────── */
+
+.steps {
+  overflow: hidden;
+}
+
+.row {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  min-height: 460px;
+}
+
+/* Odd rows mirror: image right, text left. */
+.rowReverse {
+  flex-direction: row-reverse;
+}
+
+/* Scroll reveal — the frame's IntersectionObserver fade-up. */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.revealIn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Image side ─────────────────────────────────────────────────────── */
+
+.media {
+  position: relative;
+  width: 55%;
+  overflow: hidden;
+  /* Also the fallback surface when a photo is not yet in public/how-it-works. */
+  background: var(--gadde-950);
+}
+
+.photo {
+  object-fit: cover;
+  /* Per-step framing; --focus carries the frame's objectPosition. */
+  object-position: var(--focus, center center);
+}
+
+/* The frame scales two photos from 1.05 to 1 as they enter the viewport. */
+.photoZoom {
+  transform: scale(1.05);
+  transition: transform 0.9s ease;
+}
+
+.photoZoomIn {
+  transform: scale(1);
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--gadde-950) 12%, transparent) 0%,
+    transparent 55%
+  );
+}
+
+.rowReverse .vignette {
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--gadde-950) 12%, transparent) 0%,
+    transparent 55%
+  );
+}
+
+.ghostNum {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  pointer-events: none;
+  font-family: var(--serif);
+  font-size: 3.5rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.14);
+  line-height: 1;
+}
+
+/* ── Payment-first overlay (step ೦೬) ────────────────────────────────── */
+
+.payOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 5rem 1rem 2rem;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--gadde-950) 93%, transparent) 0%,
+    transparent 100%
+  );
+}
+
+.payLine {
+  font-family: var(--noto-kannada);
+  font-size: clamp(1.3rem, 2.8vw, 2rem);
+  font-weight: 700;
+  color: var(--hottu-50);
+  text-align: center;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.payAccent {
+  color: var(--bhatta-400);
+}
+
+.paySub {
+  font-family: var(--outfit);
+  font-size: 0.78rem;
+  color: color-mix(in srgb, var(--bhatta-400) 65%, transparent);
+  letter-spacing: 0.06em;
+  margin: 4px 0 0;
+}
+
+/* ── Text side ──────────────────────────────────────────────────────── */
+
+.copy {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4rem 2.5rem;
+  /* The frame cycles hottu-50 / 100 / 200 across the seven rows. */
+  background: var(--step-bg);
+}
+
+.stepNum {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--bhatta-600);
+  margin: 0 0 1.25rem;
+}
+
+.stepTitle {
+  font-family: var(--noto-kannada);
+  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+  font-weight: 700;
+  color: var(--masi-900);
+  line-height: 1.35;
+  margin: 0 0 0.5rem;
+}
+
+.stepTitleSub {
+  font-family: var(--outfit);
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--masi-900) 62%, transparent);
+  letter-spacing: 0.02em;
+  margin: 0 0 1.25rem;
+}
+
+.stepDivider {
+  height: 1px;
+  width: 2.5rem;
+  background: var(--bhatta-600);
+  opacity: 0.7;
+  margin-bottom: 1.25rem;
+}
+
+.stepBody {
+  font-family: var(--noto-kannada);
+  font-size: 1.08rem;
+  color: color-mix(in srgb, var(--masi-900) 88%, transparent);
+  line-height: 1.75;
+  margin: 0 0 0.5rem;
+}
+
+.stepBodySub {
+  font-family: var(--outfit);
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--masi-900) 52%, transparent);
+  letter-spacing: 0.02em;
+  line-height: 1.625;
+  margin: 0;
+}
+
+.footnote {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  line-height: 1.625;
+  font-style: italic;
+  color: color-mix(in srgb, var(--masi-900) 30%, transparent);
+  border-left: 2px solid color-mix(in srgb, var(--bhatta-600) 30%, transparent);
+  padding-left: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+/* ── Safe Dealing ───────────────────────────────────────────────────── */
+
+.safe {
+  padding: 5rem 1.5rem;
+  background: var(--hottu-100);
+}
+
+.safeInner {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.safeRule {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.safeRuleLine {
+  height: 1px;
+  flex: 1;
+  background: color-mix(in srgb, var(--masi-900) 12%, transparent);
+}
+
+.safeRuleDot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: var(--bhatta-600);
+}
+
+.safeTitle {
+  font-family: var(--noto-kannada);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: var(--masi-900);
+  line-height: 1.35;
+  margin: 0 0 0.5rem;
+}
+
+.safeTitleSub {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--masi-900) 45%, transparent);
+  letter-spacing: 0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.safeLede {
+  font-family: var(--noto-kannada);
+  font-size: 0.88rem;
+  color: color-mix(in srgb, var(--masi-900) 60%, transparent);
+  line-height: 1.65;
+  margin: 0 0 2rem;
+}
+
+.safeLedeSub {
+  font-family: var(--outfit);
+  font-size: 0.78rem;
+  color: color-mix(in srgb, var(--masi-900) 38%, transparent);
+}
+
+.points {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.point {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.pointBadge {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bhatta-600) 12%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--bhatta-600) 35%, transparent);
+}
+
+.pointBadgeNum {
+  font-family: var(--noto-kannada);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--bhatta-600);
+}
+
+.pointKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--masi-900);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.pointEn {
+  font-family: var(--outfit);
+  font-size: 0.78rem;
+  color: color-mix(in srgb, var(--masi-900) 42%, transparent);
+  margin: 2px 0 0;
+}
+
+.closing {
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--gadde-950);
+  border-left: 3px solid var(--bhatta-600);
+}
+
+.closingKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--hottu-50) 82%, transparent);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.closingEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--bhatta-400) 50%, transparent);
+  margin: 4px 0 0;
+}
+
+/* ── Below the frame's lg breakpoint the split rows stack ───────────── */
+
+@media (max-width: 1023px) {
+  .row,
+  .rowReverse {
+    flex-direction: column;
+  }
+
+  .media {
+    width: 100%;
+    min-height: 320px;
+  }
+
+  .copy {
+    width: 100%;
+    padding: 3rem 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .photoZoom {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
