@@ -94,23 +94,15 @@
   --inter: var(--font-inter), 'Inter', system-ui, sans-serif;
 }
 
-/* --- Footer design tokens (Figma frame b7llkwYtWHD4leB751w7HN) ---
-   Kept at their approved literal values; these are a shipped, signed-off
-   port and are deliberately not re-pointed at the brand ramp. */
+/* --- Faces introduced by the retired four-column footer
+       (Figma frame b7llkwYtWHD4leB751w7HN) ---
+   That footer was replaced by the port of KHTmHHpRF4tRwZJoVKKAwh, and its
+   ten colour tokens went with it. Both faces below are still in use:
+   --lora sets the italic English headline on /about, and --noto-kannada
+   trails every Latin stack site-wide so Kannada falls through to it. */
 :root {
   --lora: var(--font-lora), 'Lora', Georgia, serif;
   --noto-kannada: var(--font-noto-sans-kannada), 'Noto Sans Kannada', 'Noto Sans', sans-serif;
-
-  --emerald-deep: #1B3F2F;
-  --emerald-mid: #2A5C42;
-  --footer-text: #D4E8DB;
-  --footer-link: #C8DDD0;
-  --footer-kn: #8DB59E;
-  --footer-muted: #6A9A7A;
-  --footer-sub: #4A8A62;
-  --gold-heading: #C5963A;
-  --gold-hover: #D9B26A;
-  --cream-brand: #F4EDD8;
 }
 
 /* --- How It Works design fonts (Figma Make file ggE1oxd0J45ec9RUdrAWFi) ---

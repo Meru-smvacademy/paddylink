@@ -2,9 +2,8 @@
    (src/App.tsx). Values are the frame's, verbatim. Desktop-first at 1440px.
 
    Replaces the earlier four-column footer (Figma frame b7llkwYtWHD4leB751w7HN).
-   That port's tokens (--emerald-deep, --footer-*, --gold-heading, --cream-brand,
-   --lora) are now unused; they are deliberately left in tokens.css for a
-   separate cleanup rather than widening this change.
+   That port's ten colour tokens have since been removed from tokens.css; the
+   --lora and --noto-kannada faces it introduced are still in use elsewhere.
 
    Every colour in this frame is already in the brand ramp, so each is used as
    its token and the frame's rgba() alphas become color-mix() against it:
