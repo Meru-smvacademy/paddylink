@@ -1,172 +1,257 @@
-/* Footer — ported from Figma Make frame b7llkwYtWHD4leB751w7HN.
-   Values are the frame's, verbatim. Only the footer block is in scope;
-   the About page above it in that file is untouched. */
+/* Site footer — ported from Figma Make file KHTmHHpRF4tRwZJoVKKAwh
+   (src/App.tsx). Values are the frame's, verbatim. Desktop-first at 1440px.
+
+   Replaces the earlier four-column footer (Figma frame b7llkwYtWHD4leB751w7HN).
+   That port's tokens (--emerald-deep, --footer-*, --gold-heading, --cream-brand,
+   --lora) are now unused; they are deliberately left in tokens.css for a
+   separate cleanup rather than widening this change.
+
+   Every colour in this frame is already in the brand ramp, so each is used as
+   its token and the frame's rgba() alphas become color-mix() against it:
+     #0B2418 -> --gadde-950   #12352A -> --gadde-900
+     #FDF6E3 -> --hottu-50    #F0B429 -> --bhatta-400
+     rgb(156,196,168) -> --gadde-300
+
+   The frame's shell paints #0a1510 behind the footer; that is the frame's own
+   demo page, not part of the component, and is not reproduced. */
 
 .footer {
-  background-color: var(--emerald-deep);
-  color: var(--footer-text);
+  width: 100%;
+  /* Frame value. Wider viewports show the page background either side —
+     this is the designed look, and is deliberately 80px narrower overall
+     than the header's --shell-max. */
+  max-width: 1440px;
+  margin: 0 auto;
+  background: var(--gadde-950);
+  font-family: var(--inter), var(--noto-kannada), sans-serif;
 }
 
-.columns {
+.inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2.5rem 3.5rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 3rem;
+  padding: 48px 0 0;
 }
 
-/* --- Col 1: brand --- */
+/* ── Row 1: brand · links · contact ─────────────────────────────────── */
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+  padding-bottom: 36px;
+}
+
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  margin-bottom: 1rem;
+  gap: 12px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.logoTile {
+  width: 46px;
+  height: 46px;
+  border-radius: 11px;
+  background: var(--hottu-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.logoImg {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  display: block;
 }
 
 .wordmark {
-  font-family: var(--lora);
-  font-size: 1.375rem;
+  color: var(--hottu-50);
+  font-size: 20px;
   font-weight: 600;
-  color: var(--cream-brand);
-  letter-spacing: 0.02em;
-}
-
-.tagline {
-  font-family: var(--noto-kannada);
-  font-size: 0.9375rem;
-  color: var(--footer-kn);
-  line-height: 1.85;
-  letter-spacing: 0.01em;
-  margin: 0;
-}
-
-/* --- Column headings --- */
-.heading {
-  font-family: var(--noto-kannada);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--gold-heading);
-  margin-bottom: 1.125rem;
-}
-
-.headingSub {
+  letter-spacing: 0.03em;
   font-family: var(--inter);
-  color: var(--footer-sub);
-  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
-/* --- Link lists --- */
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* Centre: two stacked link rows, Kannada above English */
+.links {
   display: flex;
   flex-direction: column;
+  gap: 14px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.listInfo { gap: 0.625rem; }
-.listLegal { gap: 0.75rem; }
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.linkItem {
+  display: flex;
+  align-items: center;
+}
 
 .link {
-  color: var(--footer-link);
+  color: color-mix(in srgb, var(--hottu-50) 80%, transparent);
+  font-weight: 400;
   text-decoration: none;
-  font-family: var(--inter);
-  font-size: 1rem;
-  line-height: 1.65;
-  transition: color 0.15s ease;
-  display: block;
-}
-
-.knLabel {
-  display: block;
-  font-family: var(--noto-kannada);
-  font-size: 0.9375rem;
-  color: var(--footer-kn);
-  line-height: 1.45;
-  transition: color 0.15s ease;
-}
-
-.enLabel {
-  font-size: 0.875rem;
-  color: inherit;
-  line-height: 1.5;
-}
-
-.note {
-  display: block;
-  font-family: var(--inter);
-  font-size: 0.75rem;
-  color: var(--footer-muted);
-  line-height: 1.5;
-  margin-top: 0.2rem;
+  line-height: 1;
+  transition: color 0.15s;
 }
 
 .link:hover,
 .link:focus-visible {
-  color: var(--gold-hover);
+  color: var(--hottu-50);
 }
 
-.link:hover .knLabel,
-.link:focus-visible .knLabel {
-  color: var(--gold-hover);
+.linkKn {
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  font-family: var(--noto-kannada);
 }
 
-/* --- Col 4: contact --- */
+.linkEn {
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+  font-family: var(--inter);
+}
+
+.sep {
+  color: color-mix(in srgb, var(--hottu-50) 22%, transparent);
+  margin: 0 12px;
+  font-size: 14px;
+  font-family: sans-serif;
+  user-select: none;
+}
+
+/* Right: phone over email, right-aligned */
 .contact {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .phone {
-  display: block;
-  font-family: var(--inter);
-  font-size: 1.0625rem;
-  color: var(--gold-hover);
+  color: var(--bhatta-400);
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  font-family: var(--inter);
+  transition: opacity 0.15s;
 }
 
-.hours {
-  font-family: var(--inter);
-  font-size: 0.875rem;
-  color: var(--footer-kn);
-  line-height: 1.6;
+.phone:hover,
+.phone:focus-visible {
+  opacity: 0.72;
 }
 
 .email {
+  color: color-mix(in srgb, var(--hottu-50) 88%, transparent);
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
   font-family: var(--inter);
-  font-size: 1rem;
-  color: var(--footer-link);
+  transition: color 0.15s;
 }
 
-/* --- Bottom bar --- */
-.bottomBar {
-  border-top: 1px solid var(--emerald-mid);
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.75rem 2.5rem;
+.email:hover,
+.email:focus-visible {
+  color: var(--hottu-50);
 }
 
-.legalText {
+/* ── Hairline ───────────────────────────────────────────────────────── */
+
+.hairline {
+  height: 1px;
+  background: var(--gadde-900);
+}
+
+/* ── Row 2: address block ───────────────────────────────────────────── */
+
+.legal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px 0 36px;
+}
+
+.meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.company {
+  color: color-mix(in srgb, var(--hottu-50) 70%, transparent);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   font-family: var(--inter);
-  font-size: 0.8125rem;
-  color: var(--footer-muted);
-  line-height: 1.9;
-  margin: 0;
+  white-space: nowrap;
 }
 
-.legalKn {
+.metaDot {
+  color: var(--gadde-900);
+  font-size: 11px;
+  user-select: none;
+}
+
+.cin {
+  color: color-mix(in srgb, var(--gadde-300) 72%, transparent);
+  font-size: 12px;
+  font-family: var(--inter);
+  letter-spacing: 0.035em;
+}
+
+.copyright {
+  color: color-mix(in srgb, var(--gadde-300) 72%, transparent);
+  font-size: 12px;
+  font-family: var(--inter);
+  letter-spacing: 0.02em;
+}
+
+.address {
+  color: color-mix(in srgb, var(--gadde-300) 68%, transparent);
+  font-size: 12.5px;
+  font-family: var(--inter);
+  letter-spacing: 0.02em;
+  line-height: 1.6;
+}
+
+.disclaimerKn {
+  color: color-mix(in srgb, var(--gadde-300) 60%, transparent);
+  font-size: 13px;
   font-family: var(--noto-kannada);
-  font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+  line-height: 1.65;
+}
+
+.disclaimerEn {
+  color: color-mix(in srgb, var(--gadde-300) 48%, transparent);
+  font-size: 12px;
+  font-family: var(--inter);
+  letter-spacing: 0.025em;
+  line-height: 1.6;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .link,
-  .knLabel {
+  .phone,
+  .email {
     transition: none;
   }
 }

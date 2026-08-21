@@ -1,133 +1,146 @@
+import Image from 'next/image';
 import Link from 'next/link';
+import T from './T';
 import styles from './Footer.module.css';
 
 /**
- * Site footer — ported from Figma Make frame b7llkwYtWHD4leB751w7HN.
- * Only the footer block from that file is in scope; the About page above
- * it was not read or used.
+ * Site footer — ported from Figma Make file KHTmHHpRF4tRwZJoVKKAwh
+ * (src/App.tsx), replacing the earlier four-column footer.
  *
- * The frame renders Kannada and English together for every link, so the
- * footer does not respond to the ಕ|EN toggle. That is the design.
+ * Two rows split by a hairline: brand · legal links · contact above,
+ * company/CIN/copyright, address and the two disclaimers below.
+ *
+ * LANGUAGE: the frame prints both languages at once — a Kannada link row
+ * above an English one, and a Kannada disclaimer above its English twin —
+ * and has no toggle of its own. That stack is preserved and the ಕ|EN
+ * control does not change it, matching the ruling on /how-it-works, so
+ * every <T> carries the same string in both slots.
+ *
+ * The frame's logo is the parked burst crest (logo_png_paddy_link_v8.png);
+ * per brief the interim crescent is dropped into the same 46x46 cream tile
+ * at the frame's 38x38 inner size. Marked LOGO-SUB below.
+ *
+ * The frame leaves every legal href as "#"; the real routes are wired here
+ * per brief. Marked HREF-WIRED below.
  */
 
-const infoLinks = [
-  { kn: 'ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ', label: 'How It Works', href: '/how-it-works' },
-  { kn: 'ಖರೀದಿದಾರರಿಗೆ', label: 'For Buyers', href: '/buyers' },
-  { kn: 'ನಮ್ಮ ಬಗ್ಗೆ', label: 'About', href: '/about' },
-  { kn: 'ಸಹಾಯ', label: 'Support', href: '/support' },
-];
+const LEGAL = [
+  { kn: 'ನಿಯಮಗಳು', en: 'Terms', href: '/terms' },
+  { kn: 'ಗೌಪ್ಯತೆ', en: 'Privacy', href: '/privacy' },
+  { kn: 'ಮರುಪಾವತಿ', en: 'Refunds', href: '/refund-policy' },
+  { kn: 'ಕುಂದುಕೊರತೆ', en: 'Grievance', href: '/support#grievance' },
+]; // HREF-WIRED — all four are "#" in the frame.
 
-const legalLinks: { kn: string; en: string; href: string; note?: string }[] = [
-  { kn: 'ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳು', en: 'Terms & Conditions', href: '/terms' },
-  { kn: 'ಗೌಪ್ಯತಾ ನೀತಿ', en: 'Privacy Policy', href: '/privacy' },
-  { kn: 'ಮರುಪಾವತಿ ನೀತಿ', en: 'Refund Policy', href: '/refund-policy' },
-  {
-    kn: 'ಕುಂದುಕೊರತೆ ಅಧಿಕಾರಿ',
-    en: 'Grievance Officer',
-    href: 'mailto:founder@kalbantt.in',
-    note: 'founder@kalbantt.in',
-  },
-];
+function LinkRow({ lang }: { lang: 'kn' | 'en' }) {
+  return (
+    <div className={styles.linkRow}>
+      {LEGAL.map((item, i) => {
+        const label = lang === 'kn' ? item.kn : item.en;
+        return (
+          <span key={item.href} className={styles.linkItem}>
+            <Link
+              href={item.href}
+              lang={lang}
+              className={`${styles.link} ${lang === 'kn' ? styles.linkKn : styles.linkEn}`}
+            >
+              <T kn={label} en={label} />
+            </Link>
+            {i < LEGAL.length - 1 && (
+              <span aria-hidden="true" className={styles.sep}>
+                ·
+              </span>
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={styles.columns}>
-        {/* Col 1 — Brand */}
-        <div>
-          <div className={styles.brand}>
-            <svg width="30" height="30" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-              <circle cx="14" cy="14" r="12" fill="#2A5C42" />
-              <path d="M18 8a8 8 0 1 0 0 12A6 6 0 1 1 18 8z" fill="#C5963A" />
-              <circle cx="18.5" cy="9.5" r="1.25" fill="#D9B26A" />
-            </svg>
+      <div className={styles.inner}>
+        {/* ── Row 1: brand · links · contact ── */}
+        <div className={styles.top}>
+          <Link href="/" className={styles.brand}>
+            <span className={styles.logoTile}>
+              {/* LOGO-SUB — interim crescent in place of the frame's burst crest. */}
+              <Image
+                src="/brand/paddy-crescent.png"
+                alt="PaddyLink paddy crescent"
+                width={38}
+                height={38}
+                className={styles.logoImg}
+              />
+            </span>
             <span className={styles.wordmark}>PaddyLink</span>
+          </Link>
+
+          <div className={styles.links}>
+            <LinkRow lang="kn" />
+            <LinkRow lang="en" />
           </div>
-          <p className={styles.tagline}>
-            ರೈತ ಸಂಪರ್ಕ · ಪರಿಶೀಲಿತ ಖರೀದಿದಾರರು · ನೇರ ವ್ಯವಹಾರ
-          </p>
-        </div>
 
-        {/* Col 2 — Information */}
-        <div>
-          <p className={styles.heading}>
-            ಮಾಹಿತಿ <span className={styles.headingSub}>/ Information</span>
-          </p>
-          <ul className={`${styles.list} ${styles.listInfo}`}>
-            {infoLinks.map((link) => (
-              <li key={link.label}>
-                <Link href={link.href} className={styles.link}>
-                  <span className={styles.knLabel}>{link.kn}</span>
-                  <span className={styles.enLabel}>{link.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Col 3 — Legal */}
-        <div>
-          <p className={styles.heading}>
-            ಕಾನೂನು <span className={styles.headingSub}>/ Legal</span>
-          </p>
-          <ul className={`${styles.list} ${styles.listLegal}`}>
-            {legalLinks.map((link) => (
-              <li key={link.en}>
-                {link.href.startsWith('mailto:') ? (
-                  <a href={link.href} className={styles.link}>
-                    <span className={styles.knLabel}>{link.kn}</span>
-                    <span className={styles.enLabel}>{link.en}</span>
-                    {link.note && <span className={styles.note}>{link.note}</span>}
-                  </a>
-                ) : (
-                  <Link href={link.href} className={styles.link}>
-                    <span className={styles.knLabel}>{link.kn}</span>
-                    <span className={styles.enLabel}>{link.en}</span>
-                    {link.note && <span className={styles.note}>{link.note}</span>}
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Col 4 — Contact */}
-        <div>
-          <p className={styles.heading}>
-            ಸಂಪರ್ಕ <span className={styles.headingSub}>/ Contact</span>
-          </p>
           <div className={styles.contact}>
-            <div>
-              <span className={styles.phone}>+91 91085 40960</span>
-              <span className={styles.hours}>
-                Mon–Sat, 10am–6pm
-                <br />
-                Call / WhatsApp
-              </span>
-            </div>
-            <div>
-              <span className={styles.email}>founder@kalbantt.in</span>
-            </div>
+            <a href="tel:+919108540960" className={styles.phone}>
+              +91 91085 40960
+            </a>
+            <a href="mailto:founder@kalbantt.in" className={styles.email}>
+              founder@kalbantt.in
+            </a>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className={styles.bottomBar}>
-        <p className={styles.legalText}>
-          Kalbantt Tech OPC Private Limited · CIN: U85500KA2026OPC224772
-          <br />
-          Registered Office: Unit 101, Oxford Towers, 139/88 Old Airport Road,
-          Kodihalli, Bangalore, Karnataka, India – 560008
-          <br />
-          © 2026 Kalbantt Tech OPC Pvt Ltd.{' '}
-          <span className={styles.legalKn}>
-            PaddyLink ಮಾಹಿತಿ ಮತ್ತು ಸಂಪರ್ಕ ಸೇವೆ ಮಾತ್ರ — ವ್ಯವಹಾರಗಳು ರೈತರು ಮತ್ತು
-            ಖರೀದಿದಾರರ ನಡುವೆ ನೇರವಾಗಿ ನಡೆಯುತ್ತವೆ.
-          </span>{' '}
-          / PaddyLink is an information and connection service only — transactions
-          happen directly between farmers and buyers.
-        </p>
+        <div className={styles.hairline} />
+
+        {/* ── Row 2: address block ── */}
+        <div className={styles.legal}>
+          <div className={styles.meta}>
+            <span className={styles.company}>
+              <T
+                kn="Kalbantt Tech OPC Private Limited"
+                en="Kalbantt Tech OPC Private Limited"
+              />
+            </span>
+            <span aria-hidden="true" className={styles.metaDot}>
+              ·
+            </span>
+            <span className={styles.cin}>
+              <T kn="CIN: U85500KA2026OPC224772" en="CIN: U85500KA2026OPC224772" />
+            </span>
+            <span aria-hidden="true" className={styles.metaDot}>
+              ·
+            </span>
+            <span className={styles.copyright}>
+              <T
+                kn="© 2026 Kalbantt Tech OPC Pvt Ltd"
+                en="© 2026 Kalbantt Tech OPC Pvt Ltd"
+              />
+            </span>
+          </div>
+
+          <div className={styles.address}>
+            <T
+              kn="Unit 101, Oxford Towers, 139/88 Old Airport Road, Kodihalli, Bangalore, Karnataka 560008"
+              en="Unit 101, Oxford Towers, 139/88 Old Airport Road, Kodihalli, Bangalore, Karnataka 560008"
+            />
+          </div>
+
+          <div className={styles.disclaimerKn} lang="kn">
+            <T
+              kn="PaddyLink ಮಾಹಿತಿ ಮತ್ತು ಸಂಪರ್ಕ ಸೇವೆ ಮಾತ್ರ — ವ್ಯವಹಾರಗಳು ರೈತರು ಮತ್ತು ಖರೀದಿದಾರರ ನಡುವೆ ನೇರ."
+              en="PaddyLink ಮಾಹಿತಿ ಮತ್ತು ಸಂಪರ್ಕ ಸೇವೆ ಮಾತ್ರ — ವ್ಯವಹಾರಗಳು ರೈತರು ಮತ್ತು ಖರೀದಿದಾರರ ನಡುವೆ ನೇರ."
+            />
+          </div>
+
+          <div className={styles.disclaimerEn} lang="en">
+            <T
+              kn="PaddyLink is an information and connection service only — transactions are directly between farmers and buyers."
+              en="PaddyLink is an information and connection service only — transactions are directly between farmers and buyers."
+            />
+          </div>
+        </div>
       </div>
     </footer>
   );
