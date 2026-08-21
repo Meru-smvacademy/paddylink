@@ -107,7 +107,7 @@
   letter-spacing: 0.04em;
   transition: all 0.18s ease;
   background: transparent;
-  color: var(--ink-50);
+  color: var(--text-muted);
 }
 
 .pillActive {

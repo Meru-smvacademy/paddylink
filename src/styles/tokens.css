@@ -1,31 +1,68 @@
 /* PaddyLink design tokens.
-   Values extracted from the Figma header design (Make file vfgAppGDsfwuOsPU28zyFK).
-   These replace the provisional Step 1 values. */
+
+   Brand palette (below) is the source of truth. The semantic names that the
+   components already use are aliases onto it, so a component keeps reading
+   --cream / --emerald-900 while the value lives in one place.
+
+   Retired in this pass: the --navy-* scale and the --ink* scale. */
 
 :root {
+  /* ============================================================
+     BRAND PALETTE
+     gadde   — field green      bhatta — paddy gold
+     hottu   — dawn cream       kemmannu — laterite red
+     masi    — ink / text
+     ============================================================ */
+
+  /* --- gadde (green) --- */
+  --gadde-950: #0B2418;
+  --gadde-900: #12352A;
+  --gadde-700: #1E5B3A;
+  --gadde-600: #2A7A3B;
+  --gadde-300: #9CC4A8;
+
+  /* --- bhatta (gold) --- */
+  --bhatta-600: #C9963A;
+  --bhatta-400: #F0B429;
+  --bhatta-200: #F3DFA6;
+
+  /* --- hottu (cream) --- */
+  --hottu-50: #FDF6E3;
+  --hottu-100: #F6EFDA;
+  --hottu-200: #EDE1C2;
+
+  /* --- kemmannu (red) --- */
+  --kemmannu-600: #A4472D;
+  --kemmannu-400: #C06B4F;
+
+  /* --- masi (ink) --- */
+  --masi-900: #14241B;
+  --masi-500: #54665B;
+
+  /* ============================================================
+     SEMANTIC ALIASES
+     ============================================================ */
+
   /* --- Surfaces --- */
-  --page-bg: #f5f4f0;          /* body background */
-  --cream: #fdf6e3;            /* header background */
+  --page-bg: #f5f4f0;              /* body background — neutral, outside the brand ramp */
+  --cream: var(--hottu-50);        /* header background */
+
+  /* --- Text ---
+     Replaces the retired --ink scale. --ink was #1e2837 and --ink-50 was a
+     50% alpha of it; both now resolve to solid masi values. */
+  --text: var(--masi-900);
+  --text-muted: var(--masi-500);
 
   /* --- Brand green --- */
-  --emerald-900: #2a7a3b;      /* wordmark */
+  --emerald-900: var(--gadde-600);  /* wordmark */
 
-  /* --- Gold scale --- */
+  /* --- Gold scale ---
+     --gold-500 folds into bhatta-600. The 300/600/700 steps are header-only
+     shades with no brand-palette equivalent and stay as literals. */
   --gold-300: #e2b96a;
-  --gold-500: #c9963a;         /* accent, active toggle pill start */
-  --gold-600: #a97c2c;         /* active toggle pill end */
-  --gold-700: #b07d2a;         /* nav link rest state */
-
-  /* --- Navy scale --- */
-  --navy-700: #1a3360;
-  --navy-800: #132849;
-  --navy-900: #0d1f3c;
-  --navy-950: #07152b;
-
-  /* --- Ink --- */
-  --ink: #1e2837;              /* rgb(30,40,55) */
-  --ink-50: rgba(30, 40, 55, 0.5);
-  --ink-18: rgba(30, 40, 55, 0.18);
+  --gold-500: var(--bhatta-600);   /* accent, active toggle pill start */
+  --gold-600: #a97c2c;             /* active toggle pill end */
+  --gold-700: #b07d2a;             /* nav link rest state */
 
   /* --- Lines & shadows --- */
   --hairline: rgba(0, 0, 0, 0.08);
@@ -57,7 +94,9 @@
   --inter: var(--font-inter), 'Inter', system-ui, sans-serif;
 }
 
-/* --- Footer design tokens (Figma frame b7llkwYtWHD4leB751w7HN) --- */
+/* --- Footer design tokens (Figma frame b7llkwYtWHD4leB751w7HN) ---
+   Kept at their approved literal values; these are a shipped, signed-off
+   port and are deliberately not re-pointed at the brand ramp. */
 :root {
   --lora: var(--font-lora), 'Lora', Georgia, serif;
   --noto-kannada: var(--font-noto-sans-kannada), 'Noto Sans Kannada', 'Noto Sans', sans-serif;
