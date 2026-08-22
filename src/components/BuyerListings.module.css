@@ -1,0 +1,789 @@
+/* Buyer listings browser — ported from Figma Make file
+   8Wf4G4tW7lGRmd8LI2LyKw (src/App.tsx). Layout, spacing, type scale and
+   copy are the frame's, verbatim. Desktop-first at 1440px.
+
+   Private route. Tokens appear here and nowhere public.
+
+   DEV-PALETTE — CEO-approved. The frame was written against a fuller ramp
+   than we ship, and its family names collide with ours: its `gadde-*` is a
+   GOLD family (its own hexes give #96690C and #E2B755), while ours is green.
+   Rather than expand the ramp, the CEO's brand rule splits the two by role:
+
+     GREEN (gadde) = verified / trust
+       quality-checked badge, its tick disc, the quality-only toggle when on
+     GOLD (bhatta) = spend
+       token chip, coin disc, unlock buttons, modal accents, card stripe
+
+   The frame's own gold `gadde-*` steps therefore map onto our bhatta and
+   gadde by role, not by name:
+
+     frame                role                        token
+     hottu-50             page ground, on-dark text   --hottu-50
+     hottu-100            cards, filter band          --hottu-100
+     hottu-200            every border                --hottu-200
+     hottu-300            faint text, toggle-off pill --hottu-300  (new)
+     hottu-400            all muted text and strokes  --hottu-400  (new)
+     bhatta-800           headings, card titles       --gadde-950
+     bhatta-700           unlocked farmer name        --gadde-900
+     bhatta-600           buttons, links, quantity    --bhatta-600
+     bhatta-400/200       card stripe gradient        --bhatta-400 / --bhatta-200
+     bhatta-50            safety panel fill           --hottu-50
+     gadde-100 (gold)     chip + badge fill           --hottu-100 / gadde tint
+     gadde-500/400 (gold) toggle-on pill and border   --gadde-600 / --gadde-700
+     gadde-700/800 (gold) badge and chip text         --gadde-700
+     #96690C              quality tick disc           --gadde-700
+     rgba(14,32,23,0.55)  modal overlay               gadde-950 at 55%
+
+   Only --hottu-300 and --hottu-400 were added to the ramp; nothing else is
+   new. The frame names var(--font-kannada) / var(--font-ui) without defining
+   either; per ruling those are --noto-kannada and --outfit. */
+
+.page {
+  background: var(--hottu-50);
+  min-height: 60vh;
+}
+
+/* ── Top bar ────────────────────────────────────────────────────────── */
+
+.topBar {
+  border-bottom: 1px solid var(--hottu-200);
+  background: var(--hottu-50);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.titleKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.875rem;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.titleEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0.125rem 0 0;
+  color: var(--hottu-400);
+}
+
+/* ── Token chip ─────────────────────────────────────────────────────── */
+
+.tokenRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.tokenChip {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: var(--hottu-100);
+  border: 1px solid var(--hottu-200);
+  border-radius: 9999px;
+  padding: 0.375rem 0.75rem;
+}
+
+.tokenCount {
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--gadde-950);
+}
+
+/* DEV-GUARD — not in the frame, which never checks the balance. */
+.tokenLow {
+  color: var(--kemmannu-600);
+}
+
+.addLink {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bhatta-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.addLink:hover {
+  color: color-mix(in srgb, var(--bhatta-600) 78%, var(--gadde-950));
+}
+
+.addLink:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.addLinkEn {
+  color: var(--hottu-400);
+  font-weight: 400;
+}
+
+/* ── Filter row ─────────────────────────────────────────────────────── */
+
+.filters {
+  border-bottom: 1px solid var(--hottu-200);
+  background: var(--hottu-100);
+  padding: 0.875rem 2rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.filterLabel {
+  font-family: var(--outfit);
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 0.25rem;
+  color: var(--hottu-400);
+}
+
+.select {
+  background: var(--hottu-50);
+  border: 1px solid var(--hottu-200);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  color: var(--gadde-950);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--bhatta-400);
+  box-shadow: 0 0 0 1px var(--bhatta-200);
+}
+
+.selectDistrict {
+  min-width: 140px;
+}
+
+.selectVariety {
+  min-width: 150px;
+}
+
+.selectMonth {
+  min-width: 160px;
+}
+
+/* ── Quality toggle ─────────────────────────────────────────────────── */
+
+.toggleWrap {
+  margin-left: auto;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--hottu-200);
+  background: var(--hottu-50);
+  color: var(--hottu-400);
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.toggle:hover {
+  border-color: var(--hottu-300);
+}
+
+/* DEV-PALETTE: verified reads green. */
+.toggleOn {
+  background: color-mix(in srgb, var(--gadde-300) 28%, var(--hottu-50));
+  border-color: var(--gadde-600);
+  color: var(--gadde-700);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--gadde-600);
+  outline-offset: 3px;
+}
+
+.togglePill {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--hottu-300);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.togglePillOn {
+  background: var(--gadde-600);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--hottu-50);
+  box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--gadde-950) 15%, transparent);
+  transform: translateX(2px);
+  transition: transform 0.2s;
+}
+
+.toggleKnobOn {
+  transform: translateX(15px);
+}
+
+.toggleEn {
+  font-family: var(--outfit);
+  font-weight: 400;
+  color: var(--hottu-300);
+}
+
+.toggleOn .toggleEn {
+  color: var(--gadde-600);
+}
+
+/* ── Grid ───────────────────────────────────────────────────────────── */
+
+.main {
+  padding: 1.75rem 2rem;
+}
+
+.count {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0 0 1.25rem;
+  color: var(--hottu-400);
+}
+
+.countKn {
+  font-family: var(--noto-kannada);
+}
+
+.clearInline {
+  margin-left: 0.5rem;
+  font-family: var(--noto-kannada);
+  font-size: inherit;
+  color: var(--bhatta-600);
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.clearInline:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--hottu-100);
+  border-radius: 1rem;
+  border: 1px solid var(--hottu-200);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.card:hover {
+  border-color: var(--hottu-300);
+  box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--gadde-950) 10%, transparent);
+}
+
+.stripe {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    var(--bhatta-600),
+    var(--bhatta-400),
+    var(--bhatta-200)
+  );
+  opacity: 0.6;
+}
+
+.cardBody {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.variety {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.quantity {
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin: 0.125rem 0 0;
+  color: var(--bhatta-600);
+}
+
+.unlockedTag {
+  flex-shrink: 0;
+  font-family: var(--outfit);
+  font-size: 0.625rem;
+  font-weight: 600;
+  background: var(--bhatta-600);
+  color: var(--hottu-50);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  color: var(--hottu-400);
+}
+
+/* ── Quality badge ──────────────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.625rem;
+}
+
+/* DEV-PALETTE: verified reads green. */
+.badgeChecked {
+  background: color-mix(in srgb, var(--gadde-300) 28%, var(--hottu-50));
+  border: 1px solid var(--gadde-300);
+}
+
+.badgeCheckedText {
+  font-family: var(--noto-kannada);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gadde-700);
+}
+
+.badgeMoisture {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gadde-600);
+}
+
+.badgePending {
+  background: var(--hottu-100);
+  border: 1px solid var(--hottu-200);
+}
+
+.badgePendingText {
+  font-family: var(--noto-kannada);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--hottu-400);
+}
+
+.badgePendingEn {
+  font-family: var(--outfit);
+}
+
+/* ── Farmer identity ────────────────────────────────────────────────── */
+
+.identity {
+  border-top: 1px solid var(--hottu-200);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.farmerFull {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--gadde-900);
+}
+
+.phoneFull {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--bhatta-600);
+}
+
+.farmerMasked {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--hottu-400);
+}
+
+.phoneMasked {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  margin: 0;
+  color: var(--hottu-300);
+}
+
+/* ── Card footer ────────────────────────────────────────────────────── */
+
+.cardFoot {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: var(--bhatta-600);
+  color: var(--hottu-50);
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.625rem 0;
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cta:hover {
+  background: color-mix(in srgb, var(--bhatta-600) 78%, var(--gadde-950));
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.ctaEn {
+  font-family: var(--outfit);
+  font-weight: 400;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* DEV-GUARD — not in the frame. Below the unlock price the button stops
+   being actionable rather than driving the balance negative. */
+.ctaDisabled,
+.ctaDisabled:hover {
+  background: var(--hottu-200);
+  color: var(--hottu-400);
+  cursor: not-allowed;
+}
+
+/* ── Empty state ────────────────────────────────────────────────────── */
+
+.empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 0;
+  gap: 1.25rem;
+}
+
+.emptyIcon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 9999px;
+  background: var(--hottu-100);
+  border: 2px solid var(--hottu-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyKn {
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin: 0;
+  color: var(--gadde-950);
+  text-align: center;
+}
+
+.emptyEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0.375rem 0 0;
+  color: var(--hottu-400);
+  text-align: center;
+}
+
+.clearBtn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bhatta-600);
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.clearBtn:hover {
+  color: color-mix(in srgb, var(--bhatta-600) 78%, var(--gadde-950));
+}
+
+.clearBtn:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+/* ── Unlock modal ───────────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--gadde-950) 55%, transparent);
+}
+
+.modal {
+  background: var(--hottu-50);
+  border-radius: 1rem;
+  border: 1px solid var(--hottu-200);
+  box-shadow: 0 25px 50px -12px color-mix(in srgb, var(--gadde-950) 25%, transparent);
+  width: 100%;
+  max-width: 24rem;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.modalIconRow {
+  display: flex;
+  justify-content: center;
+}
+
+.modalIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  background: var(--hottu-100);
+  border: 2px solid var(--bhatta-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalHead {
+  text-align: center;
+}
+
+.modalKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.375;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.modalEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0.375rem 0 0;
+  color: var(--hottu-400);
+}
+
+.modalCost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.modalCostKn {
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--bhatta-600);
+}
+
+.modalCostEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0.125rem 0 0;
+  color: var(--hottu-300);
+}
+
+/* DEV-GUARD — not in the frame. */
+.modalShort {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0.5rem 0 0;
+  color: var(--kemmannu-600);
+}
+
+.safety {
+  background: var(--hottu-100);
+  border: 1px solid var(--bhatta-200);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+
+.safetyKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.375;
+  margin: 0;
+  color: var(--gadde-900);
+}
+
+.safetyEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0.125rem 0 0;
+  color: var(--hottu-400);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cancel {
+  flex: 1;
+  padding: 0.625rem 0;
+  border-radius: 0.75rem;
+  border: 1px solid var(--hottu-300);
+  background: transparent;
+  color: var(--hottu-400);
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancel:hover {
+  background: var(--hottu-100);
+}
+
+.cancel:focus-visible {
+  outline: 2px solid var(--hottu-400);
+  outline-offset: 3px;
+}
+
+.confirm {
+  flex: 1;
+  padding: 0.625rem 0;
+  border-radius: 0.75rem;
+  border: none;
+  background: var(--bhatta-600);
+  color: var(--hottu-50);
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirm:hover {
+  background: color-mix(in srgb, var(--bhatta-600) 78%, var(--gadde-950));
+}
+
+.confirm:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.confirmDisabled,
+.confirmDisabled:hover {
+  background: var(--hottu-200);
+  color: var(--hottu-400);
+  cursor: not-allowed;
+}
+
+.actionEn {
+  font-family: var(--outfit);
+  font-weight: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cta,
+  .toggle,
+  .togglePill,
+  .toggleKnob,
+  .select,
+  .addLink,
+  .clearBtn,
+  .cancel,
+  .confirm {
+    transition: none;
+  }
+}

@@ -30,6 +30,11 @@
   --hottu-50: #FDF6E3;
   --hottu-100: #F6EFDA;
   --hottu-200: #EDE1C2;
+  /* The two mid-tans the dashboard needs: every muted line on a listing
+     card (location, harvest, filter labels, masked phone) sits on one of
+     these. Values are the Buyer Listings frame's own, 8Wf4G4tW7lGRmd8LI2LyKw. */
+  --hottu-300: #D4BA8A;
+  --hottu-400: #BF9A5C;
 
   /* --- kemmannu (red) --- */
   --kemmannu-600: #A4472D;

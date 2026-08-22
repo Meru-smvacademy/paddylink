@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import FarmerListingForm from './FarmerListingForm';
 import FarmerSuccess from './FarmerSuccess';
@@ -21,9 +22,9 @@ import styles from './OtpFlow.module.css';
  * Every string, size and disabled colour is identical across both doors.
  *
  * After a verified code the farmer walks on to the listing form and then the
- * success screen; both are the same Make file. The buyer has nowhere to go —
- * the frame returns buyers to the door chooser with a comment calling it a
- * placeholder — so a dashboard panel stands in, per brief.
+ * success screen; both are the same Make file. The frame returns verified
+ * buyers to the door chooser, calling it a placeholder; per CEO ruling they
+ * now land on /buyer/listings, the private listings browser.
  *
  * AWAITING-BACKEND: nothing here sends or checks a real OTP. No SMS is
  * dispatched, no code is validated, no session is created, and no listing is
@@ -47,9 +48,10 @@ const PHONE_LENGTH = 10;
 const RESEND_SECONDS = 30;
 
 type Door = 'farmer' | 'buyer';
-type Phase = 'phone' | 'verify' | 'form' | 'success' | 'dashboard';
+type Phase = 'phone' | 'verify' | 'form' | 'success';
 
 export default function OtpFlow({ door }: { door: Door }) {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
@@ -103,8 +105,13 @@ export default function OtpFlow({ door }: { door: Door }) {
       inputRefs.current[0]?.focus();
       return;
     }
-    // The frame's verified(): farmers reach the listing form, buyers do not.
-    setPhase(door === 'farmer' ? 'form' : 'dashboard');
+    // The frame's verified(): farmers reach the listing form. Buyers go to
+    // the private listings browser, per CEO ruling.
+    if (door === 'farmer') {
+      setPhase('form');
+      return;
+    }
+    router.push('/buyer/listings');
   }
 
   function handleOtpChange(i: number, raw: string) {
@@ -172,29 +179,6 @@ export default function OtpFlow({ door }: { door: Door }) {
         {phase === 'form' && <FarmerListingForm onSubmitted={() => setPhase('success')} />}
 
         {phase === 'success' && <FarmerSuccess />}
-
-        {phase === 'dashboard' && (
-          /* Not in the frame — the frame simply returns verified buyers to the
-             door chooser, calling it a placeholder. Per brief a panel stands
-             in, built from the frame's own card treatment so nothing is
-             invented beyond the two lines of copy.
-             AWAITING-BACKEND: there is no buyer dashboard behind this. */
-          <div className={styles.card} role="status">
-            <div className={styles.pillRow}>
-              <span className={styles.pill}>
-                <T kn={pill} en={pill} />
-              </span>
-            </div>
-            <div>
-              <h1 className={styles.headingKn}>
-                <T kn="ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಶೀಘ್ರದಲ್ಲಿ" en="ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಶೀಘ್ರದಲ್ಲಿ" />
-              </h1>
-              <p className={styles.headingEn}>
-                <T kn="Dashboard coming soon" en="Dashboard coming soon" />
-              </p>
-            </div>
-          </div>
-        )}
 
         {(phase === 'phone' || phase === 'verify') && (
           <div className={styles.card}>
