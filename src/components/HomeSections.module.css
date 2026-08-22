@@ -205,6 +205,18 @@
   opacity: 0.75;
 }
 
+/* ── Separator band ─────────────────────────────────────────────────────
+   Not in the frame. The pillar band and the site footer are both gadde-950,
+   so without this they merge into one dark mass. A slim cream band breaks
+   them apart: dark section -> cream -> dark footer. Home only, because it
+   lives inside this component and every other route already has cream
+   content sitting above the footer. CEO-approved deviation. */
+
+.separator {
+  height: 48px;
+  background: var(--hottu-50);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ctaGold,
   .ctaLink {

@@ -164,6 +164,10 @@ export default function HomeSections() {
           ))}
         </div>
       </section>
+
+      {/* Cream band between the dark pillar section and the dark footer.
+          Empty and decorative — see .separator in the stylesheet. */}
+      <div className={styles.separator} aria-hidden="true" />
     </>
   );
 }
