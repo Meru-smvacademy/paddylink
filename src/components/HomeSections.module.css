@@ -1,0 +1,217 @@
+/* Home middle sections — ported from Figma Make file Vq0BfMfMUhkvcu9bKxXhDy
+   (src/App.tsx), the two sections the frame places between the hero's trust
+   strip and the footer. Values are the frame's, verbatim. Desktop-first at
+   1440px.
+
+   Every brand colour is on the ramp and used as its token; the frame's rgba()
+   alphas become color-mix() against the same tokens:
+     #FDF6E3 -> --hottu-50   #0B2418 -> --gadde-950
+     #9CC4A8 -> --gadde-300  #F0B429 -> --bhatta-400
+
+   Off-ramp literals kept verbatim, exactly as the hero already ships them:
+   the CTA gradient stops #c8870a / #e8a820, its rgba(200,135,10) bloom, and
+   the text-link hover #8a5e00. No brand-ramp equivalent exists for these. */
+
+/* ── Section 1: cream band with the message card ────────────────────── */
+
+.messageSection {
+  background: var(--hottu-50);
+  padding: 100px 24px 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card {
+  background: var(--gadde-950);
+  border-left: 3px solid var(--bhatta-400);
+  /* Square on the accent edge, rounded on the other three. */
+  border-radius: 4px 16px 16px 4px;
+  padding: 52px 60px 48px;
+  max-width: 880px;
+  width: 100%;
+}
+
+.cardLine1 {
+  font-family: var(--tiro);
+  font-size: clamp(22px, 2.6vw, 34px);
+  font-weight: 700;
+  color: var(--hottu-50);
+  line-height: 1.45;
+  margin: 0 0 24px;
+}
+
+.cardLine2 {
+  font-family: var(--tiro);
+  font-size: clamp(17px, 1.8vw, 22px);
+  color: color-mix(in srgb, var(--hottu-50) 85%, transparent);
+  line-height: 1.65;
+  margin: 0 0 28px;
+}
+
+.cardLine3 {
+  font-family: var(--tiro);
+  font-size: clamp(20px, 2.2vw, 28px);
+  font-weight: 600;
+  color: var(--hottu-50);
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.cardAccent {
+  color: var(--bhatta-400);
+}
+
+.cardEn {
+  font-family: var(--inter);
+  font-size: 13.5px;
+  color: var(--gadde-300);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 600px;
+}
+
+/* ── CTA row under the card ─────────────────────────────────────────── */
+
+.ctaRow {
+  margin-top: 44px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ctaGold {
+  background: linear-gradient(135deg, #c8870a 0%, var(--bhatta-400) 60%, #e8a820 100%);
+  color: var(--gadde-950);
+  font-family: var(--tiro);
+  font-size: 18px;
+  font-weight: 700;
+  padding: 17px 44px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 28px rgba(200, 135, 10, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.ctaGold:hover,
+.ctaGold:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 36px rgba(200, 135, 10, 0.6);
+}
+
+.ctaGoldEn {
+  font-family: var(--inter);
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 8px;
+  opacity: 0.75;
+}
+
+.ctaLink {
+  font-family: var(--tiro);
+  font-size: 16px;
+  color: var(--gadde-950);
+  text-decoration: none;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--gadde-950) 30%, transparent);
+  padding-bottom: 2px;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.ctaLink:hover,
+.ctaLink:focus-visible {
+  color: #8a5e00;
+  border-bottom-color: #8a5e00;
+}
+
+.ctaLinkEn {
+  font-family: var(--inter);
+  font-size: 13px;
+  margin-left: 6px;
+  opacity: 0.65;
+}
+
+/* ── Section 2: dark pillar band ────────────────────────────────────── */
+
+.pillarSection {
+  background: var(--gadde-950);
+  padding: 96px 24px 80px;
+}
+
+.pillarGrid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+
+.pillar {
+  padding: 52px 44px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-right: 1px solid color-mix(in srgb, var(--hottu-50) 7%, transparent);
+}
+
+.pillar:last-child {
+  border-right: none;
+}
+
+.pillarKn {
+  font-family: var(--tiro);
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 600;
+  color: var(--hottu-50);
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.pillarEn {
+  font-family: var(--inter);
+  font-size: 12px;
+  color: color-mix(in srgb, var(--gadde-300) 60%, transparent);
+  margin: 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pillarDetail {
+  border-top: 1px solid color-mix(in srgb, var(--bhatta-400) 15%, transparent);
+  padding-top: 20px;
+}
+
+.pillarLine {
+  font-family: var(--tiro);
+  font-size: 15px;
+  color: color-mix(in srgb, var(--hottu-50) 72%, transparent);
+  line-height: 1.65;
+  margin: 0 0 6px;
+}
+
+.pillarLineEn {
+  font-family: var(--inter);
+  font-size: 12.5px;
+  color: var(--gadde-300);
+  line-height: 1.6;
+  margin: 0;
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctaGold,
+  .ctaLink {
+    transition: none;
+  }
+  .ctaGold:hover,
+  .ctaGold:focus-visible {
+    transform: none;
+  }
+}
