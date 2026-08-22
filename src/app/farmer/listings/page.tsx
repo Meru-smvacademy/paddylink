@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import FarmerListings from '@/components/FarmerListings';
+import { getFarmerListings } from '@/lib/farmerListings';
+import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
 
 /* Private route: part of the farmer path, reached from the success screen
    after a listing is submitted. Nothing public links here, and it stays out
@@ -9,17 +13,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/* DEV-EMPTY-PARAM: the frame reached its empty state through a demo toggle in
-   a top bar we replace. That toggle is scaffolding and is not built; ?empty=1
-   stands in so the state stays reviewable, with no control anywhere in the
-   UI. It goes away when real listings arrive.
+/* One farmer's own data: never cached, never prerendered. */
+export const dynamic = 'force-dynamic';
 
-   searchParams is a promise in this version of Next and must be awaited. */
-export default async function FarmerListingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const empty = (await searchParams).empty === '1';
-  return <FarmerListings empty={empty} />;
+export default async function FarmerListingsPage() {
+  /* TEMP-PRE-AUTH: the OTP step puts the farmer's number in an httpOnly
+     cookie because there is no session yet. No cookie means we do not know
+     whose listings to show, so the flow starts over rather than guessing. */
+  const mobile = (await cookies()).get(FARMER_MOBILE_COOKIE)?.value;
+  if (!mobile || !/^\d{10}$/.test(mobile)) {
+    redirect('/login/farmer');
+  }
+
+  const listings = await getFarmerListings(mobile);
+  return <FarmerListings listings={listings} />;
 }

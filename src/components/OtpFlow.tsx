@@ -122,6 +122,15 @@ export default function OtpFlow({
     // The frame's verified(): farmers reach the listing form. Buyers go to
     // the private listings browser, per CEO ruling.
     if (door === 'farmer') {
+      // TEMP-PRE-AUTH: remember the number server-side so /farmer/listings
+      // knows whose listings to show. Not proof of identity — see the route.
+      // Failure is not fatal here: the listing form works without it, and the
+      // farmer would only be sent back to this screen from his listings page.
+      void fetch('/api/farmer/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: phone }),
+      }).catch(() => {});
       setPhase('form');
       return;
     }

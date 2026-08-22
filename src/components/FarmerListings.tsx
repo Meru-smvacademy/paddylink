@@ -12,17 +12,16 @@ import styles from './FarmerListings.module.css';
  * KANNADA-ONLY, like the listing form it follows: the ಕ|EN toggle leaves it
  * unchanged, so no <T> appears here. The only Latin on the page is "13.2%".
  *
- * AWAITING-BACKEND: the three cards below are fixtures compiled into the
- * bundle. There is no farmer account, no session and no stored listing —
- * every visitor to this route sees the same three cards. Nothing is fetched,
- * nothing can be edited and nothing can be removed.
+ * WIRED. The cards are this farmer's real listings, read on the server from
+ * the database. The fixtures are gone, and so is the ?empty=1 parameter that
+ * stood in for an empty state — a farmer with no listings now reaches the
+ * real one.
+ *
+ * TEMP-PRE-AUTH: which farmer this is comes from the httpOnly cookie set at
+ * the OTP step, not from a verified session. Nothing proves the number
+ * belongs to whoever is looking.
  *
  * CEO-approved deviations, each marked at its site:
- * - DEV-EMPTY-PARAM  the frame reached its empty state through a demo toggle
- *                    in a top bar we replace. That toggle is scaffolding and
- *                    is not built. The empty state is reachable at
- *                    ?empty=1 instead, with no control anywhere in the UI.
- *                    It goes away when real listings arrive.
  * - DEV-ICON         the frame's 📞 and ⚠ emoji replaced with line icons in
  *                    the frame's own colours, as ruled on buyer listings.
  * - DEV-PALETTE      the frame's gadde-50/100/200/400/800, muted-fg,
@@ -31,54 +30,20 @@ import styles from './FarmerListings.module.css';
  *
  * Logged, built as designed: ಎಡಿಟ್ and ತೆಗೆದುಹಾಕಿ have no handlers in the
  * frame either and ship inert and aria-disabled — a farmer clicking ಎಡಿಟ್
- * gets nothing, and no message says why. The buyers pill tells him three
- * buyers opened his contact but offers no way to see or reach them. Both
- * become real in the backend step. The empty state's padlock icon reads as
- * "locked" rather than "empty"; it is the frame's drawing.
+ * gets nothing, and no message says why. The buyers pill now counts real
+ * unlocks but still offers no way to reach them. The empty state's padlock
+ * icon reads as "locked" rather than "empty"; it is the frame's drawing.
+ *
+ * BADGE LIMITATION: the frame has three badge states, but nothing in the
+ * schema records a quality check — there is no quality_checks table and no
+ * moisture column anywhere. So no listing can honestly show
+ * "ಗುಣಮಟ್ಟ ಪರಿಶೀಲಿತ · ತೇವಾಂಶ 13.2%", and every card reads
+ * "ಪರಿಶೀಲನೆ ಬಾಕಿ — ಕೊಯ್ಲಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ", which is both true
+ * and the promise the listing form makes. The verified and active badges stay
+ * built and unused until a quality-check table exists.
  */
 
-type BadgeType = 'verified' | 'pending' | 'active';
-
-interface Listing {
-  id: number;
-  variety: string;
-  qty: string;
-  harvest: string;
-  location: string;
-  badge: { type: BadgeType; label: string };
-  buyers: string | null;
-}
-
-/* AWAITING-BACKEND: fixtures, not data. */
-const LISTINGS: Listing[] = [
-  {
-    id: 1,
-    variety: 'ಸೋನಾ ಮಸೂರಿ',
-    qty: '40 ಕ್ವಿಂಟಾಲ್',
-    harvest: 'ಕೊಯ್ಲು: ಡಿಸೆಂಬರ್',
-    location: 'ಸಿಂಧನೂರು, ರಾಯಚೂರು',
-    badge: { type: 'verified', label: 'ಗುಣಮಟ್ಟ ಪರಿಶೀಲಿತ · ತೇವಾಂಶ 13.2%' },
-    buyers: '3 ಖರೀದಿದಾರರು ನಿಮ್ಮ ಸಂಪರ್ಕ ತೆರೆದಿದ್ದಾರೆ',
-  },
-  {
-    id: 2,
-    variety: 'ಜ್ಯೋತಿ',
-    qty: '25 ಕ್ವಿಂಟಾಲ್',
-    harvest: 'ಕೊಯ್ಲು: ನವೆಂಬರ್',
-    location: 'ಗಂಗಾವತಿ, ಕೊಪ್ಪಳ',
-    badge: { type: 'pending', label: 'ಪರಿಶೀಲನೆ ಬಾಕಿ — ಕೊಯ್ಲಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ' },
-    buyers: null,
-  },
-  {
-    id: 3,
-    variety: 'ಜಯ',
-    qty: '30 ಕ್ವಿಂಟಾಲ್',
-    harvest: 'ಕೊಯ್ಲು: ಜನವರಿ',
-    location: 'ಮಾನ್ವಿ, ರಾಯಚೂರು',
-    badge: { type: 'active', label: 'ಪಟ್ಟಿ ಸಕ್ರಿಯ' },
-    buyers: null,
-  },
-];
+import type { BadgeType, FarmerListingRow } from '@/lib/farmerListings';
 
 /* The form step of the farmer flow. */
 const FORM_HREF = '/login/farmer';
@@ -111,6 +76,13 @@ function WarningIcon() {
   );
 }
 
+/** The frame's own badge copy, verbatim. */
+const BADGE_LABELS: Record<BadgeType, string> = {
+  verified: 'ಗುಣಮಟ್ಟ ಪರಿಶೀಲಿತ',
+  pending: 'ಪರಿಶೀಲನೆ ಬಾಕಿ — ಕೊಯ್ಲಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ',
+  active: 'ಪಟ್ಟಿ ಸಕ್ರಿಯ',
+};
+
 function Badge({ type, label }: { type: BadgeType; label: string }) {
   const cls =
     type === 'verified'
@@ -133,21 +105,21 @@ function Badge({ type, label }: { type: BadgeType; label: string }) {
   );
 }
 
-function ListingCard({ listing }: { listing: Listing }) {
+function ListingCard({ listing }: { listing: FarmerListingRow }) {
   return (
     <div className={styles.card}>
       <div className={styles.cardTop}>
         <div className={styles.cardHead}>
           <h2 className={styles.variety}>
-            {listing.variety}
-            <span className={styles.qty}> · {listing.qty}</span>
+            {listing.varietyKn}
+            <span className={styles.qty}> · {listing.quantityKn}</span>
           </h2>
           <div className={styles.meta}>
-            <span>{listing.harvest}</span>
+            <span>{listing.harvestKn}</span>
             <span className={styles.metaDot} aria-hidden="true">
               ·
             </span>
-            <span>{listing.location}</span>
+            <span>{listing.locationKn}</span>
           </div>
         </div>
 
@@ -163,11 +135,11 @@ function ListingCard({ listing }: { listing: Listing }) {
       </div>
 
       <div className={styles.badgeRow}>
-        <Badge type={listing.badge.type} label={listing.badge.label} />
-        {listing.buyers && (
+        <Badge type={listing.badge} label={BADGE_LABELS[listing.badge]} />
+        {listing.buyersKn && (
           <span className={styles.buyers}>
             <PhoneIcon />
-            {listing.buyers}
+            {listing.buyersKn}
           </span>
         )}
       </div>
@@ -205,7 +177,8 @@ function EmptyState() {
   );
 }
 
-export default function FarmerListings({ empty = false }: { empty?: boolean }) {
+export default function FarmerListings({ listings }: { listings: FarmerListingRow[] }) {
+  const empty = listings.length === 0;
   return (
     <main className={styles.page}>
       <div className={styles.wrap}>
@@ -229,7 +202,7 @@ export default function FarmerListings({ empty = false }: { empty?: boolean }) {
         ) : (
           <>
             <div className={styles.cards}>
-              {LISTINGS.map((l) => (
+              {listings.map((l) => (
                 <ListingCard key={l.id} listing={l} />
               ))}
             </div>
