@@ -16,9 +16,11 @@ import styles from './Footer.module.css';
  * control does not change it, matching the ruling on /how-it-works, so
  * every <T> carries the same string in both slots.
  *
- * The frame's logo is the parked burst crest (logo_png_paddy_link_v8.png);
- * per brief the official sheaf is dropped into the same 46x46 cream tile
- * at the frame's 38x38 inner size. Marked LOGO-SUB below.
+ * The frame's logo is the parked burst crest (logo_png_paddy_link_v8.png),
+ * originally dropped into the frame's 46x46 cream tile. That tile was there
+ * to give the old light-needing crescent a ground; the official sheaf brings
+ * its own dark tile and gold ring, so the wrapper is gone and the sheaf sits
+ * at 46x46 directly on the footer. Marked TILE-REMOVED below.
  *
  * The frame leaves every legal href as "#"; the real routes are wired here
  * per brief. Marked HREF-WIRED below.
@@ -64,16 +66,16 @@ export default function Footer() {
         {/* ── Row 1: brand · links · contact ── */}
         <div className={styles.top}>
           <Link href="/" className={styles.brand}>
-            <span className={styles.logoTile}>
-              {/* LOGO-SUB — official paddy sheaf in place of the frame's burst crest. */}
-              <Image
-                src="/brand/paddy-sheaf.png"
-                alt="PaddyLink paddy sheaf"
-                width={38}
-                height={38}
-                className={styles.logoImg}
-              />
-            </span>
+            {/* TILE-REMOVED — the sheaf's own dark tile and gold ring are the
+                mark, so it sits straight on the footer ground. The frame's
+                46x46 cream tile existed for the old crescent and is obsolete. */}
+            <Image
+              src="/brand/paddy-sheaf.png"
+              alt="PaddyLink paddy sheaf"
+              width={46}
+              height={46}
+              className={styles.logoImg}
+            />
             <span className={styles.wordmark}>PaddyLink</span>
           </Link>
 
