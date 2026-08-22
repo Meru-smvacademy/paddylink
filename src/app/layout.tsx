@@ -119,10 +119,10 @@ const fontVars = [
   sourceSans3.variable,
 ].join(' ');
 
-/* Resolved at build time on the server. Until the crescent PNG is added to
+/* Resolved at build time on the server. If the brand mark is missing from
    public/brand/, the header renders no <img> rather than a broken image. */
-const hasCrescent = existsSync(
-  join(process.cwd(), 'public', 'brand', 'paddy-crescent.png'),
+const hasMark = existsSync(
+  join(process.cwd(), 'public', 'brand', 'paddy-sheaf.png'),
 );
 
 export default function RootLayout({
@@ -132,7 +132,7 @@ export default function RootLayout({
     <html lang={DEFAULT_LANG} className={fontVars}>
       <body>
         <LanguageProvider>
-          <Header hasCrescent={hasCrescent} />
+          <Header hasMark={hasMark} />
           {children}
           <Footer />
         </LanguageProvider>

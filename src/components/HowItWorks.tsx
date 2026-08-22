@@ -376,7 +376,7 @@ function SafeDealing() {
 }
 
 /**
- * `presentPhotos` is resolved on the server, mirroring the `hasCrescent`
+ * `presentPhotos` is resolved on the server, mirroring the `hasMark`
  * pattern in layout.tsx: a photo that is not yet in public/how-it-works/
  * renders no <img> at all, leaving the frame's own gadde-950 panel and its
  * ghost numeral rather than a broken-image icon.

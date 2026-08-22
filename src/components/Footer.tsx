@@ -17,7 +17,7 @@ import styles from './Footer.module.css';
  * every <T> carries the same string in both slots.
  *
  * The frame's logo is the parked burst crest (logo_png_paddy_link_v8.png);
- * per brief the interim crescent is dropped into the same 46x46 cream tile
+ * per brief the official sheaf is dropped into the same 46x46 cream tile
  * at the frame's 38x38 inner size. Marked LOGO-SUB below.
  *
  * The frame leaves every legal href as "#"; the real routes are wired here
@@ -65,10 +65,10 @@ export default function Footer() {
         <div className={styles.top}>
           <Link href="/" className={styles.brand}>
             <span className={styles.logoTile}>
-              {/* LOGO-SUB — interim crescent in place of the frame's burst crest. */}
+              {/* LOGO-SUB — official paddy sheaf in place of the frame's burst crest. */}
               <Image
-                src="/brand/paddy-crescent.png"
-                alt="PaddyLink paddy crescent"
+                src="/brand/paddy-sheaf.png"
+                alt="PaddyLink paddy sheaf"
                 width={38}
                 height={38}
                 className={styles.logoImg}

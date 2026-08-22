@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     'ಬೆಳೆಯುವಾಗಲೇ ಪಟ್ಟಿ ಮಾಡಿ, ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ, ಪರಿಶೀಲಿತ ಖರೀದಿದಾರರು, ಪಾವತಿ ಮೊದಲು — ಏಳು ಹಂತಗಳು.',
 };
 
-/* Resolved at build time on the server, mirroring the `hasCrescent` check in
+/* Resolved at build time on the server, mirroring the `hasMark` check in
    layout.tsx: a step photo that is not yet present renders no <img>, so the
    row keeps its gadde-950 panel instead of showing a broken image. */
 function presentPhotos(): string[] {

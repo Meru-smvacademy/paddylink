@@ -24,9 +24,9 @@ const MOBILE_MAX = 767;
    24px is far enough not to flicker on trackpad jitter. */
 const SCROLL_SWAP = 24;
 
-/** `hasCrescent` is resolved on the server; when false no <img> is rendered
+/** `hasMark` is resolved on the server; when false no <img> is rendered
  *  at all, so no broken-image icon appears. */
-export default function Header({ hasCrescent }: { hasCrescent: boolean }) {
+export default function Header({ hasMark }: { hasMark: boolean }) {
   const { lang, toggleLang } = useLanguage();
   const [open, setOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
@@ -151,13 +151,13 @@ export default function Header({ hasCrescent }: { hasCrescent: boolean }) {
     >
       <div className={styles.shell}>
         <Link href="/" className={styles.brand}>
-          {hasCrescent && (
+          {hasMark && (
             <Image
-              src="/brand/paddy-crescent.png"
-              alt="PaddyLink paddy crescent logo"
+              src="/brand/paddy-sheaf.png"
+              alt="PaddyLink paddy sheaf logo"
               width={74}
               height={74}
-              className={styles.crescent}
+              className={styles.mark}
               priority
             />
           )}
