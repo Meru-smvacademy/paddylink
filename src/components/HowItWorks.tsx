@@ -1,8 +1,10 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import T from './T';
+import cta from './Cta.module.css';
 import styles from './HowItWorks.module.css';
 
 /**
@@ -418,6 +420,43 @@ export default function HowItWorks({
       </div>
 
       <SafeDealing />
+
+      {/* Closing CTA band — not in the frame. CEO-specified addition: the
+          page walked a farmer through the journey and then offered him no
+          way to act. Button and link are the home page's own components,
+          from Cta.module.css. */}
+      <section className={styles.closing}>
+        <div className={styles.closingInner}>
+          <h2 className={styles.closingKn}>
+            <T kn="ಈಗ ನಿಮಗೆ ದಾರಿ ಗೊತ್ತು. ಮೊದಲ ಹೆಜ್ಜೆ ಇಡಿ." en="ಈಗ ನಿಮಗೆ ದಾರಿ ಗೊತ್ತು. ಮೊದಲ ಹೆಜ್ಜೆ ಇಡಿ." />
+          </h2>
+          <p className={styles.closingEn}>
+            <T kn="Now you know the way. Take the first step." en="Now you know the way. Take the first step." />
+          </p>
+
+          <div className={styles.closingRow}>
+            <Link href="/login" className={cta.gold}>
+              <T kn="ನಿಮ್ಮ ಭತ್ತ ನೋಂದಾಯಿಸಿ" en="ನಿಮ್ಮ ಭತ್ತ ನೋಂದಾಯಿಸಿ" />
+              <span className={cta.goldEn}>
+                <T kn="/ List Your Paddy" en="/ List Your Paddy" />
+              </span>
+            </Link>
+
+            {/* .linkOnDark: the home page's link is gadde-950, invisible on
+                this band. Geometry unchanged, colours inverted. */}
+            <Link href="/register-buyer" className={`${cta.link} ${cta.linkOnDark}`}>
+              <T kn="ಖರೀದಿದಾರರೇ? ನೋಂದಾಯಿಸಿ →" en="ಖರೀದಿದಾರರೇ? ನೋಂದಾಯಿಸಿ →" />
+              <span className={cta.linkEn}>
+                <T kn="/ Buyer? Register →" en="/ Buyer? Register →" />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Same pre-footer separator the home page uses: two dark grounds in a
+          row otherwise merge. */}
+      <div className={styles.separator} aria-hidden="true" />
     </main>
   );
 }

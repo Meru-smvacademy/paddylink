@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import T from './T';
+import cta from './Cta.module.css';
 import styles from './HomeSections.module.css';
 
 /**
@@ -119,17 +120,17 @@ export default function HomeSections() {
 
         <div className={styles.ctaRow}>
           {/* DEST — bare <button> in the frame; per brief this goes to /login. */}
-          <Link href="/login" className={styles.ctaGold}>
+          <Link href="/login" className={cta.gold}>
             <T kn="ನಿಮ್ಮ ಭತ್ತ ನೋಂದಾಯಿಸಿ" en="ನಿಮ್ಮ ಭತ್ತ ನೋಂದಾಯಿಸಿ" />
-            <span className={styles.ctaGoldEn}>
+            <span className={cta.goldEn}>
               <T kn="/ List Your Paddy" en="/ List Your Paddy" />
             </span>
           </Link>
 
           {/* DEST — href="#how" in the frame; per brief this goes to /how-it-works. */}
-          <Link href="/how-it-works" className={styles.ctaLink}>
+          <Link href="/how-it-works" className={cta.link}>
             <T kn="ಹೇಗೆ ನಡೆಯುತ್ತದೆ →" en="ಹೇಗೆ ನಡೆಯುತ್ತದೆ →" />
-            <span className={styles.ctaLinkEn}>
+            <span className={cta.linkEn}>
               <T kn="How it works →" en="How it works →" />
             </span>
           </Link>

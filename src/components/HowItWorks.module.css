@@ -423,3 +423,59 @@
     transition: none;
   }
 }
+
+/* ── Closing CTA band ───────────────────────────────────────────────────
+   Not in the Figma frame. CEO-specified addition: the page walked a farmer
+   through seven steps and then ended with no way to act.
+
+   The button and text link come from Cta.module.css, the same definitions
+   the home page uses. Only this band's own layout lives here.
+
+   Safe Dealing above is hottu-100, so this band is the page's first dark
+   ground — and the footer beneath it is gadde-950 too. The cream separator
+   that follows is the same 48px band the home page places between its dark
+   pillar section and the footer, for the same reason: without it the two
+   dark grounds merge into one mass. */
+
+.closing {
+  background: var(--gadde-950);
+  padding: 96px 24px;
+}
+
+.closingInner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.closingKn {
+  font-family: var(--tiro);
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--hottu-50);
+  margin: 0 0 12px;
+}
+
+.closingEn {
+  font-family: var(--inter);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--gadde-300);
+  margin: 0;
+}
+
+.closingRow {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Matches the home page's pre-footer separator, verbatim in intent and
+   value — see .separator in HomeSections.module.css. */
+.separator {
+  height: 48px;
+  background: var(--hottu-50);
+}

@@ -1,0 +1,100 @@
+/* Shared CTA pair — the gold gradient button and the quiet text link.
+
+   These declarations were MOVED VERBATIM out of HomeSections.module.css so
+   the home page and the /how-it-works closing band use one definition and
+   cannot drift apart. Only the class names changed: ctaGold -> gold,
+   ctaGoldEn -> goldEn, ctaLink -> link, ctaLinkEn -> linkEn. Every property
+   and value is byte-identical to what the home page already shipped.
+
+   Layout (the row, its gap and margins) stays with each page, since the two
+   bands sit differently.
+
+   The gold button needs no variant: it already appears on cream on the home
+   page and on the dark hero photo, unchanged.
+
+   The text link does. Its colour is gadde-950 on a cream ground, which would
+   be invisible on the gadde-950 closing band — see .linkOnDark. */
+
+.gold {
+  background: linear-gradient(135deg, #c8870a 0%, var(--bhatta-400) 60%, #e8a820 100%);
+  color: var(--gadde-950);
+  font-family: var(--tiro);
+  font-size: 18px;
+  font-weight: 700;
+  padding: 17px 44px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 28px rgba(200, 135, 10, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.gold:hover,
+.gold:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 36px rgba(200, 135, 10, 0.6);
+}
+
+.goldEn {
+  font-family: var(--inter);
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 8px;
+  opacity: 0.75;
+}
+
+.link {
+  font-family: var(--tiro);
+  font-size: 16px;
+  color: var(--gadde-950);
+  text-decoration: none;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--gadde-950) 30%, transparent);
+  padding-bottom: 2px;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.link:hover,
+.link:focus-visible {
+  color: #8a5e00;
+  border-bottom-color: #8a5e00;
+}
+
+.linkEn {
+  font-family: var(--inter);
+  font-size: 13px;
+  margin-left: 6px;
+  opacity: 0.65;
+}
+
+/* Dark-ground variant of the text link. Geometry, face, size, underline and
+   padding are the light version's, untouched; only the colours invert. The
+   resting colour is the hero's established on-dark muted treatment
+   (hottu-50 at 72%), and hover goes to bhatta-400 — gold on dark, per the
+   brand rule that also governs the button above. Not in any frame: there is
+   no existing quiet-link-on-dark anywhere in the site to copy. */
+.linkOnDark {
+  color: color-mix(in srgb, var(--hottu-50) 72%, transparent);
+  border-bottom-color: color-mix(in srgb, var(--hottu-50) 30%, transparent);
+}
+
+.linkOnDark:hover,
+.linkOnDark:focus-visible {
+  color: var(--bhatta-400);
+  border-bottom-color: var(--bhatta-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gold,
+  .link {
+    transition: none;
+  }
+  .gold:hover,
+  .gold:focus-visible {
+    transform: none;
+  }
+}

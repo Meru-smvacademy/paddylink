@@ -71,7 +71,9 @@
   max-width: 600px;
 }
 
-/* ── CTA row under the card ─────────────────────────────────────────── */
+/* ── CTA row under the card ───────────────────────────────────────────
+   The button and link themselves now live in Cta.module.css, shared with
+   the /how-it-works closing band. Only the row layout stays here. */
 
 .ctaRow {
   margin-top: 44px;
@@ -82,61 +84,6 @@
   justify-content: center;
 }
 
-.ctaGold {
-  background: linear-gradient(135deg, #c8870a 0%, var(--bhatta-400) 60%, #e8a820 100%);
-  color: var(--gadde-950);
-  font-family: var(--tiro);
-  font-size: 18px;
-  font-weight: 700;
-  padding: 17px 44px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 28px rgba(200, 135, 10, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.ctaGold:hover,
-.ctaGold:focus-visible {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 36px rgba(200, 135, 10, 0.6);
-}
-
-.ctaGoldEn {
-  font-family: var(--inter);
-  font-size: 12px;
-  font-weight: 500;
-  margin-left: 8px;
-  opacity: 0.75;
-}
-
-.ctaLink {
-  font-family: var(--tiro);
-  font-size: 16px;
-  color: var(--gadde-950);
-  text-decoration: none;
-  border-bottom: 1.5px solid color-mix(in srgb, var(--gadde-950) 30%, transparent);
-  padding-bottom: 2px;
-  transition: border-color 0.2s, color 0.2s;
-  white-space: nowrap;
-}
-
-.ctaLink:hover,
-.ctaLink:focus-visible {
-  color: #8a5e00;
-  border-bottom-color: #8a5e00;
-}
-
-.ctaLinkEn {
-  font-family: var(--inter);
-  font-size: 13px;
-  margin-left: 6px;
-  opacity: 0.65;
-}
 
 /* ── Section 2: dark pillar band ────────────────────────────────────── */
 
@@ -218,12 +165,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ctaGold,
-  .ctaLink {
+  .ctaRow {
     transition: none;
-  }
-  .ctaGold:hover,
-  .ctaGold:focus-visible {
-    transform: none;
   }
 }
