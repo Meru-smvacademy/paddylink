@@ -1,23 +1,30 @@
-/* Farmer OTP — ported from Figma Make file GrgKytpvcZYRwTpZsAM9wa
-   (src/App.tsx, OtpScreen with door="farmer"). Values are the frame's,
-   verbatim. Desktop-first at 1440px.
-
-   Only the two OTP states are ported here. The listing form and success
-   screen in the same file are later pieces.
+/* Entry flow — ported from Figma Make file GrgKytpvcZYRwTpZsAM9wa
+   (src/App.tsx, OtpScreen). Values are the frame's, verbatim. Desktop-first
+   at 1440px. Shared by both doors, as the frame shares it.
 
    Every colour is already on the brand ramp and used as its token:
      #FDF6E3 -> --hottu-50    #F6EFDA -> --hottu-100  #EDE1C2 -> --hottu-200
      #0B2418 -> --gadde-950   #12352A -> --gadde-900  #1E5B3A -> --gadde-700
      #2A7A3B -> --gadde-600   #9CC4A8 -> --gadde-300  #A4472D -> --kemmannu-600
+     #C9963A -> --bhatta-600  #F3DFA6 -> --bhatta-200
 
-   The farmer door's accent is gadde-700 and its accent-light gadde-300;
-   both faces (Noto Sans Kannada, Outfit) are already loaded. */
+   The frame's two per-door variables become custom properties here, so the
+   buyer door differs in exactly the places the frame differs and nowhere
+   else. Both faces (Noto Sans Kannada, Outfit) are already loaded. */
 
 .page {
+  --accent: var(--gadde-700);
+  --accent-light: var(--gadde-300);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--hottu-50);
+}
+
+/* The frame's accent / accentLight for door === "buyer". */
+.buyer {
+  --accent: var(--bhatta-600);
+  --accent-light: var(--bhatta-200);
 }
 
 .main {
@@ -79,7 +86,7 @@
   width: 100%;
   max-width: 28rem;
   border-radius: 1rem;
-  border: 2px solid var(--gadde-300);
+  border: 2px solid var(--accent-light);
   padding: 3rem;
   display: flex;
   flex-direction: column;
@@ -100,7 +107,7 @@
   font-size: 0.75rem;
   font-weight: 600;
   font-family: var(--outfit);
-  background: var(--gadde-700);
+  background: var(--accent);
   color: var(--hottu-50);
 }
 
@@ -178,13 +185,13 @@
 }
 
 .sendBtnReady {
-  background: var(--gadde-700);
+  background: var(--accent);
   color: var(--hottu-50);
   cursor: pointer;
 }
 
 .sendBtn:focus-visible {
-  outline: 2px solid var(--gadde-700);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -219,7 +226,7 @@
 }
 
 .boxFilled {
-  border-color: var(--gadde-700);
+  border-color: var(--accent);
 }
 
 .boxError {
@@ -280,13 +287,13 @@
 }
 
 .resendBtnActive {
-  color: var(--gadde-700);
+  color: var(--accent);
   opacity: 1;
   cursor: pointer;
 }
 
 .resendBtn:focus-visible {
-  outline: 2px solid var(--gadde-700);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 

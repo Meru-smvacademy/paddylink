@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import FarmerOtp from '@/components/FarmerOtp';
+import OtpFlow from '@/components/OtpFlow';
 
 export const metadata: Metadata = {
   title: 'ರೈತ ಪ್ರವೇಶ / Farmer login — PaddyLink',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function LoginFarmerPage() {
-  return <FarmerOtp />;
+  return <OtpFlow door="farmer" />;
 }

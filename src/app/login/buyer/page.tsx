@@ -1,9 +1,11 @@
-// Placeholder — becomes the buyer OTP screen in the next step.
-// Target of the Buyer card on /login.
+import type { Metadata } from 'next';
+import OtpFlow from '@/components/OtpFlow';
+
+export const metadata: Metadata = {
+  title: 'ಖರೀದಿದಾರ ಪ್ರವೇಶ / Buyer login — PaddyLink',
+  description: 'ನಿಮ್ಮ ಮೊಬೈಲ್ ನಂಬರ್ ಮತ್ತು OTP ಮೂಲಕ ಪ್ರವೇಶಿಸಿ.',
+};
+
 export default function LoginBuyerPage() {
-  return (
-    <main>
-      <h1>ಖರೀದಿದಾರ / Buyer</h1>
-    </main>
-  );
+  return <OtpFlow door="buyer" />;
 }

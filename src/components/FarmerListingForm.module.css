@@ -1,7 +1,7 @@
 /* Farmer listing form — ported from Figma Make file GrgKytpvcZYRwTpZsAM9wa
    (src/App.tsx, FormScreen, pre-submit branch). Values are the frame's,
-   verbatim. Desktop-first at 1440px. Piece 2 of 3; the success state is
-   piece 3 and is not built here.
+   verbatim. Desktop-first at 1440px. The frame's `submitted` branch is the
+   success screen and ships as FarmerSuccess.
 
    Every colour is on the brand ramp and used as its token:
      #FDF6E3 -> --hottu-50   #F6EFDA -> --hottu-100  #EDE1C2 -> --hottu-200
@@ -391,31 +391,6 @@ select.control:disabled {
 
 .tail {
   padding-bottom: 1.5rem;
-}
-
-/* ── Success stub — piece 3 attaches here ───────────────────────────── */
-
-.stub {
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  text-align: center;
-  background: var(--gadde-700);
-  margin-top: 0.5rem;
-}
-
-.stubKn {
-  font-family: var(--noto-kannada);
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--hottu-50);
-}
-
-.stubEn {
-  font-family: var(--outfit);
-  font-size: 0.8125rem;
-  margin: 0.25rem 0 0;
-  color: var(--gadde-300);
 }
 
 @media (prefers-reduced-motion: reduce) {

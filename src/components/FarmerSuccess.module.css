@@ -1,0 +1,102 @@
+/* Farmer success screen — ported from Figma Make file GrgKytpvcZYRwTpZsAM9wa
+   (src/App.tsx, FormScreen, the `submitted` branch). Values are the frame's,
+   verbatim. Desktop-first at 1440px. Piece 3 of 3 — completes the flow.
+
+   Every colour is on the brand ramp and used as its token:
+     #FDF6E3 -> --hottu-50   #F6EFDA -> --hottu-100  #EDE1C2 -> --hottu-200
+     #0B2418 -> --gadde-950  #12352A -> --gadde-900  #1E5B3A -> --gadde-700
+     #2A7A3B -> --gadde-600  #F3DFA6 -> --bhatta-200 */
+
+.shell {
+  max-width: 32rem;
+  padding: 0 2rem;
+  text-align: center;
+}
+
+/* ── Checkmark ──────────────────────────────────────────────────────── */
+
+.tick {
+  width: 112px;
+  height: 112px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  background: var(--gadde-700);
+}
+
+/* ── Headings ───────────────────────────────────────────────────────── */
+
+.headKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+  font-size: 2.25rem;
+  color: var(--gadde-950);
+}
+
+.headEn {
+  font-family: var(--outfit);
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin: 0 0 1.5rem;
+  color: var(--gadde-600);
+}
+
+/* ── Reassurance panel ──────────────────────────────────────────────── */
+
+.panel {
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.75rem;
+  background: var(--hottu-100);
+  border: 1.5px solid var(--hottu-200);
+}
+
+.panelKn {
+  font-family: var(--noto-kannada);
+  font-weight: 500;
+  line-height: 1.625;
+  font-size: 1rem;
+  margin: 0;
+  color: var(--gadde-900);
+}
+
+.panelEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0;
+  color: var(--gadde-600);
+}
+
+/* ── Back to start ──────────────────────────────────────────────────── */
+
+.restart {
+  display: inline-block;
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  border: 2px solid var(--gadde-700);
+  font-family: var(--outfit);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--gadde-700);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.restart:hover {
+  opacity: 0.8;
+}
+
+.restart:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .restart {
+    transition: none;
+  }
+}

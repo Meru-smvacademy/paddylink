@@ -6,12 +6,14 @@ import styles from './FarmerListingForm.module.css';
 
 /**
  * Farmer listing form — ported from Figma Make file GrgKytpvcZYRwTpZsAM9wa
- * (src/App.tsx, FormScreen, pre-submit branch). Piece 2 of 3; the success
- * screen is piece 3 and is deliberately not built here.
+ * (src/App.tsx, FormScreen, pre-submit branch). The frame's own `submitted`
+ * branch is the success screen, built as FarmerSuccess and reached through
+ * the onSubmitted callback below.
  *
  * AWAITING-BACKEND: submitting sends nothing anywhere. There is no request,
  * no storage and no upload — the photo input is inert exactly as it is in
- * the frame. Submit only reveals the piece-3 stub panel.
+ * the frame. Submit only switches the flow to the success screen; every
+ * value typed here is discarded, exactly as the frame discards it.
  *
  * LANGUAGE: the frame prints a Kannada label over a small English one and
  * has no working toggle. That stack is preserved and the site ಕ|EN control
@@ -45,7 +47,7 @@ const VARIETIES = [
 
 type Field = 'name' | 'variety' | 'quantity' | 'district' | 'taluk' | 'harvestMonth';
 
-export default function FarmerListingForm() {
+export default function FarmerListingForm({ onSubmitted }: { onSubmitted: () => void }) {
   const [form, setForm] = useState({
     name: '',
     variety: '',
@@ -56,7 +58,6 @@ export default function FarmerListingForm() {
     consent: false,
   });
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
-  const [submitted, setSubmitted] = useState(false);
 
   function set(key: string, val: string | boolean) {
     setForm((f) => ({
@@ -348,10 +349,10 @@ export default function FarmerListingForm() {
           </label>
         </div>
 
-        {/* Submit — AWAITING-BACKEND: reveals the piece-3 stub only. */}
+        {/* Submit — AWAITING-BACKEND: advances to the success screen only. */}
         <button
           type="button"
-          onClick={() => canSubmit && setSubmitted(true)}
+          onClick={() => canSubmit && onSubmitted()}
           disabled={!canSubmit}
           className={`${styles.submit} ${canSubmit ? styles.submitReady : ''}`}
         >
@@ -360,17 +361,6 @@ export default function FarmerListingForm() {
             <T kn="/ List it" en="/ List it" />
           </span>
         </button>
-
-        {submitted && (
-          <div className={styles.stub} role="status">
-            <p className={styles.stubKn}>
-              <T kn="ಯಶಸ್ಸು ಶೀಘ್ರದಲ್ಲಿ" en="ಯಶಸ್ಸು ಶೀಘ್ರದಲ್ಲಿ" />
-            </p>
-            <p className={styles.stubEn}>
-              <T kn="Success screen coming soon" en="Success screen coming soon" />
-            </p>
-          </div>
-        )}
 
         <div className={styles.tail} />
       </div>
