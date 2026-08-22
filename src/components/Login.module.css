@@ -1,0 +1,222 @@
+/* Login — the two-door entry screen, ported from Figma Make file
+   GrgKytpvcZYRwTpZsAM9wa (src/App.tsx, ChooseScreen). Values are the
+   frame's, verbatim. Desktop-first at 1440px.
+
+   The Make file also holds the OTP, farmer-form and success screens; those
+   become /login/farmer and /login/buyer in a later step and are not ported
+   here.
+
+   Every colour in the frame's @theme is already in the brand ramp, so each
+   is used as its token with no literals:
+     #0B2418 -> --gadde-950   #12352A -> --gadde-900   #1E5B3A -> --gadde-700
+     #2A7A3B -> --gadde-600   #9CC4A8 -> --gadde-300
+     #C9963A -> --bhatta-600  #F3DFA6 -> --bhatta-200
+     #FDF6E3 -> --hottu-50    #F6EFDA -> --hottu-100   #EDE1C2 -> --hottu-200
+
+   Both faces are already loaded: --noto-kannada and --outfit (the frame's
+   'Outfit', added earlier for /how-it-works).
+
+   Three CEO-approved deviations, all flagged:
+   - the cards are <button focus:outline-none> in the frame, which suppresses
+     the focus ring and makes them keyboard-unusable; they are real links here
+     with a visible :focus-visible ring in each card's own accent;
+   - the register link targets /register-buyer rather than the frame's buyer
+     door;
+   - the frame leaves its English "New buyer? Register →" span dead, so both
+     halves are wrapped in one combined link target. */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--hottu-50);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+}
+
+/* ── Heading ────────────────────────────────────────────────────────── */
+
+.heading {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.titleKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+  color: var(--gadde-950);
+}
+
+.titleEn {
+  font-family: var(--outfit);
+  font-weight: 500;
+  font-size: 1.25rem;
+  letter-spacing: 0.025em;
+  margin: 0;
+  color: var(--gadde-600);
+}
+
+.rule {
+  margin: 1.25rem auto 0;
+  width: 4rem;
+  height: 2px;
+  background: var(--gadde-300);
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────── */
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  width: 100%;
+  max-width: 48rem;
+}
+
+/* --accent / --accent-shadow are set per card in the component. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+  text-decoration: none;
+  border-radius: 1rem;
+  border: 2px solid var(--accent);
+  padding: 2.5rem;
+  background: var(--hottu-100);
+  box-shadow: 0 4px 20px var(--accent-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--gadde-950) 14%, transparent);
+}
+
+/* The frame sets focus:outline-none, which leaves these keyboard-unusable.
+   Restored in each card's own accent. */
+.card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.cardIcon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.cardTitleKn {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.25;
+  margin-bottom: 0.25rem;
+  color: var(--gadde-950);
+}
+
+.cardTitleEn {
+  display: block;
+  font-family: var(--outfit);
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--accent);
+}
+
+.cardBodyKn {
+  font-family: var(--noto-kannada);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.625;
+  margin: 0;
+  color: var(--gadde-900);
+}
+
+.cardBodyEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--gadde-600);
+}
+
+.cardCta {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  transition: gap 0.18s ease;
+}
+
+.card:hover .cardCta,
+.card:focus-visible .cardCta {
+  gap: 0.75rem;
+}
+
+/* ── Register link ──────────────────────────────────────────────────── */
+
+.registerWrap {
+  margin-top: 1.75rem;
+  text-align: center;
+}
+
+/* One combined target: the frame left its English half a dead span. */
+.register {
+  text-decoration: none;
+  transition: opacity 0.18s ease;
+  border-radius: 4px;
+}
+
+.register:hover {
+  opacity: 0.7;
+}
+
+.register:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.registerKn {
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  color: var(--bhatta-600);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.registerEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+  color: var(--gadde-300);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardCta,
+  .register {
+    transition: none;
+  }
+  .card:hover {
+    transform: none;
+  }
+}
