@@ -15,12 +15,11 @@
    demo page, not part of the component, and is not reproduced. */
 
 .footer {
+  /* The frame's 1440 artboard capped the whole footer at 1440px, which left
+     cream gutters either side on wider viewports while the hero's trust strip
+     above ran full-bleed. The intent is a full-bleed ground with capped
+     content, so the cap lives on .inner alone. CEO-approved deviation. */
   width: 100%;
-  /* Frame value. Wider viewports show the page background either side —
-     this is the designed look, and is deliberately 80px narrower overall
-     than the header's --shell-max. */
-  max-width: 1440px;
-  margin: 0 auto;
   background: var(--gadde-950);
   font-family: var(--inter), var(--noto-kannada), sans-serif;
 }
