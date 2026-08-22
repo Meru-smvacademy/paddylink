@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import FarmerListingForm from './FarmerListingForm';
 import T from './T';
 import styles from './FarmerOtp.module.css';
 
@@ -10,6 +11,8 @@ import styles from './FarmerOtp.module.css';
  * (src/App.tsx, OtpScreen with door="farmer"). Piece 1 of the entry flow:
  * the two OTP states only. The listing form and success screen in the same
  * Make file are later pieces and are deliberately not built here.
+ *
+ * Piece 2 attaches the listing form after a successful code entry.
  *
  * AWAITING-BACKEND: nothing here sends or checks a real OTP. No SMS is
  * dispatched, no code is validated, and no session is created. The states
@@ -32,11 +35,10 @@ const PHONE_LENGTH = 10;
 const RESEND_SECONDS = 30;
 
 export default function FarmerOtp() {
-  const [phase, setPhase] = useState<'phone' | 'verify'>('phone');
+  const [phase, setPhase] = useState<'phone' | 'verify' | 'form'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [error, setError] = useState(false);
-  const [advanced, setAdvanced] = useState(false);
   const [countdown, setCountdown] = useState(RESEND_SECONDS);
   const [canResend, setCanResend] = useState(false);
 
@@ -77,7 +79,7 @@ export default function FarmerOtp() {
   function check(next: string[]) {
     const code = next.join('');
     // AWAITING-BACKEND: this is where the verify-OTP request goes. Until then
-    // a full six digits advances to the stub panel. The length guard below is
+    // a full six digits advances to the listing form. The length guard below is
     // the instructed wrong-length error; the frame's own rule was the literal
     // code "000000", which is kept so the error state stays reachable.
     if (code.length !== OTP_LENGTH || code === '0'.repeat(OTP_LENGTH)) {
@@ -86,7 +88,7 @@ export default function FarmerOtp() {
       inputRefs.current[0]?.focus();
       return;
     }
-    setAdvanced(true);
+    setPhase('form');
   }
 
   function handleOtpChange(i: number, raw: string) {
@@ -120,7 +122,6 @@ export default function FarmerOtp() {
     // AWAITING-BACKEND: this is where the resend-OTP request goes.
     setOtp(Array(OTP_LENGTH).fill(''));
     setError(false);
-    setAdvanced(false);
     startCountdown();
     inputRefs.current[0]?.focus();
   }
@@ -130,10 +131,10 @@ export default function FarmerOtp() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.main}>
+      <div className={`${styles.main} ${phase === 'form' ? styles.mainForm : ''}`}>
         {/* Frame's back link, kept in its own treatment. Returns to the door
             chooser exactly as the frame does. */}
-        <div className={styles.backRow}>
+        <div className={`${styles.backRow} ${phase === 'form' ? styles.backRowForm : ''}`}>
           <Link href="/login" className={styles.back}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path
@@ -148,6 +149,9 @@ export default function FarmerOtp() {
           </Link>
         </div>
 
+        {phase === 'form' ? (
+          <FarmerListingForm />
+        ) : (
         <div className={styles.card}>
           <div className={styles.pillRow}>
             <span className={styles.pill}>
@@ -259,18 +263,6 @@ export default function FarmerOtp() {
                 </div>
               )}
 
-              {/* STUB — piece 2 attaches the listing form here. */}
-              {advanced && (
-                <div className={styles.stubPanel} role="status">
-                  <p className={styles.stubKn}>
-                    <T kn="ಮುಂದಿನ ಹಂತ ಶೀಘ್ರದಲ್ಲಿ" en="ಮುಂದಿನ ಹಂತ ಶೀಘ್ರದಲ್ಲಿ" />
-                  </p>
-                  <p className={styles.stubEn}>
-                    <T kn="Next step coming soon" en="Next step coming soon" />
-                  </p>
-                </div>
-              )}
-
               <div className={styles.resendRow}>
                 <button
                   type="button"
@@ -298,6 +290,7 @@ export default function FarmerOtp() {
             </>
           )}
         </div>
+        )}
       </div>
     </main>
   );

@@ -1,0 +1,434 @@
+/* Farmer listing form — ported from Figma Make file GrgKytpvcZYRwTpZsAM9wa
+   (src/App.tsx, FormScreen, pre-submit branch). Values are the frame's,
+   verbatim. Desktop-first at 1440px. Piece 2 of 3; the success state is
+   piece 3 and is not built here.
+
+   Every colour is on the brand ramp and used as its token:
+     #FDF6E3 -> --hottu-50   #F6EFDA -> --hottu-100  #EDE1C2 -> --hottu-200
+     #0B2418 -> --gadde-950  #12352A -> --gadde-900  #14241B -> --masi-900
+     #1E5B3A -> --gadde-700  #2A7A3B -> --gadde-600  #9CC4A8 -> --gadde-300
+     #F0B429 -> --bhatta-400 #F3DFA6 -> --bhatta-200 #A4472D -> --kemmannu-600 */
+
+.shell {
+  width: 100%;
+  max-width: 42rem;
+}
+
+/* ── Heading ────────────────────────────────────────────────────────── */
+
+.head {
+  margin-bottom: 2.5rem;
+}
+
+.headKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.25rem;
+  font-size: clamp(1.8rem, 3vw, 2.75rem);
+  color: var(--gadde-950);
+}
+
+.headEn {
+  font-family: var(--outfit);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin: 0;
+  color: var(--gadde-600);
+}
+
+.headRule {
+  margin-top: 1rem;
+  width: 3rem;
+  height: 2px;
+  background: var(--gadde-300);
+}
+
+/* ── Voice panel ────────────────────────────────────────────────────── */
+
+.voice {
+  border-radius: 1rem;
+  padding: 1.75rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  background: var(--masi-900);
+  border: 1.5px solid var(--gadde-700);
+}
+
+.voiceBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  width: 88px;
+  height: 88px;
+  background: var(--bhatta-400);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.voiceBtn:hover,
+.voiceBtn:focus-visible {
+  transform: scale(1.05);
+}
+
+.voiceBtn:focus-visible {
+  outline: 2px solid var(--bhatta-400);
+  outline-offset: 4px;
+}
+
+.voiceBody {
+  flex: 1;
+}
+
+.voiceKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  line-height: 1.375;
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+  color: var(--bhatta-200);
+}
+
+.voiceEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0 0 0.75rem;
+  color: var(--gadde-300);
+}
+
+.voiceBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--gadde-600);
+  color: var(--bhatta-200);
+}
+
+/* ── Fields ─────────────────────────────────────────────────────────── */
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.label {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 0.25rem;
+  color: var(--gadde-950);
+}
+
+.req {
+  color: var(--kemmannu-600);
+}
+
+.optional {
+  margin-left: 0.5rem;
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--gadde-300);
+}
+
+.subLabel {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  color: var(--gadde-600);
+}
+
+.control {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 2px solid var(--hottu-200);
+  font-family: var(--outfit);
+  font-size: 1.125rem;
+  background: var(--hottu-50);
+  color: var(--gadde-950);
+  transition: border-color 0.2s;
+}
+
+.control:focus {
+  outline: none;
+  border-color: var(--gadde-600);
+}
+
+select.control {
+  cursor: pointer;
+}
+
+select.control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Validation is not in the frame — this reuses the OTP screen's
+   kemmannu-600 error treatment from the same Make file. */
+.controlError,
+.controlError:focus {
+  border-color: var(--kemmannu-600);
+}
+
+.rowTwo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+/* ── Quantity ───────────────────────────────────────────────────────── */
+
+.qtyRow {
+  display: flex;
+  align-items: stretch;
+  border-radius: 0.75rem;
+  border: 2px solid var(--hottu-200);
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.qtyRowError {
+  border-color: var(--kemmannu-600);
+}
+
+.qtyInput {
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  font-family: var(--outfit);
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: var(--hottu-50);
+  color: var(--gadde-950);
+  border: none;
+}
+
+.qtyInput:focus {
+  outline: none;
+}
+
+.qtyUnit {
+  display: flex;
+  align-items: center;
+  padding: 0 1.25rem;
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1.125rem;
+  background: var(--hottu-200);
+  border-left: 2px solid var(--hottu-200);
+  color: var(--gadde-900);
+}
+
+/* ── Photo ──────────────────────────────────────────────────────────── */
+
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  border: 2px dashed var(--hottu-200);
+  padding: 2.5rem 0;
+  cursor: pointer;
+  background: var(--hottu-100);
+  transition: border-color 0.2s;
+}
+
+.drop:hover,
+.drop:focus-within {
+  border-color: var(--gadde-600);
+}
+
+.dropIcon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hottu-200);
+}
+
+.dropKn {
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--gadde-600);
+}
+
+.dropEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--gadde-300);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Consent ────────────────────────────────────────────────────────── */
+
+.consent {
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  border: 2px solid var(--hottu-200);
+  background: var(--hottu-100);
+}
+
+.consentLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.consentBoxWrap {
+  position: relative;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.consentBox {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.375rem;
+  border: 2px solid var(--hottu-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hottu-50);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.consentBoxOn {
+  border-color: var(--gadde-700);
+  background: var(--gadde-700);
+}
+
+.consentInput:focus-visible + .consentBox {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+.consentKn {
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.625;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.consentEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0;
+  color: var(--gadde-600);
+}
+
+/* ── Submit ─────────────────────────────────────────────────────────── */
+
+.submit {
+  width: 100%;
+  padding: 1.25rem 0;
+  border-radius: 0.75rem;
+  border: none;
+  margin-top: 0.5rem;
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.5rem;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  background: var(--hottu-200);
+  color: var(--gadde-300);
+  cursor: not-allowed;
+}
+
+.submitReady {
+  background: var(--gadde-700);
+  color: var(--bhatta-200);
+  cursor: pointer;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--gadde-700) 25%, transparent);
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+.submitEn {
+  font-family: var(--outfit);
+  font-weight: 500;
+  font-size: 1.125rem;
+  margin-left: 0.75rem;
+  opacity: 0.8;
+}
+
+.tail {
+  padding-bottom: 1.5rem;
+}
+
+/* ── Success stub — piece 3 attaches here ───────────────────────────── */
+
+.stub {
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  text-align: center;
+  background: var(--gadde-700);
+  margin-top: 0.5rem;
+}
+
+.stubKn {
+  font-family: var(--noto-kannada);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--hottu-50);
+}
+
+.stubEn {
+  font-family: var(--outfit);
+  font-size: 0.8125rem;
+  margin: 0.25rem 0 0;
+  color: var(--gadde-300);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voiceBtn,
+  .control,
+  .qtyRow,
+  .drop,
+  .consentBox,
+  .submit {
+    transition: none;
+  }
+  .voiceBtn:hover,
+  .voiceBtn:focus-visible {
+    transform: none;
+  }
+}

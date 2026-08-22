@@ -60,6 +60,19 @@
   outline-offset: 3px;
 }
 
+/* Once the listing form attaches, the column stops centring vertically —
+   the form is tall and the frame's form screen aligns to the top. */
+.mainForm {
+  justify-content: flex-start;
+  padding: 3rem 2rem;
+}
+
+/* The form column is wider than the card, so the back link widens with it
+   to stay flush with the form's left edge. */
+.backRowForm {
+  max-width: 42rem;
+}
+
 /* ── Card ───────────────────────────────────────────────────────────── */
 
 .card {
@@ -304,30 +317,6 @@
   font-size: 0.75rem;
   margin: 0.125rem 0 0;
   color: var(--gadde-600);
-}
-
-/* ── Stub panel where the listing form will attach (piece 2) ────────── */
-
-.stubPanel {
-  border-radius: 0.5rem;
-  padding: 1rem;
-  text-align: center;
-  background: var(--gadde-700);
-}
-
-.stubKn {
-  font-family: var(--noto-kannada);
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
-  color: var(--hottu-50);
-}
-
-.stubEn {
-  font-family: var(--outfit);
-  font-size: 0.75rem;
-  margin: 0.25rem 0 0;
-  color: var(--gadde-300);
 }
 
 @media (prefers-reduced-motion: reduce) {
