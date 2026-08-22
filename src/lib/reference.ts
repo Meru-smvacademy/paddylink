@@ -9,17 +9,22 @@ import { createClient } from '@supabase/supabase-js';
  * needed to read them. Fetched on the server so the form renders with its
  * dropdowns already populated, with no loading state.
  *
- * The district list is deliberately short. It holds the districts PaddyLink
- * actually operates in, not all of Karnataka, because the farmer form
- * promises "ಕಟಾವಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ" — a promise we can only keep
- * where we operate. It grows as operations grow; nothing in the app hardcodes
- * it any more.
+ * All 31 districts are here, each flagged with whether PaddyLink operates in
+ * it. The farmer form shows only the operational ones, because it promises
+ * "ಕಟಾವಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ" and that is a promise we can only keep
+ * where we go. The buyer KYC form shows all of them, because a buyer's
+ * business address is not our operating scope. Flagging a fourth district in
+ * the database makes it appear for farmers with no code change.
  */
 
 export interface RefDistrict {
   id: number;
   name_en: string;
   name_kn: string;
+  /** True where PaddyLink staff can actually visit at harvest. The farmer
+   *  form offers only these; the buyer KYC form offers every district,
+   *  because a buyer's address is not our operating scope. */
+  is_operational: boolean;
 }
 
 export interface RefTaluk {
@@ -61,7 +66,7 @@ export async function getReferenceData(): Promise<ReferenceData> {
   const supabase = anonServerClient();
 
   const [districts, taluks, varieties] = await Promise.all([
-    supabase.from('ref_districts').select('id,name_en,name_kn').order('id'),
+    supabase.from('ref_districts').select('id,name_en,name_kn,is_operational').order('id'),
     supabase.from('ref_taluks').select('id,district_id,name_en,name_kn').order('id'),
     supabase.from('ref_varieties').select('id,name_en,name_kn').order('id'),
   ]);
@@ -100,4 +105,9 @@ export function harvestMonthToDate(month: number, today = new Date()): string {
   const thisMonth = today.getMonth() + 1;
   const year = month >= thisMonth ? today.getFullYear() : today.getFullYear() + 1;
   return `${year}-${String(month).padStart(2, '0')}-01`;
+}
+
+/** The districts a farmer may list in — see is_operational. */
+export function operationalDistricts(reference: ReferenceData): RefDistrict[] {
+  return reference.districts.filter((d) => d.is_operational);
 }

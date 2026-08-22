@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRef, useState } from 'react';
+import type { RefDistrict } from '@/lib/reference';
 import T from './T';
 import styles from './RegisterBuyer.module.css';
 
@@ -10,11 +11,16 @@ import styles from './RegisterBuyer.module.css';
  * diIRk922EiLVvRKPPVuMbq (src/App.tsx). Layout, copy and field order are the
  * frame's, verbatim.
  *
- * AWAITING-BACKEND: nothing on this page reaches a server. No registration is
- * created, no KYC record is opened, no document is uploaded and no
- * verification is queued. A chosen file is read for its name, size and type
- * in the browser and is never sent anywhere. Submitting only swaps this
- * component to its success state; every value typed is then discarded.
+ * WIRED. Submitting posts to /api/buyer/register, which validates every field
+ * server-side, creates the buyer with kyc_status 'pending', uploads the
+ * certificate to the private kyc-docs bucket and writes the buyer_documents
+ * row that puts it in the review queue.
+ *
+ * Nothing here can approve anyone: approval is a human decision made in the
+ * admin portal, and only an approved buyer ever reaches a farmer's contact.
+ *
+ * TEMP-PRE-AUTH: there is no session, so nothing proves the mobile number
+ * belongs to whoever is typing. The route says the same at its own boundary.
  *
  * LANGUAGE: the frame prints a Kannada label over a small uppercase English
  * one and has no working toggle. That stack is preserved and the site ಕ|EN
@@ -35,39 +41,10 @@ import styles from './RegisterBuyer.module.css';
  *                strands the buyer. One link home is added.
  */
 
-const KARNATAKA_DISTRICTS = [
-  'ಬಾಗಲಕೋಟೆ / Bagalkote',
-  'ಬಳ್ಳಾರಿ / Ballari',
-  'ಬೆಳಗಾವಿ / Belagavi',
-  'ಬೆಂಗಳೂರು ಗ್ರಾಮಾಂತರ / Bengaluru Rural',
-  'ಬೆಂಗಳೂರು ನಗರ / Bengaluru Urban',
-  'ಬೀದರ್ / Bidar',
-  'ವಿಜಯಪುರ / Vijayapura',
-  'ಚಾಮರಾಜನಗರ / Chamarajanagara',
-  'ಚಿಕ್ಕಬಳ್ಳಾಪುರ / Chikkaballapura',
-  'ಚಿಕ್ಕಮಗಳೂರು / Chikkamagaluru',
-  'ಚಿತ್ರದುರ್ಗ / Chitradurga',
-  'ದಕ್ಷಿಣ ಕನ್ನಡ / Dakshina Kannada',
-  'ದಾವಣಗೆರೆ / Davanagere',
-  'ಧಾರವಾಡ / Dharwad',
-  'ಗದಗ / Gadag',
-  'ಹಾಸನ / Hassan',
-  'ಹಾವೇರಿ / Haveri',
-  'ಕಲಬುರಗಿ / Kalaburagi',
-  'ಕೊಡಗು / Kodagu',
-  'ಕೋಲಾರ / Kolar',
-  'ಕೊಪ್ಪಳ / Koppal',
-  'ಮಂಡ್ಯ / Mandya',
-  'ಮೈಸೂರು / Mysuru',
-  'ರಾಯಚೂರು / Raichur',
-  'ರಾಮನಗರ / Ramanagara',
-  'ಶಿವಮೊಗ್ಗ / Shivamogga',
-  'ತುಮಕೂರು / Tumakuru',
-  'ಉಡುಪಿ / Udupi',
-  'ಉತ್ತರ ಕನ್ನಡ / Uttara Kannada',
-  'ವಿಜಯನಗರ / Vijayanagara',
-  'ಯಾದಗಿರಿ / Yadgir',
-];
+/* Districts come from the database now (migration 008 seeded all 31). The
+   buyer form offers every one of them: a buyer's business address is not our
+   operating scope, and a mill in Bengaluru buying from Raichur is exactly the
+   trade this platform exists for. */
 
 /* DEV-VALIDATE — real formats per ruling, not bare length checks.
    PAN: five letters, four digits, one letter.
@@ -104,9 +81,10 @@ const MESSAGES: Record<Field, string> = {
 };
 
 const TOO_BIG = 'ಫೈಲ್ 5 MB ಗಿಂತ ಚಿಕ್ಕದಿರಬೇಕು / File must be under 5 MB';
+const ALREADY_REGISTERED = 'ಈ ಸಂಖ್ಯೆ ಈಗಾಗಲೇ ನೋಂದಣಿಯಾಗಿದೆ. / This number is already registered.';
 const WRONG_TYPE = 'PDF, JPG ಅಥವಾ PNG ಮಾತ್ರ / PDF, JPG or PNG only';
 
-export default function RegisterBuyer() {
+export default function RegisterBuyer({ districts }: { districts: RefDistrict[] }) {
   const [form, setForm] = useState({
     fullName: '',
     businessName: '',
@@ -122,15 +100,19 @@ export default function RegisterBuyer() {
   const [touched, setTouched] = useState<Partial<Record<Field, boolean>>>({});
   const [dragOver, setDragOver] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [duplicateMobile, setDuplicateMobile] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const set = (key: keyof typeof form, value: string | boolean) =>
+  const set = (key: keyof typeof form, value: string | boolean) => {
+    if (key === 'mobile') setDuplicateMobile(false);
     setForm((f) => ({ ...f, [key]: value }));
+  };
 
   const blur = (f: Field) => setTouched((t) => ({ ...t, [f]: true }));
 
-  /* AWAITING-BACKEND: the file is inspected locally and kept in component
-     state only. Nothing is uploaded, stored or transmitted. */
+  /* Inspected locally here; uploaded by the server route on submit. */
   function handleFile(file: File | null) {
     setTouched((t) => ({ ...t, gstFile: true }));
     if (!file) return;
@@ -170,11 +152,43 @@ export default function RegisterBuyer() {
   /* DEV-VALIDATE: the frame's canSubmit was `form.consent` alone. */
   const canSubmit = !Object.values(invalid).some(Boolean) && form.consent;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // AWAITING-BACKEND: this is where the registration request goes.
-    if (!canSubmit) return;
-    setSubmitted(true);
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setSubmitFailed(false);
+    setDuplicateMobile(false);
+
+    const body = new FormData();
+    body.set('name', form.fullName.trim());
+    body.set('business_name', form.businessName.trim());
+    body.set('mobile', form.mobile);
+    body.set('gstin', form.gst);
+    body.set('pan', form.pan);
+    body.set('district_id', form.district);
+    body.set('business_address', form.address.trim());
+    body.set('consent', String(form.consent));
+    if (gstFile) body.set('document', gstFile);
+
+    try {
+      const res = await fetch('/api/buyer/register', { method: 'POST', body });
+      if (res.status === 409) {
+        // buyers.mobile is UNIQUE. Inline on the field, per CEO ruling —
+        // TEMP-PRE-AUTH: once OTP is live an existing number routes to login
+        // before this form is ever reached.
+        setDuplicateMobile(true);
+        setTouched((t) => ({ ...t, mobile: true }));
+        setSubmitting(false);
+        return;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await res.json();
+      setSubmitted(true);
+    } catch (err) {
+      console.error('[buyer register] submit failed', err);
+      setSubmitFailed(true);
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -346,10 +360,23 @@ export default function RegisterBuyer() {
                   }`}
                 />
               </div>
-              {showError('mobile') && (
+              {showError('mobile') && !duplicateMobile && (
                 <p className={styles.error}>
                   <T kn={MESSAGES.mobile} en={MESSAGES.mobile} />
                 </p>
+              )}
+              {/* TEMP-PRE-AUTH: inline duplicate notice, CEO wording. */}
+              {duplicateMobile && (
+                <>
+                  <p className={styles.error} role="alert">
+                    <T kn={ALREADY_REGISTERED} en={ALREADY_REGISTERED} />
+                  </p>
+                  <p className={styles.errorAction}>
+                    <Link href="/login/buyer" className={styles.errorLink}>
+                      <T kn="ಲಾಗಿನ್ ಮಾಡಿ → / Log in →" en="ಲಾಗಿನ್ ಮಾಡಿ → / Log in →" />
+                    </Link>
+                  </p>
+                </>
               )}
             </div>
 
@@ -436,9 +463,9 @@ export default function RegisterBuyer() {
                   <option value="" disabled>
                     ಜಿಲ್ಲೆ ಆಯ್ಕೆ ಮಾಡಿ / Select district
                   </option>
-                  {KARNATAKA_DISTRICTS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
+                  {districts.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {`${d.name_kn} / ${d.name_en}`}
                     </option>
                   ))}
                 </select>
@@ -671,14 +698,22 @@ export default function RegisterBuyer() {
             <div className={styles.submitWrap}>
               <button
                 type="submit"
-                disabled={!canSubmit}
-                className={`${styles.submit} ${canSubmit ? styles.submitReady : ''}`}
+                disabled={!canSubmit || submitting}
+                className={`${styles.submit} ${canSubmit && !submitting ? styles.submitReady : ''}`}
               >
                 <T kn="ನೋಂದಣಿ ಸಲ್ಲಿಸಿ" en="ನೋಂದಣಿ ಸಲ್ಲಿಸಿ" />
                 <span className={styles.submitEn}>
                   <T kn="Submit Registration" en="Submit Registration" />
                 </span>
               </button>
+              {submitFailed && (
+                <p className={styles.error} role="alert" style={{ textAlign: 'center' }}>
+                  <T
+                    kn="ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ / Please try again"
+                    en="ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ / Please try again"
+                  />
+                </p>
+              )}
               <p className={styles.note}>
                 <span className={styles.noteKn}>
                   <T kn="ಪರಿಶೀಲನೆ 24–48 ಗಂಟೆ" en="ಪರಿಶೀಲನೆ 24–48 ಗಂಟೆ" />

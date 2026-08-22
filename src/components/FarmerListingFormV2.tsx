@@ -342,7 +342,8 @@ export default function FarmerListingFormV2({
                 className={`${styles.control} ${showError('district') ? styles.controlError : ''}`}
               >
                 <option value="">ಆಯ್ಕೆ ಮಾಡಿ</option>
-                {reference.districts.map((d) => (
+                {/* Operational only: this screen promises a harvest visit. */}
+                {reference.districts.filter((d) => d.is_operational).map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name_kn}
                   </option>

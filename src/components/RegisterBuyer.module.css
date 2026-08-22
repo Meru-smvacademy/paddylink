@@ -637,3 +637,22 @@
     transform: none;
   }
 }
+
+/* Duplicate-mobile action line — TEMP-PRE-AUTH, not in the frame. */
+.errorAction {
+  margin: 0.25rem 0 0;
+}
+
+.errorLink {
+  font-family: var(--noto-kannada);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bhatta-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.errorLink:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 2px;
+}
