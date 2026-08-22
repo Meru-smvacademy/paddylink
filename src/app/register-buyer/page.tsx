@@ -1,9 +1,12 @@
-// Placeholder — real design arrives from Figma in a later step.
-// Target of every CTA and the sticky button on /buyers.
+import type { Metadata } from 'next';
+import RegisterBuyer from '@/components/RegisterBuyer';
+
+export const metadata: Metadata = {
+  title: 'ಖರೀದಿದಾರ ನೋಂದಣಿ / Buyer Registration — PaddyLink',
+  description:
+    'ಪರಿಶೀಲನೆಗೆ ಈ ವಿವರ ಬೇಕು — ಒಮ್ಮೆ ಮಾತ್ರ. We verify every buyer, one time only.',
+};
+
 export default function RegisterBuyerPage() {
-  return (
-    <main>
-      <h1>Register as Buyer</h1>
-    </main>
-  );
+  return <RegisterBuyer />;
 }

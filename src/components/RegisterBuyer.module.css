@@ -1,0 +1,639 @@
+/* Buyer registration (KYC) — ported from Figma Make file
+   diIRk922EiLVvRKPPVuMbq (src/App.tsx). Layout, spacing, type scale and
+   copy are the frame's, verbatim. Desktop-first at 1440px.
+
+   DEV-PALETTE — CEO-approved deviation. The frame was built in stock
+   Tailwind stone + amber, which shares almost nothing with the PaddyLink
+   ramp. Every colour below is mapped onto the ramp so the page reads as the
+   same product as /login/buyer, which a buyer reaches this page from:
+
+     frame      role                          token
+     #fef7e4    page ground                -> --hottu-50    (near-identical)
+     #ffffff    card fill                  -> --hottu-100
+     #f0e3c8    card border, divider       -> --hottu-200
+     #e7d9c0    input border, disabled fill-> --hottu-200
+     #fefaf2    upload tile fill           -> --hottu-50
+     #fffbeb    consent panel, success ring-> --hottu-50
+     #b45309    THE accent                 -> --bhatta-600
+     #92400e    accent hover               -> bhatta-600 darkened on gadde-950
+     #fbbf24    rings and panel borders    -> --bhatta-400  (very close)
+     #1c1917    headings                   -> --gadde-950
+     #44403c    body copy                  -> --gadde-900
+     #78716c    muted labels               -> --masi-500
+     #a8a29e    hints and placeholders     -> --gadde-300
+                validation errors          -> --kemmannu-600
+
+   The frame names var(--font-kannada) / var(--font-sans) without defining
+   either; per ruling those are --noto-kannada and --outfit, matching the
+   OTP flow this page continues from. */
+
+.page {
+  background: var(--hottu-50);
+  padding: 3.5rem 1rem;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--hottu-100);
+  border-radius: 1rem;
+  border: 1px solid var(--hottu-200);
+  box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--gadde-950) 10%, transparent),
+    0 4px 6px -4px color-mix(in srgb, var(--gadde-950) 10%, transparent);
+  overflow: hidden;
+}
+
+/* ── Accent pill header ─────────────────────────────────────────────── */
+
+.pillRow {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 2rem 0.5rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  background: var(--bhatta-600);
+  color: var(--hottu-50);
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--gadde-950) 5%, transparent);
+}
+
+.pillKn {
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.375;
+}
+
+.pillDiv {
+  width: 1px;
+  height: 1rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--hottu-50) 30%, transparent);
+}
+
+.pillEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  opacity: 0.9;
+}
+
+/* ── Intro ──────────────────────────────────────────────────────────── */
+
+.intro {
+  text-align: center;
+  padding: 1rem 2rem 1.5rem;
+}
+
+.introKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  line-height: 1.625;
+  margin: 0;
+  color: var(--gadde-900);
+}
+
+.introEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  margin: 0.125rem 0 0;
+  color: var(--gadde-300);
+}
+
+.introAccent {
+  color: var(--bhatta-600);
+  font-weight: 500;
+}
+
+.rule {
+  height: 1px;
+  background: var(--hottu-200);
+  margin: 0 2rem;
+}
+
+/* ── Form ───────────────────────────────────────────────────────────── */
+
+.form {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.375rem;
+}
+
+.labelKn {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.375;
+  color: var(--gadde-950);
+}
+
+.labelEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  margin-top: 0.125rem;
+  color: var(--masi-500);
+}
+
+.control {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--hottu-200);
+  background: var(--hottu-50);
+  padding: 0.625rem 0.875rem;
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  color: var(--gadde-950);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.control::placeholder {
+  color: var(--gadde-300);
+}
+
+/* The frame's focus:ring-2 ring-[#b45309] with a transparent border. */
+.control:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--bhatta-600);
+}
+
+/* DEV-VALIDATE — not in the frame. Kemmannu error treatment, matching the
+   farmer listing form. */
+.controlError,
+.controlError:focus {
+  border-color: var(--kemmannu-600);
+  box-shadow: none;
+}
+
+.hint {
+  margin: 0.25rem 0 0;
+  font-family: var(--outfit);
+  font-size: 0.625rem;
+  letter-spacing: 0.025em;
+  color: var(--gadde-300);
+}
+
+.error {
+  margin: 0.25rem 0 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--kemmannu-600);
+}
+
+/* ── Mobile ─────────────────────────────────────────────────────────── */
+
+.mobileRow {
+  display: flex;
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.875rem;
+  border-radius: 0.5rem 0 0 0.5rem;
+  border: 1px solid var(--hottu-200);
+  border-right: none;
+  background: var(--hottu-50);
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gadde-900);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.mobileInput {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+/* ── District ───────────────────────────────────────────────────────── */
+
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  appearance: none;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+.chevron {
+  pointer-events: none;
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  color: var(--gadde-300);
+}
+
+/* ── Address ────────────────────────────────────────────────────────── */
+
+.textarea {
+  resize: none;
+  height: 6rem;
+  font-family: var(--noto-kannada);
+}
+
+/* ── Upload tile ────────────────────────────────────────────────────── */
+
+.drop {
+  position: relative;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 2px dashed var(--hottu-200);
+  background: var(--hottu-50);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  display: block;
+  text-align: center;
+}
+
+.dropOver,
+.drop:focus-visible {
+  border-color: var(--bhatta-600);
+  background: var(--hottu-50);
+}
+
+.drop:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.dropFilled {
+  border-color: color-mix(in srgb, var(--bhatta-600) 40%, transparent);
+}
+
+/* DEV-VALIDATE / DEV-UPLOAD — not in the frame. */
+.dropError {
+  border-color: var(--kemmannu-600);
+}
+
+.dropBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+}
+
+.dropIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hottu-200);
+  color: var(--bhatta-600);
+}
+
+.dropIconFilled {
+  background: color-mix(in srgb, var(--bhatta-600) 10%, transparent);
+}
+
+.dropKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.dropEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0.125rem 0 0;
+  color: var(--masi-500);
+}
+
+.dropRules {
+  font-family: var(--outfit);
+  font-size: 0.625rem;
+  letter-spacing: 0.025em;
+  margin: 0;
+  color: var(--gadde-300);
+}
+
+.fileName {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--bhatta-600);
+  overflow-wrap: anywhere;
+}
+
+.fileMeta {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0;
+  color: var(--gadde-300);
+}
+
+.change {
+  font-family: var(--noto-kannada);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.change:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 2px;
+}
+
+/* DEV-UPLOAD — the frame promises "max 5 MB" and checks nothing, and drops
+   unsupported types in silence. Both now report here. */
+.dropReject {
+  font-family: var(--noto-kannada);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--kemmannu-600);
+}
+
+/* ── Consent ────────────────────────────────────────────────────────── */
+
+.consent {
+  border-radius: 0.75rem;
+  background: var(--hottu-50);
+  border: 1px solid color-mix(in srgb, var(--bhatta-400) 60%, transparent);
+  padding: 1rem 1.25rem;
+}
+
+.consentLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.consentBoxWrap {
+  position: relative;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.consentBox {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.25rem;
+  border: 2px solid color-mix(in srgb, var(--bhatta-600) 40%, transparent);
+  background: var(--hottu-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.consentBoxOn {
+  background: var(--bhatta-600);
+  border-color: var(--bhatta-600);
+}
+
+.consentInput:focus-visible + .consentBox {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.consentKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.375;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.consentEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  line-height: 1.625;
+  margin: 0.25rem 0 0;
+  color: var(--masi-500);
+}
+
+.consentAccent {
+  color: var(--bhatta-600);
+}
+
+.consentAccentEn {
+  color: var(--bhatta-600);
+  font-weight: 500;
+}
+
+/* ── Submit ─────────────────────────────────────────────────────────── */
+
+.submitWrap {
+  padding-top: 0.5rem;
+}
+
+.submit {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: none;
+  padding: 0.875rem 0;
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+  background: var(--hottu-200);
+  color: var(--gadde-300);
+  cursor: not-allowed;
+}
+
+.submitReady {
+  background: var(--bhatta-600);
+  color: var(--hottu-50);
+  cursor: pointer;
+  box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--gadde-950) 5%, transparent);
+}
+
+.submitReady:hover {
+  /* The frame's #92400e — bhatta-600 taken down against gadde-950. */
+  background: color-mix(in srgb, var(--bhatta-600) 78%, var(--gadde-950));
+  box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--gadde-950) 10%, transparent);
+}
+
+.submitReady:active {
+  transform: scale(0.98);
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.submitEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  margin-top: 0.125rem;
+  opacity: 0.8;
+}
+
+.note {
+  text-align: center;
+  margin: 0.75rem 0 0;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  color: var(--gadde-300);
+}
+
+.noteKn {
+  font-family: var(--noto-kannada);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Success ────────────────────────────────────────────────────────── */
+
+.successCard {
+  background: var(--hottu-100);
+  border-radius: 1rem;
+  border: 1px solid var(--hottu-200);
+  box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--gadde-950) 10%, transparent),
+    0 4px 6px -4px color-mix(in srgb, var(--gadde-950) 10%, transparent);
+  padding: 3.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+}
+
+.successRing {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 9999px;
+  background: var(--hottu-50);
+  border: 2px solid var(--bhatta-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--gadde-950) 5%, transparent);
+}
+
+.successKn {
+  font-family: var(--noto-kannada);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.successEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  margin: 0.25rem 0 0;
+  color: var(--masi-500);
+}
+
+.successBodyKn {
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  line-height: 1.625;
+  margin: 0;
+  max-width: 24rem;
+  color: var(--gadde-900);
+}
+
+.successBodyEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  letter-spacing: 0.025em;
+  margin: 0;
+  color: var(--gadde-300);
+}
+
+/* DEV-LINK — not in the frame, which strands the buyer with no way onward.
+   CEO-approved addition. */
+.homeLink {
+  display: inline-block;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 2px solid var(--bhatta-600);
+  color: var(--bhatta-600);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.homeLink:hover {
+  opacity: 0.8;
+}
+
+.homeLink:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control,
+  .drop,
+  .consentBox,
+  .submit,
+  .homeLink {
+    transition: none;
+  }
+  .submitReady:active {
+    transform: none;
+  }
+}
