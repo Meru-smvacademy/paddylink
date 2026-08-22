@@ -28,8 +28,9 @@ const GRAIN_BULLET = '🌾';
 const stats: { kn: string; en: string | null }[] = [
   { kn: 'ರೈತರಿಗೆ ಸದಾ ಉಚಿತ', en: 'Free for farmers, always' },
   { kn: 'ಪ್ರತಿ ಖರೀದಿದಾರ ಪರಿಶೀಲಿತ', en: 'Every buyer verified' },
-  // The frame gives this third item no English line.
-  { kn: 'ರಾಯಚೂರು · ಕೊಪ್ಪಳ · ಯಾದಗಿರಿ', en: null },
+  // CEO ruling: no district list as the platform's scope. The frame gives this
+  // item no English line, so none is invented here.
+  { kn: 'ಕರ್ನಾಟಕದ ಭತ್ತದ ನಾಡಿನಲ್ಲಿ', en: null },
 ];
 
 export default function About() {

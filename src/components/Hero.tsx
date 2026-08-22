@@ -47,7 +47,7 @@ const TRUST: { kn: string; en: string }[] = [
   // EN-ADDED on each `en` below.
   { kn: 'ರೈತರಿಗೆ ಸದಾ ಉಚಿತ', en: 'Free for farmers, always' },
   { kn: 'ಪ್ರತಿ ಖರೀದಿದಾರ GST ಪರಿಶೀಲಿತ', en: 'Every buyer GST-verified' },
-  { kn: 'ರಾಯಚೂರು · ಕೊಪ್ಪಳ · ಯಾದಗಿರಿ', en: 'Raichur · Koppal · Yadgir' },
+  { kn: 'ಕರ್ನಾಟಕದ ಭತ್ತದ ನಾಡಿನಲ್ಲಿ', en: "Across Karnataka's rice belt" },
 ];
 
 export default function Hero() {
