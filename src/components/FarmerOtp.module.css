@@ -1,0 +1,340 @@
+/* Farmer OTP — ported from Figma Make file GrgKytpvcZYRwTpZsAM9wa
+   (src/App.tsx, OtpScreen with door="farmer"). Values are the frame's,
+   verbatim. Desktop-first at 1440px.
+
+   Only the two OTP states are ported here. The listing form and success
+   screen in the same file are later pieces.
+
+   Every colour is already on the brand ramp and used as its token:
+     #FDF6E3 -> --hottu-50    #F6EFDA -> --hottu-100  #EDE1C2 -> --hottu-200
+     #0B2418 -> --gadde-950   #12352A -> --gadde-900  #1E5B3A -> --gadde-700
+     #2A7A3B -> --gadde-600   #9CC4A8 -> --gadde-300  #A4472D -> --kemmannu-600
+
+   The farmer door's accent is gadde-700 and its accent-light gadde-300;
+   both faces (Noto Sans Kannada, Outfit) are already loaded. */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--hottu-50);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  gap: 1rem;
+}
+
+/* The frame puts this in its own top bar, which the site header replaces;
+   kept here in the frame's treatment, directly above the card. */
+.backRow {
+  width: 100%;
+  max-width: 28rem;
+  display: flex;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gadde-700);
+  text-decoration: none;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+}
+
+.back:hover {
+  opacity: 0.7;
+}
+
+.back:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────── */
+
+.card {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 1rem;
+  border: 2px solid var(--gadde-300);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: var(--hottu-100);
+  box-shadow: 0 8px 40px color-mix(in srgb, var(--gadde-950) 10%, transparent);
+}
+
+.pillRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pill {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--outfit);
+  background: var(--gadde-700);
+  color: var(--hottu-50);
+}
+
+.headingKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.25rem;
+  font-size: 1.85rem;
+  color: var(--gadde-950);
+}
+
+.headingEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--gadde-600);
+}
+
+/* ── Phone entry ────────────────────────────────────────────────────── */
+
+.phoneRow {
+  display: flex;
+  align-items: stretch;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 2px solid var(--hottu-200);
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  font-family: var(--outfit);
+  font-weight: 600;
+  font-size: 1.125rem;
+  background: var(--hottu-200);
+  border-right: 2px solid var(--hottu-200);
+  color: var(--gadde-950);
+}
+
+.phoneInput {
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  font-family: var(--outfit);
+  font-size: 1.5rem;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  color: var(--gadde-950);
+}
+
+.phoneInput:focus {
+  outline: none;
+}
+
+.phoneInput::placeholder {
+  opacity: 0.3;
+}
+
+.sendBtn {
+  width: 100%;
+  padding: 1rem 0;
+  border-radius: 0.75rem;
+  border: none;
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.25rem;
+  transition: background 0.2s, color 0.2s;
+  background: var(--hottu-200);
+  color: var(--gadde-300);
+  cursor: not-allowed;
+}
+
+.sendBtnReady {
+  background: var(--gadde-700);
+  color: var(--hottu-50);
+  cursor: pointer;
+}
+
+.sendBtn:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+.sendBtnEn {
+  font-family: var(--outfit);
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+  opacity: 0.8;
+}
+
+/* ── Code entry ─────────────────────────────────────────────────────── */
+
+.boxes {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.box {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  border: 2px solid var(--hottu-200);
+  text-align: center;
+  font-family: var(--outfit);
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: var(--hottu-50);
+  color: var(--gadde-950);
+  transition: border-color 0.2s, color 0.2s;
+  min-width: 0;
+}
+
+.boxFilled {
+  border-color: var(--gadde-700);
+}
+
+.boxError {
+  border-color: var(--kemmannu-600);
+  color: var(--kemmannu-600);
+}
+
+/* Frame's .otp-box:focus rule, verbatim. */
+.box:focus {
+  outline: none;
+  border-color: var(--gadde-600);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gadde-600) 15%, transparent);
+}
+
+.errorPanel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--hottu-50);
+  border: 1.5px solid var(--kemmannu-600);
+}
+
+.errorKn {
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--kemmannu-600);
+}
+
+.errorEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+  color: var(--kemmannu-600);
+}
+
+.resendRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resendBtn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: opacity 0.2s;
+  color: var(--gadde-300);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.resendBtnActive {
+  color: var(--gadde-700);
+  opacity: 1;
+  cursor: pointer;
+}
+
+.resendBtn:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+.resendEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0;
+  color: var(--gadde-300);
+}
+
+.reassure {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  background: var(--hottu-200);
+}
+
+.reassureKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--gadde-900);
+}
+
+.reassureEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0.125rem 0 0;
+  color: var(--gadde-600);
+}
+
+/* ── Stub panel where the listing form will attach (piece 2) ────────── */
+
+.stubPanel {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  background: var(--gadde-700);
+}
+
+.stubKn {
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--hottu-50);
+}
+
+.stubEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0.25rem 0 0;
+  color: var(--gadde-300);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back,
+  .sendBtn,
+  .box,
+  .resendBtn {
+    transition: none;
+  }
+}
