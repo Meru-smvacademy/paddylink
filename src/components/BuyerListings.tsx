@@ -1,6 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  browseClient,
+  getBrowseListings,
+  type BrowseListing,
+} from '@/lib/browseListings';
+import type { RefDistrict, RefVariety } from '@/lib/reference';
 import T from './T';
 import styles from './BuyerListings.module.css';
 
@@ -13,11 +19,22 @@ import styles from './BuyerListings.module.css';
  * /login/buyer. Nothing public links here, and tokens appear on this page
  * and nowhere else on the site.
  *
- * AWAITING-BACKEND: every listing below is fixture data compiled into the
- * bundle. No listing is fetched, no farmer record exists, no contact is
- * really unlocked and no token is really spent. The balance and the unlocked
- * flags are component state and reset on every reload. The "+ ಸೇರಿಸಿ / Add"
- * control is deliberately inert — there is no top-up flow yet.
+ * WIRED FOR READS. The cards are real active listings from
+ * public.listings_browse, and every filter is a database query — the browser
+ * runs the same anon-key query the server does, against the one object anon
+ * is allowed to read. The view carries no identity at all: no farmer id, no
+ * name, no mobile, no village.
+ *
+ * UNLOCK IS STILL DEMO, and deliberately so. A real unlock spends a token and
+ * releases a farmer's contact, which needs an authenticated buyer, a wallet
+ * and the unlock_contact() function — none of which is reachable before OTP
+ * auth lands. So the modal flips a card in component state, decrements a
+ * demo balance, and touches nothing in the database. No token is spent and no
+ * contact is released. The names and numbers a demo unlock reveals are
+ * fixtures, not real farmers.
+ *
+ * AWAITING-BACKEND: the token balance, the "+ ಸೇರಿಸಿ / Add" control and the
+ * unlock itself.
  *
  * LANGUAGE: the frame prints Kannada with a smaller English twin and has no
  * working toggle. That stack is preserved and the site ಕ|EN control does not
@@ -50,117 +67,30 @@ import styles from './BuyerListings.module.css';
 
 type QualityStatus = 'checked' | 'pending';
 
-interface Listing {
-  id: number;
-  variety: string;
-  quantity: string;
-  taluk: string;
-  district: string;
-  harvest: string;
-  quality: QualityStatus;
-  moisture?: string;
-  farmerMasked: string;
-  farmerFull: string;
-  phoneMasked: string;
-  phoneFull: string;
-  unlocked: boolean;
-}
+/** A real browse row, plus the DEMO unlock flag which lives only in state. */
+type Card = BrowseListing & { unlocked: boolean };
 
-/* AWAITING-BACKEND: fixtures, not data.
-   DEV-FIXTURES: phoneFull values are a synthetic 90000 0000N run. */
-const INITIAL_LISTINGS: Listing[] = [
-  {
-    id: 1,
-    variety: 'ಸೋನಾ ಮಸೂರಿ',
-    quantity: '40 ಕ್ವಿಂಟಾಲ್',
-    taluk: 'ಸಿಂಧನೂರು',
-    district: 'ರಾಯಚೂರು',
-    harvest: 'ಡಿಸೆಂಬರ್',
-    quality: 'checked',
-    moisture: '13.2',
-    farmerMasked: 'ರೈತ: ಸಿ****ಪ್ಪ',
-    farmerFull: 'ರೈತ: ಸಿದ್ದಪ್ಪ ಕಮ್ಮಾರ',
-    phoneMasked: '9X XXX XXXXX',
-    phoneFull: '90000 00001',
-    unlocked: true,
-  },
-  {
-    id: 2,
-    variety: 'ಬಿಪಿಟಿ-5204',
-    quantity: '65 ಕ್ವಿಂಟಾಲ್',
-    taluk: 'ಮಾನ್ವಿ',
-    district: 'ರಾಯಚೂರು',
-    harvest: 'ನವೆಂಬರ್',
-    quality: 'checked',
-    moisture: '12.8',
-    farmerMasked: 'ರೈತ: ಲ****ಮ್ಮ',
-    farmerFull: 'ರೈತ: ಲಕ್ಷ್ಮಮ್ಮ ಪಾಟೀಲ್',
-    phoneMasked: '9X XXX XXXXX',
-    phoneFull: '90000 00002',
-    unlocked: false,
-  },
-  {
-    id: 3,
-    variety: 'ಜಯ',
-    quantity: '28 ಕ್ವಿಂಟಾಲ್',
-    taluk: 'ಗಂಗಾವತಿ',
-    district: 'ಕೊಪ್ಪಳ',
-    harvest: 'ಡಿಸೆಂಬರ್',
-    quality: 'pending',
-    farmerMasked: 'ರೈತ: ರ****ಪ್ಪ',
-    farmerFull: 'ರೈತ: ರಾಮಪ್ಪ ನಾಯಕ',
-    phoneMasked: '9X XXX XXXXX',
-    phoneFull: '90000 00003',
-    unlocked: false,
-  },
-  {
-    id: 4,
-    variety: 'ಐಆರ್-64',
-    quantity: '80 ಕ್ವಿಂಟಾಲ್',
-    taluk: 'ಹೊಸಪೇಟೆ',
-    district: 'ವಿಜಯನಗರ',
-    harvest: 'ಜನವರಿ',
-    quality: 'checked',
-    moisture: '13.9',
-    farmerMasked: 'ರೈತ: ನ****ಮ',
-    farmerFull: 'ರೈತ: ನಾಗರಾಜಮ್ಮ ರೆಡ್ಡಿ',
-    phoneMasked: '9X XXX XXXXX',
-    phoneFull: '90000 00004',
-    unlocked: false,
-  },
-  {
-    id: 5,
-    variety: 'ಸ್ವರ್ಣ',
-    quantity: '52 ಕ್ವಿಂಟಾಲ್',
-    taluk: 'ಶಹಾಪುರ',
-    district: 'ಯಾದಗಿರ',
-    harvest: 'ನವೆಂಬರ್',
-    quality: 'pending',
-    farmerMasked: 'ರೈತ: ಬ****ಪ್ಪ',
-    farmerFull: 'ರೈತ: ಬಸಪ್ಪ ಚವ್ಹಾಣ',
-    phoneMasked: '9X XXX XXXXX',
-    phoneFull: '90000 00005',
-    unlocked: false,
-  },
-  {
-    id: 6,
-    variety: 'ರತ್ನಗಿರಿ',
-    quantity: '35 ಕ್ವಿಂಟಾಲ್',
-    taluk: 'ಕುಷ್ಟಗಿ',
-    district: 'ಕೊಪ್ಪಳ',
-    harvest: 'ಡಿಸೆಂಬರ್',
-    quality: 'pending',
-    farmerMasked: 'ರೈತ: ಮ****ಪ್ಪ',
-    farmerFull: 'ರೈತ: ಮಲ್ಲಪ್ಪ ಬಿರಾದಾರ',
-    phoneMasked: '9X XXX XXXXX',
-    phoneFull: '90000 00006',
-    unlocked: false,
-  },
+/* The demo identities a DEMO unlock reveals. These are NOT farmers: the
+   browse view carries no identity, and a real unlock needs auth, a wallet and
+   unlock_contact(). Until then an unlocked card shows this placeholder pair
+   so the state is reviewable, and it is obviously not a real person. */
+const DEMO_IDENTITY = {
+  farmerFull: 'ರೈತ: ಪರೀಕ್ಷಾ ಹೆಸರು',
+  phoneFull: '90000 00000',
+};
+
+const MASKED_FARMER = 'ರೈತ: *****';
+const MASKED_PHONE = '9X XXX XXXXX';
+
+/* The twelve months, so a harvest date can be labelled in Kannada. */
+const MONTHS_KN = [
+  'ಜನವರಿ', 'ಫೆಬ್ರವರಿ', 'ಮಾರ್ಚ್', 'ಏಪ್ರಿಲ್', 'ಮೇ', 'ಜೂನ್',
+  'ಜುಲೈ', 'ಆಗಸ್ಟ್', 'ಸೆಪ್ಟೆಂಬರ್', 'ಅಕ್ಟೋಬರ್', 'ನವೆಂಬರ್', 'ಡಿಸೆಂಬರ್',
 ];
 
-const DISTRICTS = ['ರಾಯಚೂರು', 'ಕೊಪ್ಪಳ', 'ವಿಜಯನಗರ', 'ಯಾದಗಿರ', 'ಗುಲಬರ್ಗಾ'];
-const VARIETIES = ['ಸೋನಾ ಮಸೂರಿ', 'ಬಿಪಿಟಿ-5204', 'ಜಯ', 'ಐಆರ್-64', 'ಸ್ವರ್ಣ', 'ರತ್ನಗಿರಿ'];
-const MONTHS = ['ನವೆಂಬರ್', 'ಡಿಸೆಂಬರ್', 'ಜನವರಿ'];
+function harvestKn(isoDate: string) {
+  return MONTHS_KN[Number(isoDate.slice(5, 7)) - 1] ?? '';
+}
 
 const UNLOCK_COST = 5;
 const START_BALANCE = 32;
@@ -266,9 +196,9 @@ function ListingCard({
   affordable,
   onUnlockClick,
 }: {
-  listing: Listing;
+  listing: Card;
   affordable: boolean;
-  onUnlockClick: (id: number) => void;
+  onUnlockClick: (id: string) => void;
 }) {
   return (
     <div className={styles.card}>
@@ -278,10 +208,13 @@ function ListingCard({
         <div className={styles.cardHead}>
           <div>
             <h2 className={styles.variety}>
-              <T kn={listing.variety} en={listing.variety} />
+              <T kn={listing.variety_kn} en={listing.variety_kn} />
             </h2>
             <p className={styles.quantity}>
-              <T kn={listing.quantity} en={listing.quantity} />
+              <T
+                kn={`${listing.quantity_quintals} ಕ್ವಿಂಟಾಲ್`}
+                en={`${listing.quantity_quintals} ಕ್ವಿಂಟಾಲ್`}
+              />
             </p>
           </div>
           {listing.unlocked && (
@@ -294,38 +227,48 @@ function ListingCard({
         <p className={styles.metaRow}>
           <PinIcon />
           <T
-            kn={`${listing.taluk}, ${listing.district}`}
-            en={`${listing.taluk}, ${listing.district}`}
+            kn={`${listing.taluk_kn ?? ''}, ${listing.district_en ?? ''}`}
+            en={`${listing.taluk_kn ?? ''}, ${listing.district_en ?? ''}`}
           />
         </p>
 
         <p className={styles.metaRow}>
           <CalendarIcon />
-          <T kn={`ಕಟಾವು: ${listing.harvest}`} en={`ಕಟಾವು: ${listing.harvest}`} />
+          <T
+            kn={`ಕಟಾವು: ${harvestKn(listing.harvest_month)}`}
+            en={`ಕಟಾವು: ${harvestKn(listing.harvest_month)}`}
+          />
         </p>
 
         <div>
-          <QualityBadge quality={listing.quality} moisture={listing.moisture} />
+          {/* The badge reads the fact, not a fixture: verified only when
+              staff recorded a check (migration 007). */}
+          <QualityBadge
+            quality={listing.quality_checked_at ? 'checked' : 'pending'}
+            moisture={listing.moisture_pct != null ? String(listing.moisture_pct) : undefined}
+          />
         </div>
 
         <div className={styles.identity}>
+          {/* The browse view carries no identity, so there is nothing real to
+              reveal. A DEMO unlock shows an obviously fake pair. */}
           {listing.unlocked ? (
             <>
               <p className={styles.farmerFull}>
-                <T kn={listing.farmerFull} en={listing.farmerFull} />
+                <T kn={DEMO_IDENTITY.farmerFull} en={DEMO_IDENTITY.farmerFull} />
               </p>
               <p className={styles.phoneFull}>
                 <PhoneIcon />
-                <T kn={listing.phoneFull} en={listing.phoneFull} />
+                <T kn={DEMO_IDENTITY.phoneFull} en={DEMO_IDENTITY.phoneFull} />
               </p>
             </>
           ) : (
             <>
               <p className={styles.farmerMasked}>
-                <T kn={listing.farmerMasked} en={listing.farmerMasked} />
+                <T kn={MASKED_FARMER} en={MASKED_FARMER} />
               </p>
               <p className={styles.phoneMasked}>
-                <T kn={listing.phoneMasked} en={listing.phoneMasked} />
+                <T kn={MASKED_PHONE} en={MASKED_PHONE} />
               </p>
             </>
           )}
@@ -335,7 +278,10 @@ function ListingCard({
       <div className={styles.cardFoot}>
         {listing.unlocked ? (
           /* DEV-ICON: the frame's tel: dropped the country code. */
-          <a href={`tel:+91${listing.phoneFull.replace(/\s/g, '')}`} className={styles.cta}>
+          <a
+            href={`tel:+91${DEMO_IDENTITY.phoneFull.replace(/\s/g, '')}`}
+            className={styles.cta}
+          >
             <PhoneIcon size={15} />
             <T kn="ಕರೆ ಮಾಡಿ " en="ಕರೆ ಮಾಡಿ " />
             <span className={styles.ctaEn}>
@@ -522,24 +468,65 @@ function EmptyState({ onClear }: { onClear: () => void }) {
   );
 }
 
-export default function BuyerListings() {
-  const [listings, setListings] = useState<Listing[]>(INITIAL_LISTINGS);
+export default function BuyerListings({
+  initialListings,
+  districts,
+  varieties,
+}: {
+  initialListings: BrowseListing[];
+  districts: RefDistrict[];
+  varieties: RefVariety[];
+}) {
+  const [rows, setRows] = useState<BrowseListing[]>(initialListings);
+  /* DEMO unlocks live in their own state, not derived from the current
+     result set: filtering a card out must not forget that it was unlocked,
+     or the state vanishes the moment a buyer looks at another district. */
+  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(() => new Set());
+  const [loading, setLoading] = useState(false);
   const [tokenBalance, setTokenBalance] = useState(START_BALANCE);
+  /* Filters hold canonical English names and a month number — what the view
+     is queried by. The dropdowns show Kannada. */
   const [districtFilter, setDistrictFilter] = useState('');
   const [varietyFilter, setVarietyFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
   const [qualityOnly, setQualityOnly] = useState(false);
-  const [unlockTarget, setUnlockTarget] = useState<number | null>(null);
+  const [unlockTarget, setUnlockTarget] = useState<string | null>(null);
 
-  const filtered = listings.filter((l) => {
-    if (districtFilter && l.district !== districtFilter) return false;
-    if (varietyFilter && l.variety !== varietyFilter) return false;
-    if (monthFilter && l.harvest !== monthFilter) return false;
-    if (qualityOnly && l.quality !== 'checked') return false;
-    return true;
-  });
-
+  const supabase = useMemo(() => browseClient(), []);
   const hasFilters = Boolean(districtFilter || varietyFilter || monthFilter || qualityOnly);
+
+  /* Every filter change is a query against listings_browse — the same anon
+     read the server does, not a client-side sift of a preloaded array. A
+     DEMO unlock is remembered across refetches so the reviewed state does not
+     vanish when a filter moves. */
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getBrowseListings(
+      {
+        districtEn: districtFilter || undefined,
+        varietyEn: varietyFilter || undefined,
+        harvestMonth: monthFilter ? Number(monthFilter) : undefined,
+        qualityCheckedOnly: qualityOnly || undefined,
+      },
+      supabase,
+    )
+      .then((next) => {
+        if (!cancelled) setRows(next);
+      })
+      .catch((e) => console.error('[buyer listings] query failed', e))
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [districtFilter, varietyFilter, monthFilter, qualityOnly, supabase]);
+
+  const filtered: Card[] = useMemo(
+    () => rows.map((r) => ({ ...r, unlocked: unlockedIds.has(r.id) })),
+    [rows, unlockedIds],
+  );
   const affordable = tokenBalance >= UNLOCK_COST;
 
   const clearFilters = useCallback(() => {
@@ -552,10 +539,11 @@ export default function BuyerListings() {
   const closeModal = useCallback(() => setUnlockTarget(null), []);
 
   function handleUnlockConfirm() {
-    // AWAITING-BACKEND: this is where the unlock-contact request goes. No
-    // token is really spent and no contact is really released.
+    // DEMO ONLY. A real unlock calls unlock_contact(), which needs an
+    // authenticated buyer and a wallet — neither exists before OTP auth. This
+    // spends nothing, releases nothing, and resets on reload.
     if (unlockTarget === null || !affordable) return;
-    setListings((prev) => prev.map((l) => (l.id === unlockTarget ? { ...l, unlocked: true } : l)));
+    setUnlockedIds((prev) => new Set(prev).add(unlockTarget));
     setTokenBalance((b) => b - UNLOCK_COST);
     setUnlockTarget(null);
   }
@@ -604,9 +592,10 @@ export default function BuyerListings() {
             className={`${styles.select} ${styles.selectDistrict}`}
           >
             <option value="">ಎಲ್ಲ ಜಿಲ್ಲೆಗಳು</option>
-            {DISTRICTS.map((d) => (
-              <option key={d} value={d}>
-                {d}
+            {/* Value is name_en: listings_browse carries district_en. */}
+            {districts.map((d) => (
+              <option key={d.id} value={d.name_en}>
+                {d.name_kn}
               </option>
             ))}
           </select>
@@ -623,9 +612,10 @@ export default function BuyerListings() {
             className={`${styles.select} ${styles.selectVariety}`}
           >
             <option value="">ಎಲ್ಲ ತಳಿಗಳು</option>
-            {VARIETIES.map((v) => (
-              <option key={v} value={v}>
-                {v}
+            {/* Value is name_en so a Kannada relabel cannot break the filter. */}
+            {varieties.map((v) => (
+              <option key={v.id} value={v.name_en}>
+                {v.name_kn}
               </option>
             ))}
           </select>
@@ -642,8 +632,10 @@ export default function BuyerListings() {
             className={`${styles.select} ${styles.selectMonth}`}
           >
             <option value="">ಎಲ್ಲ ತಿಂಗಳು</option>
-            {MONTHS.map((m) => (
-              <option key={m} value={m}>
+            {/* All twelve now: the frame listed three because its fixtures
+                only used three. Value is the month number. */}
+            {MONTHS_KN.map((m, i) => (
+              <option key={m} value={i + 1}>
                 {m}
               </option>
             ))}
