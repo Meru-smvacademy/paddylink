@@ -17,6 +17,10 @@ import styles from './FarmerSuccess.module.css';
  * has no working toggle. That stack is preserved and the site ಕ|EN control
  * does not flip it, so every <T> carries the same string in both slots.
  *
+ * DEV-LINK: the frame offers only "back to start", stranding the farmer with
+ * no way to his listings. A link to /farmer/listings is added above it, in
+ * the words the /login farmer card already uses.
+ *
  * Two things about the frame's own design, flagged rather than fixed:
  * - It shows nothing the farmer just entered — no name, variety, quantity,
  *   taluk, harvest month, and no reference number. A mistyped quantity is
@@ -68,11 +72,20 @@ export default function FarmerSuccess() {
         </p>
       </div>
 
-      {/* The frame's handler resets the form and returns to the door chooser,
-          which is /login here — not the site's front page. */}
-      <Link href="/login" className={styles.restart}>
-        <T kn="← ಮೊದಲ ಪುಟಕ್ಕೆ / Back to start" en="← ಮೊದಲ ಪುಟಕ್ಕೆ / Back to start" />
-      </Link>
+      <div className={styles.actions}>
+        {/* DEV-LINK — not in the frame. The farmer door on /login promises
+            "ನಿಮ್ಮ ಪಟ್ಟಿಗಳನ್ನು ನೋಡಿ"; /farmer/listings is what finally keeps
+            that promise, so the loop closes in the same words. */}
+        <Link href="/farmer/listings" className={styles.primary}>
+          <T kn="ನಿಮ್ಮ ಪಟ್ಟಿಗಳನ್ನು ನೋಡಿ / See your listings" en="ನಿಮ್ಮ ಪಟ್ಟಿಗಳನ್ನು ನೋಡಿ / See your listings" />
+        </Link>
+
+        {/* The frame's handler resets the form and returns to the door
+            chooser, which is /login here — not the site's front page. */}
+        <Link href="/login" className={styles.restart}>
+          <T kn="← ಮೊದಲ ಪುಟಕ್ಕೆ / Back to start" en="← ಮೊದಲ ಪುಟಕ್ಕೆ / Back to start" />
+        </Link>
+      </div>
     </div>
   );
 }

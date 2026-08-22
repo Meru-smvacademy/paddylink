@@ -72,9 +72,41 @@
 
 /* ── Back to start ──────────────────────────────────────────────────── */
 
+/* DEV-LINK — the frame has a single control here. */
+.actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.primary {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  border-radius: 0.75rem;
+  border: 2px solid var(--gadde-700);
+  background: var(--gadde-700);
+  font-family: var(--outfit);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--hottu-50);
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.primary:hover {
+  background: var(--gadde-900);
+  border-color: var(--gadde-900);
+}
+
+.primary:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
 .restart {
   display: inline-block;
-  margin-top: 2rem;
   padding: 0.75rem 2rem;
   border-radius: 0.75rem;
   border: 2px solid var(--gadde-700);
