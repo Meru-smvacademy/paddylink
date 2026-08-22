@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import FarmerListingForm from './FarmerListingForm';
+import FarmerListingFormV2 from './FarmerListingFormV2';
 import FarmerSuccess from './FarmerSuccess';
 import T from './T';
 import styles from './OtpFlow.module.css';
@@ -22,7 +22,8 @@ import styles from './OtpFlow.module.css';
  * Every string, size and disabled colour is identical across both doors.
  *
  * After a verified code the farmer walks on to the listing form and then the
- * success screen; both are the same Make file. The frame returns verified
+ * success screen. The form is now the CEO's redesign, from Make file
+ * RaEviXLLlGJv2UI7Bp7xy3; the success screen is still this file's. The frame returns verified
  * buyers to the door chooser, calling it a placeholder; per CEO ruling they
  * now land on /buyer/listings, the private listings browser.
  *
@@ -176,7 +177,7 @@ export default function OtpFlow({ door }: { door: Door }) {
           </div>
         )}
 
-        {phase === 'form' && <FarmerListingForm onSubmitted={() => setPhase('success')} />}
+        {phase === 'form' && <FarmerListingFormV2 onSubmitted={() => setPhase('success')} />}
 
         {phase === 'success' && <FarmerSuccess />}
 

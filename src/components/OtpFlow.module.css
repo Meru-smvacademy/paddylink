@@ -75,9 +75,10 @@
 }
 
 /* The form column is wider than the card, so the back link widens with it
-   to stay flush with the form's left edge. */
+   to stay flush with the form's left edge. The redesigned form's card is
+   720px wide. */
 .backRowForm {
-  max-width: 42rem;
+  max-width: 720px;
 }
 
 /* ── Card ───────────────────────────────────────────────────────────── */

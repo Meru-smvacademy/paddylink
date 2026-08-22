@@ -1,0 +1,573 @@
+/* Farmer listing form, redesigned — ported from Figma Make file
+   RaEviXLLlGJv2UI7Bp7xy3 (src/App.tsx). Layout, spacing, type scale and copy
+   are the frame's, verbatim. Desktop-first at 1440px.
+
+   Replaces FarmerListingForm in the /login/farmer flow. The old component
+   stays in the repo, unused, for history.
+
+   DEV-KN-ONLY — this screen carries no English at all, by CEO decision: it is
+   the farmer's screen and speaks his language. The ಕ|EN toggle leaves it
+   unchanged, as on every other ported page. The only Latin on it is the
+   frame's own "JPG, PNG · 10MB ಗರಿಷ್ಠ".
+
+   DEV-PALETTE — CEO-approved, mapped by role onto the existing ramp with no
+   new tokens. The frame calls a `mud-*` neutral family and gadde-50/200/400
+   steps we do not ship:
+
+     frame              role                          token
+     mud-900            headings, input text       -> --gadde-950
+     mud-700            labels, consent copy       -> --gadde-900
+     mud-600            upload caption             -> --masi-500
+     mud-400            placeholders, muted, hints -> --hottu-400
+     gadde-50           pill, consent, photo tints -> gadde-300 mixed on cream
+     gadde-200          pill and consent borders   -> gadde-300 mixed on cream
+     gadde-400          hover borders              -> --gadde-600
+     gadde-600/700      buttons, accents           -> --gadde-600 / --gadde-700
+     hottu-50/100/200   page, card, fills          -> unchanged
+     hottu-300          input and divider borders  -> --hottu-300
+     amber-400 / -900   mic badge                  -> --bhatta-400 / --gadde-950
+     white              on-dark text, tick         -> --hottu-50
+     red-600            photo remove hover         -> --kemmannu-600
+
+   The frame names var(--font-kannada-serif) without defining it; that is
+   --noto-serif-kannada here. Body text uses --noto-kannada. */
+
+.shell {
+  width: 100%;
+  max-width: 720px;
+}
+
+.card {
+  background: var(--hottu-100);
+  border-radius: 1rem;
+  border: 1px solid var(--hottu-200);
+  box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--gadde-950) 5%, transparent);
+  padding: 3rem 2.5rem;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+
+.head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: color-mix(in srgb, var(--gadde-300) 18%, var(--hottu-50));
+  color: var(--gadde-700);
+  border: 1px solid color-mix(in srgb, var(--gadde-300) 70%, var(--hottu-50));
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  margin-bottom: 1.25rem;
+}
+
+.title {
+  font-family: var(--noto-serif-kannada);
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+  color: var(--gadde-950);
+}
+
+.subLine {
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--hottu-400);
+}
+
+/* ── Mic tile ───────────────────────────────────────────────────────── */
+
+/* The frame styles this as a pointer-cursor div with a hover colour and a
+   chevron, but wires no handler to it. It keeps the designed look and is
+   marked aria-disabled with a default cursor, so it cannot pretend to be
+   tappable. */
+.mic {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  text-align: left;
+  background: var(--gadde-700);
+  border: none;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
+  cursor: default;
+}
+
+.micGlow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  border-radius: 1rem;
+  background: radial-gradient(circle at 30% 50%, var(--hottu-50) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.micIcon {
+  position: relative;
+  flex-shrink: 0;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--hottu-50) 15%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hottu-50);
+}
+
+.micBody {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.micTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.micTitle {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.25;
+  color: var(--hottu-50);
+}
+
+.micBadge {
+  flex-shrink: 0;
+  background: var(--bhatta-400);
+  color: var(--gadde-950);
+  font-family: var(--noto-kannada);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+}
+
+.micSub {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  margin: 0;
+  color: color-mix(in srgb, var(--hottu-50) 70%, transparent);
+}
+
+.micChevron {
+  position: relative;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--hottu-50) 40%, transparent);
+}
+
+/* ── Divider ────────────────────────────────────────────────────────── */
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.75rem 0;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: var(--hottu-300);
+}
+
+.dividerText {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0 0.25rem;
+  color: var(--hottu-400);
+}
+
+/* ── Fields ─────────────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--gadde-900);
+}
+
+.req {
+  color: var(--gadde-700);
+  margin-left: 0.25rem;
+}
+
+.control {
+  width: 100%;
+  background: var(--hottu-50);
+  border: 1px solid var(--hottu-300);
+  color: var(--gadde-950);
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.control::placeholder {
+  color: var(--hottu-400);
+}
+
+.control:focus {
+  outline: none;
+  border-color: var(--gadde-700);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gadde-700) 15%, transparent);
+}
+
+select.control {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Validation is not in the frame — kemmannu border and aria-invalid only,
+   as on the previous form. The frame supplies no error copy, so none is
+   invented. */
+.controlError,
+.controlError:focus {
+  border-color: var(--kemmannu-600);
+  box-shadow: none;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* ── Quintals ───────────────────────────────────────────────────────── */
+
+.qtyWrap {
+  position: relative;
+}
+
+.qtyInput {
+  padding-right: 7rem;
+}
+
+.qtyUnit {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding-right: 1rem;
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--hottu-400);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Harvest month grid ─────────────────────────────────────────────── */
+
+.months {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.month {
+  padding: 0.625rem 0.5rem;
+  border-radius: 0.75rem;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  background: var(--hottu-50);
+  color: var(--gadde-900);
+  border: 1px solid var(--hottu-300);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.month:hover {
+  border-color: var(--gadde-600);
+  color: var(--gadde-700);
+}
+
+.monthOn,
+.monthOn:hover {
+  background: var(--gadde-700);
+  color: var(--hottu-50);
+  border-color: var(--gadde-700);
+  box-shadow: 0 1px 2px 0 color-mix(in srgb, var(--gadde-950) 5%, transparent);
+}
+
+.month:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 2px;
+}
+
+.monthsError {
+  border-color: var(--kemmannu-600);
+}
+
+/* ── Photo ──────────────────────────────────────────────────────────── */
+
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 2px dashed var(--hottu-300);
+  background: var(--hottu-50);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  min-height: 120px;
+  padding: 1.5rem;
+}
+
+.drop:hover,
+.drop:focus-within {
+  border-color: var(--gadde-600);
+  background: color-mix(in srgb, var(--gadde-300) 12%, var(--hottu-50));
+}
+
+.dropFilled {
+  border-color: var(--gadde-600);
+  background: color-mix(in srgb, var(--gadde-300) 12%, var(--hottu-50));
+  padding: 0.5rem;
+}
+
+.dropIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: var(--hottu-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hottu-400);
+}
+
+.dropKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+  color: var(--masi-500);
+  text-align: center;
+}
+
+.dropRules {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin: 0.125rem 0 0;
+  color: var(--hottu-400);
+  text-align: center;
+}
+
+/* DEV-UPLOAD — the frame promises 10MB and enforces nothing. A rejected type
+   turns the frame's own rule line kemmannu rather than inventing copy. */
+.dropRulesError {
+  color: var(--kemmannu-600);
+}
+
+.dropReject {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0.375rem 0 0;
+  color: var(--kemmannu-600);
+}
+
+.preview {
+  max-height: 10rem;
+  border-radius: 0.5rem;
+  object-fit: contain;
+}
+
+.removePhoto {
+  align-self: flex-start;
+  margin-top: 0.375rem;
+  font-family: var(--noto-kannada);
+  font-size: 0.75rem;
+  color: var(--hottu-400);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.removePhoto:hover {
+  color: var(--kemmannu-600);
+}
+
+.removePhoto:focus-visible {
+  outline: 2px solid var(--kemmannu-600);
+  outline-offset: 2px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Consent ────────────────────────────────────────────────────────── */
+
+.consent {
+  background: color-mix(in srgb, var(--gadde-300) 18%, var(--hottu-50));
+  border: 1px solid color-mix(in srgb, var(--gadde-300) 70%, var(--hottu-50));
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.consentLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.consentBoxWrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.consentBox {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.25rem;
+  border: 2px solid var(--hottu-400);
+  background: var(--hottu-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.consentLabel:hover .consentBox {
+  border-color: var(--gadde-600);
+}
+
+.consentBoxOn,
+.consentLabel:hover .consentBoxOn {
+  background: var(--gadde-700);
+  border-color: var(--gadde-700);
+}
+
+.consentInput:focus-visible + .consentBox {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+.consentText {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  line-height: 1.625;
+  margin: 0;
+  color: var(--gadde-900);
+}
+
+/* DEV-CONSENT: the frame styled its own platform name this way. */
+.brand {
+  font-weight: 600;
+  color: var(--gadde-700);
+}
+
+/* ── Submit ─────────────────────────────────────────────────────────── */
+
+.submitWrap {
+  padding-top: 0.5rem;
+}
+
+.submit {
+  width: 100%;
+  padding: 1rem 0;
+  border-radius: 0.75rem;
+  border: none;
+  font-family: var(--noto-kannada);
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: var(--hottu-200);
+  color: var(--hottu-400);
+  cursor: not-allowed;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.submitReady {
+  background: var(--gadde-700);
+  color: var(--hottu-50);
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--gadde-950) 10%, transparent);
+}
+
+.submitReady:hover {
+  background: var(--gadde-600);
+  box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--gadde-950) 10%, transparent);
+}
+
+.submitReady:active {
+  transform: scale(0.99);
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control,
+  .month,
+  .drop,
+  .consentBox,
+  .submit,
+  .removePhoto {
+    transition: none;
+  }
+  .submitReady:active {
+    transform: none;
+  }
+}
