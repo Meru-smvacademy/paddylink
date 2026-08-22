@@ -1,0 +1,176 @@
+/* Shared shell for the three legal documents: /terms, /privacy and
+   /refund-policy. Not a Figma port — these are document pages, built to the
+   CEO's brief: cream ground, one readable ~760px column, generous leading,
+   no CTAs and no decorative sections.
+
+   Latin text is set in Inter throughout rather than the display faces the
+   marketing pages use: these are long-form documents meant to be read, not
+   scanned. Kannada is Noto Sans Kannada, as on the farmer screens. */
+
+.page {
+  background: var(--hottu-50);
+  padding: 4rem 1.5rem 5rem;
+}
+
+.doc {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+/* ── Masthead ───────────────────────────────────────────────────────── */
+
+.title {
+  font-family: var(--inter);
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+  color: var(--gadde-950);
+}
+
+.updated {
+  font-family: var(--inter);
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--masi-500);
+}
+
+/* Small status line, per brief. */
+.version {
+  font-family: var(--inter);
+  font-size: 0.8125rem;
+  margin: 0.25rem 0 0;
+  color: var(--gadde-300);
+}
+
+/* ── Kannada summary panel ──────────────────────────────────────────── */
+
+.summary {
+  margin: 2.5rem 0 3rem;
+  background: var(--hottu-100);
+  border-left: 4px solid var(--gadde-700);
+  border-radius: 0 0.75rem 0.75rem 0;
+  padding: 1.75rem 2rem;
+}
+
+.summaryHead {
+  font-family: var(--noto-kannada);
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0 0 1rem;
+  color: var(--gadde-950);
+}
+
+.summaryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.summaryItem {
+  position: relative;
+  padding-left: 1.25rem;
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  line-height: 1.9;
+  color: var(--gadde-900);
+}
+
+.summaryItem::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85em;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--gadde-700);
+}
+
+/* ── Sections ───────────────────────────────────────────────────────── */
+
+.section {
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-family: var(--inter);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 0.875rem;
+  color: var(--gadde-950);
+}
+
+.sectionNumber {
+  color: var(--gadde-700);
+  margin-right: 0.5rem;
+}
+
+.para {
+  font-family: var(--inter);
+  font-size: 1rem;
+  line-height: 1.85;
+  margin: 0 0 1rem;
+  color: var(--gadde-900);
+}
+
+.para:last-child {
+  margin-bottom: 0;
+}
+
+/* Clause numbers, so 2.1 / 2.2 / 2.3 stay findable in a wall of text. */
+.clause {
+  font-weight: 600;
+  color: var(--gadde-700);
+  margin-right: 0.375rem;
+}
+
+.bullets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bullet {
+  position: relative;
+  padding-left: 1.25rem;
+  font-family: var(--inter);
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--gadde-900);
+}
+
+.bullet::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.82em;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--gadde-300);
+}
+
+.link {
+  color: var(--gadde-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link:hover {
+  color: var(--gadde-600);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 2px;
+}
