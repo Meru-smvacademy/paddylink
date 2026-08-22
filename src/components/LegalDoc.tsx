@@ -15,7 +15,9 @@ import styles from './LegalDoc.module.css';
  * appears. The toggle does not flip them.
  *
  * The published date is the build's authoring date, per brief. When the text
- * changes, LAST_UPDATED changes with it.
+ * changes, LAST_UPDATED changes with it. The source line read
+ * "Last updated: [date] — Version 1"; per CEO ruling the version is carried
+ * by the separate status line below it, so it is not repeated here.
  */
 
 export const LAST_UPDATED = '23 August 2026';
@@ -47,7 +49,7 @@ export default function LegalDoc({
     <main className={styles.page}>
       <article className={styles.doc}>
         <h1 className={styles.title}>{title}</h1>
-        <p className={styles.updated}>Last updated: {LAST_UPDATED} — Version 1</p>
+        <p className={styles.updated}>Last updated: {LAST_UPDATED}</p>
         <p className={styles.version}>Version 1 — under legal review</p>
 
         {/* Kannada summary, at the top of every one of the three pages. */}
