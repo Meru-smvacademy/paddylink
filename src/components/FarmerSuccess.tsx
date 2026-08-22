@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import type { CreatedListing } from './FarmerListingFormV2';
 import T from './T';
 import styles from './FarmerSuccess.module.css';
 
@@ -9,9 +10,11 @@ import styles from './FarmerSuccess.module.css';
  * (src/App.tsx, FormScreen, the `submitted` branch). Piece 3 of 3, which
  * completes the farmer entry flow.
  *
- * AWAITING-BACKEND: nothing has been saved when this renders. No listing was
- * created, no record exists and no confirmation was sent. The screen shows
- * purely because a valid form was submitted in the browser.
+ * The listing IS saved by the time this renders — the form posts to
+ * /api/farmer/listings and passes the created row down, so the summary below
+ * is read back from the database rather than echoed from the form. That
+ * closes the gap flagged when this screen was ported: the frame showed the
+ * farmer nothing he had entered, so a mistyped quantity was invisible.
  *
  * LANGUAGE: the frame prints Kannada with a smaller English line beneath and
  * has no working toggle. That stack is preserved and the site ಕ|EN control
@@ -22,9 +25,6 @@ import styles from './FarmerSuccess.module.css';
  * the words the /login farmer card already uses.
  *
  * Two things about the frame's own design, flagged rather than fixed:
- * - It shows nothing the farmer just entered — no name, variety, quantity,
- *   taluk, harvest month, and no reference number. A mistyped quantity is
- *   invisible here. The frame discards the values on submit; so does this.
  * - Its only control returns to the door chooser. The farmer door advertises
  *   "ನಿಮ್ಮ ಪಟ್ಟಿಗಳನ್ನು ನೋಡಿ", but no listings screen exists in the file.
  *
@@ -32,7 +32,18 @@ import styles from './FarmerSuccess.module.css';
  * in OtpFlow and is hidden for the same reason, leaving the one button below.
  */
 
-export default function FarmerSuccess() {
+/** The harvest month as the farmer picked it, from the stored date. */
+const MONTHS_KN = [
+  'ಜನವರಿ', 'ಫೆಬ್ರವರಿ', 'ಮಾರ್ಚ್', 'ಏಪ್ರಿಲ್', 'ಮೇ', 'ಜೂನ್',
+  'ಜುಲೈ', 'ಆಗಸ್ಟ್', 'ಸೆಪ್ಟೆಂಬರ್', 'ಅಕ್ಟೋಬರ್', 'ನವೆಂಬರ್', 'ಡಿಸೆಂಬರ್',
+];
+
+function harvestKn(isoDate: string) {
+  const m = Number(isoDate.slice(5, 7));
+  return MONTHS_KN[m - 1] ?? '';
+}
+
+export default function FarmerSuccess({ listing }: { listing?: CreatedListing | null }) {
   return (
     /* role="status" is not in the frame. This replaces the form without a
        navigation, so without it a screen reader is given no announcement
@@ -56,6 +67,26 @@ export default function FarmerSuccess() {
       <p className={styles.headEn}>
         <T kn="Your paddy is listed!" en="Your paddy is listed!" />
       </p>
+
+      {/* What was actually stored. Kannada-only, like the form it follows. */}
+      {listing && (
+        <dl className={styles.summary}>
+          <div className={styles.summaryRow}>
+            <dt className={styles.summaryKey}>ಪ್ರಮಾಣ</dt>
+            <dd className={styles.summaryValue}>{listing.quantity_quintals} ಕ್ವಿಂಟಾಲ್</dd>
+          </div>
+          <div className={styles.summaryRow}>
+            <dt className={styles.summaryKey}>ಕೊಯ್ಲು ತಿಂಗಳು</dt>
+            <dd className={styles.summaryValue}>{harvestKn(listing.harvest_month)}</dd>
+          </div>
+          {listing.variety_kn && (
+            <div className={styles.summaryRow}>
+              <dt className={styles.summaryKey}>ಭತ್ತದ ತಳಿ</dt>
+              <dd className={styles.summaryValue}>{listing.variety_kn}</dd>
+            </div>
+          )}
+        </dl>
+      )}
 
       <div className={styles.panel}>
         <p className={styles.panelKn}>

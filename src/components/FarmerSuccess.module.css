@@ -132,3 +132,37 @@
     transition: none;
   }
 }
+
+/* Stored-listing summary — not in the frame, which showed the farmer nothing
+   he had entered. These values are read back from the created row. */
+.summary {
+  margin: 0 0 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--hottu-200);
+}
+
+.summaryKey {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  margin: 0;
+  color: var(--masi-500);
+}
+
+.summaryValue {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--gadde-950);
+}

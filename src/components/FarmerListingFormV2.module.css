@@ -571,3 +571,14 @@ select.control {
     transform: none;
   }
 }
+
+/* Submit failure — not in the frame, which has no failure state at all.
+   Uses the kemmannu treatment already carried by the field errors. */
+.submitError {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--kemmannu-600);
+}

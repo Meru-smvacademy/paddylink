@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import FarmerListingFormV2 from './FarmerListingFormV2';
+import FarmerListingFormV2, { type CreatedListing } from './FarmerListingFormV2';
 import FarmerSuccess from './FarmerSuccess';
+import type { ReferenceData } from '@/lib/reference';
 import T from './T';
 import styles from './OtpFlow.module.css';
 
@@ -27,10 +28,14 @@ import styles from './OtpFlow.module.css';
  * buyers to the door chooser, calling it a placeholder; per CEO ruling they
  * now land on /buyer/listings, the private listings browser.
  *
- * AWAITING-BACKEND: nothing here sends or checks a real OTP. No SMS is
- * dispatched, no code is validated, no session is created, and no listing is
- * stored. The states are driven entirely by local input length so the screens
- * can be reviewed; every point needing a real call is marked below.
+ * AWAITING-BACKEND applies to the OTP itself and nothing else now: no SMS is
+ * dispatched, no code is validated and no session is created. The states are
+ * driven by local input length so the screens can be reviewed, and every
+ * point needing a real call is marked below.
+ *
+ * The listing form beyond it IS wired — it writes real rows. Which means the
+ * number typed here is the only thing identifying a farmer, and nothing yet
+ * proves it is his. That is the hole real OTP closes.
  *
  * LANGUAGE: the frame prints Kannada with a smaller English line beneath and
  * has no working toggle of its own. That stack is preserved and the site
@@ -51,9 +56,17 @@ const RESEND_SECONDS = 30;
 type Door = 'farmer' | 'buyer';
 type Phase = 'phone' | 'verify' | 'form' | 'success';
 
-export default function OtpFlow({ door }: { door: Door }) {
+export default function OtpFlow({
+  door,
+  reference,
+}: {
+  door: Door;
+  /** Only the farmer door renders the listing form, so this is optional. */
+  reference?: ReferenceData;
+}) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('phone');
+  const [listing, setListing] = useState<CreatedListing | null>(null);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [error, setError] = useState(false);
@@ -177,9 +190,20 @@ export default function OtpFlow({ door }: { door: Door }) {
           </div>
         )}
 
-        {phase === 'form' && <FarmerListingFormV2 onSubmitted={() => setPhase('success')} />}
+        {phase === 'form' && reference && (
+          <FarmerListingFormV2
+            reference={reference}
+            /* TEMP-PRE-AUTH: the number the farmer typed at the OTP step,
+               carried in component state. No session proves it is his. */
+            mobile={phone}
+            onSubmitted={(created) => {
+              setListing(created);
+              setPhase('success');
+            }}
+          />
+        )}
 
-        {phase === 'success' && <FarmerSuccess />}
+        {phase === 'success' && <FarmerSuccess listing={listing} />}
 
         {(phase === 'phone' || phase === 'verify') && (
           <div className={styles.card}>

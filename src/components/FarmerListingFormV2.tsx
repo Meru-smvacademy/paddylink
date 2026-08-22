@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { OTHER_VARIETY_EN, type ReferenceData } from '@/lib/reference';
 import styles from './FarmerListingFormV2.module.css';
 
 /**
@@ -12,10 +13,18 @@ import styles from './FarmerListingFormV2.module.css';
  * after OTP verify, before the success screen. The old component stays in the
  * repo unused, for history.
  *
- * AWAITING-BACKEND: submitting sends nothing anywhere. There is no request,
- * no storage and no upload — a chosen photo is read in the browser for its
- * preview and never leaves it. Submit only advances the flow to the success
- * screen, and every value typed is discarded.
+ * WIRED. Submitting posts to /api/farmer/listings, which validates every
+ * field server-side, upserts the farmer by mobile and inserts the listing.
+ * The photo goes to the private listing-photos bucket. Nothing typed here is
+ * discarded any more.
+ *
+ * The district, taluk and variety options come from the database (migration
+ * 005's reference views), so the spellings are canonical and the district
+ * list is the one PaddyLink actually operates in.
+ *
+ * TEMP-PRE-AUTH: the mobile number arrives from the OTP step in component
+ * state, not from a verified session — real OTP is not live yet. The route
+ * says the same at its own boundary.
  *
  * DEV-KN-ONLY: this screen carries no English at all, by CEO decision — it is
  * the farmer's screen and speaks his language. The ಕ|EN toggle leaves it
@@ -37,48 +46,20 @@ import styles from './FarmerListingFormV2.module.css';
  * - DEV-A11Y     the month grid was twelve bare buttons with no grouping and
  *                no pressed state; the mic tile looked tappable and was not.
  *
- * Built verbatim per the character-for-character rule, logged for the backend
- * data pass: the district list holds 30 entries and omits ಚಿತ್ರದುರ್ಗ, so a
- * Chitradurga farmer cannot pick his district. The canonical list will come
- * from the database.
+ * The frame's 30 hardcoded districts are gone, replaced by the three the
+ * database serves. CEO ruling: this screen promises
+ * "ಕಟಾವಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ", a promise we can only keep where we
+ * operate, so the dropdown serves reality and grows with operations.
  *
  * Also logged as a deliberate divergence: this Make file ships its own
  * success screen ("ಯಶಸ್ವಿಯಾಗಿ ಪಟ್ಟಿ ಆಯಿತು!"), which is NOT built. The flow
  * keeps the existing FarmerSuccess screen, per brief.
  */
 
-const DISTRICTS = [
-  'ಬೆಂಗಳೂರು ನಗರ',
-  'ಬೆಂಗಳೂರು ಗ್ರಾಮಾಂತರ',
-  'ತುಮಕೂರು',
-  'ಕೋಲಾರ',
-  'ಚಿಕ್ಕಬಳ್ಳಾಪುರ',
-  'ರಾಮನಗರ',
-  'ಚಾಮರಾಜನಗರ',
-  'ಮಂಡ್ಯ',
-  'ಮೈಸೂರು',
-  'ಹಾಸನ',
-  'ಚಿಕ್ಕಮಗಳೂರು',
-  'ದಾವಣಗೆರೆ',
-  'ಶಿವಮೊಗ್ಗ',
-  'ಉಡುಪಿ',
-  'ದಕ್ಷಿಣ ಕನ್ನಡ',
-  'ಕೊಡಗು',
-  'ಉತ್ತರ ಕನ್ನಡ',
-  'ಧಾರವಾಡ',
-  'ಹಾವೇರಿ',
-  'ಗದಗ',
-  'ಬಾಗಲಕೋಟೆ',
-  'ವಿಜಯಪುರ',
-  'ಬೆಳಗಾವಿ',
-  'ಬೀದರ್',
-  'ಕಲಬುರಗಿ',
-  'ಯಾದಗಿರಿ',
-  'ರಾಯಚೂರು',
-  'ಕೊಪ್ಪಳ',
-  'ಬಳ್ಳಾರಿ',
-  'ವಿಜಯನಗರ',
-];
+/* Districts, taluks and varieties now come from the database (migration 005's
+   reference views), not from a list in this file. That is what fixes the
+   spellings and keeps the options honest: they are the districts PaddyLink
+   actually operates in, and they grow with operations. */
 
 const HARVEST_MONTHS = [
   'ಜನವರಿ',
@@ -102,19 +83,50 @@ const TOO_BIG = 'ಫೋಟೋ 10MB ಗಿಂತ ಚಿಕ್ಕದಿರಬೇ�
 
 const MAX_QUINTALS = 10000;
 
-type Field = 'name' | 'district' | 'taluk' | 'village' | 'variety' | 'quintals' | 'harvestMonth';
+type Field =
+  | 'name'
+  | 'district'
+  | 'taluk'
+  | 'village'
+  | 'variety'
+  | 'varietyOther'
+  | 'quintals'
+  | 'harvestMonth';
 
-export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () => void }) {
+export interface CreatedListing {
+  id: string;
+  quantity_quintals: number;
+  harvest_month: string;
+  expires_at: string;
+  variety_kn: string | null;
+  photo_stored: boolean;
+}
+
+export default function FarmerListingFormV2({
+  reference,
+  mobile,
+  onSubmitted,
+}: {
+  reference: ReferenceData;
+  /** TEMP-PRE-AUTH: carried from the OTP step in component state, not a
+      verified session. The server route re-validates the shape but cannot
+      yet prove the number belongs to whoever is typing. */
+  mobile: string;
+  onSubmitted: (listing: CreatedListing) => void;
+}) {
   const [form, setForm] = useState({
     name: '',
     district: '',
     taluk: '',
     village: '',
     variety: '',
+    varietyOther: '',
     quintals: '',
     harvestMonth: '',
     consent: false,
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitFailed, setSubmitFailed] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoReject, setPhotoReject] = useState<'size' | 'type' | null>(null);
@@ -122,7 +134,18 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const set = (key: keyof typeof form, value: string | boolean) =>
-    setForm((f) => ({ ...f, [key]: value }));
+    setForm((f) => ({
+      ...f,
+      [key]: value,
+      // Changing district invalidates the taluk beneath it.
+      ...(key === 'district' ? { taluk: '' } : {}),
+      // Leaving ಇತರೆ / Other drops the free-text name with it.
+      ...(key === 'variety' && !isOtherVariety(value as string) ? { varietyOther: '' } : {}),
+    }));
+
+  function isOtherVariety(id: string) {
+    return reference.varieties.find((v) => String(v.id) === id)?.name_en === OTHER_VARIETY_EN;
+  }
 
   const blur = (f: Field) => setTouched((t) => ({ ...t, [f]: true }));
 
@@ -134,7 +157,7 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
     [photoPreview],
   );
 
-  /* AWAITING-BACKEND: the photo is previewed locally and never uploaded. */
+  /* Previewed locally here; uploaded by the server route on submit. */
   function handlePhoto(file: File | null) {
     if (photoPreview) URL.revokeObjectURL(photoPreview);
     if (!file) {
@@ -170,12 +193,18 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
   const quintalsValid =
     form.quintals !== '' && Number.isFinite(quintalsNum) && quintalsNum >= 1 && quintalsNum <= MAX_QUINTALS;
 
+  const otherChosen = isOtherVariety(form.variety);
+  const taluksHere = reference.taluks.filter((t) => String(t.district_id) === form.district);
+
   const invalid: Record<Field, boolean> = {
     name: form.name.trim() === '',
     district: form.district === '',
-    taluk: form.taluk.trim() === '',
+    taluk: form.taluk === '',
     village: form.village.trim() === '',
-    variety: form.variety.trim() === '',
+    variety: form.variety === '',
+    // Only required when ಇತರೆ / Other is the choice — the rule the server
+    // route enforces too.
+    varietyOther: otherChosen && form.varietyOther.trim() === '',
     quintals: !quintalsValid,
     harvestMonth: form.harvestMonth === '',
   };
@@ -186,11 +215,36 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
      required field must also be valid. */
   const canSubmit = !Object.values(invalid).some(Boolean) && form.consent;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // AWAITING-BACKEND: this is where the create-listing request goes.
-    if (!canSubmit) return;
-    onSubmitted();
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setSubmitFailed(false);
+
+    const body = new FormData();
+    body.set('mobile', mobile);
+    body.set('name', form.name.trim());
+    body.set('village', form.village.trim());
+    body.set('district_id', form.district);
+    body.set('taluk_id', form.taluk);
+    body.set('variety_id', form.variety);
+    if (otherChosen) body.set('variety_other', form.varietyOther.trim());
+    body.set('quantity_quintals', form.quintals);
+    // The grid is ordered January-first, so its index is the month number.
+    body.set('harvest_month', String(HARVEST_MONTHS.indexOf(form.harvestMonth) + 1));
+    body.set('consent', String(form.consent));
+    if (photo) body.set('photo', photo);
+
+    try {
+      const res = await fetch('/api/farmer/listings', { method: 'POST', body });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { listing } = await res.json();
+      onSubmitted(listing);
+    } catch (err) {
+      console.error('[listing form] submit failed', err);
+      setSubmitFailed(true);
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -288,9 +342,9 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
                 className={`${styles.control} ${showError('district') ? styles.controlError : ''}`}
               >
                 <option value="">ಆಯ್ಕೆ ಮಾಡಿ</option>
-                {DISTRICTS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
+                {reference.districts.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name_kn}
                   </option>
                 ))}
               </select>
@@ -300,16 +354,25 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
               <label className={styles.label} htmlFor="fl-taluk">
                 ತಾಲೂಕು<span className={styles.req}>*</span>
               </label>
-              <input
+              {/* Dependent on district, from reference.taluks. The frame made
+                  this free text because it had no taluk data; the database
+                  has all 19 for the districts we operate in. */}
+              <select
                 id="fl-taluk"
-                type="text"
-                placeholder="ತಾಲೂಕು ಹೆಸರು"
                 value={form.taluk}
                 onChange={(e) => set('taluk', e.target.value)}
                 onBlur={() => blur('taluk')}
+                disabled={form.district === ''}
                 aria-invalid={showError('taluk')}
                 className={`${styles.control} ${showError('taluk') ? styles.controlError : ''}`}
-              />
+              >
+                <option value="">ಆಯ್ಕೆ ಮಾಡಿ</option>
+                {taluksHere.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name_kn}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -335,16 +398,42 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
             <label className={styles.label} htmlFor="fl-variety">
               ಭತ್ತದ ತಳಿ<span className={styles.req}>*</span>
             </label>
-            <input
+            {/* From reference.varieties, with ಇತರೆ / Other pinned last by
+                the server helper — it is no longer the highest id, since
+                migration 006 seeded ಜ್ಯೋತಿ after it. */}
+            <select
               id="fl-variety"
-              type="text"
-              placeholder="ಉದಾ: ಸೋನ ಮಸೂರಿ, ಜ್ಯೋತಿ, ಸಾಂಬಾ..."
               value={form.variety}
               onChange={(e) => set('variety', e.target.value)}
               onBlur={() => blur('variety')}
               aria-invalid={showError('variety')}
               className={`${styles.control} ${showError('variety') ? styles.controlError : ''}`}
-            />
+            >
+              <option value="">ಆಯ್ಕೆ ಮಾಡಿ</option>
+              {reference.varieties.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name_kn}
+                </option>
+              ))}
+            </select>
+
+            {/* Only alongside ಇತರೆ / Other, and stored in listings.variety_other. */}
+            {otherChosen && (
+              <input
+                id="fl-variety-other"
+                type="text"
+                maxLength={60}
+                placeholder="ತಳಿ ಹೆಸರು"
+                value={form.varietyOther}
+                onChange={(e) => set('varietyOther', e.target.value)}
+                onBlur={() => blur('varietyOther')}
+                aria-label="ತಳಿ ಹೆಸರು"
+                aria-invalid={showError('varietyOther')}
+                className={`${styles.control} ${
+                  showError('varietyOther') ? styles.controlError : ''
+                }`}
+              />
+            )}
           </div>
 
           {/* 6. Quintals */}
@@ -508,11 +597,19 @@ export default function FarmerListingFormV2({ onSubmitted }: { onSubmitted: () =
           <div className={styles.submitWrap}>
             <button
               type="submit"
-              disabled={!canSubmit}
-              className={`${styles.submit} ${canSubmit ? styles.submitReady : ''}`}
+              disabled={!canSubmit || submitting}
+              className={`${styles.submit} ${canSubmit && !submitting ? styles.submitReady : ''}`}
             >
               ಪಟ್ಟಿ ಮಾಡಿ
             </button>
+            {/* The frame has no failure state. "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ" is reused
+                verbatim from the OTP screen's error in the same flow, rather
+                than inventing a new sentence. */}
+            {submitFailed && (
+              <p className={styles.submitError} role="alert">
+                ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ
+              </p>
+            )}
           </div>
         </form>
       </div>
