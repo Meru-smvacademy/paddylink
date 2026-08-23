@@ -48,6 +48,9 @@ export default async function DeskLayout({
             <Link href="/admin/quality" className={styles.navLink}>
               Quality
             </Link>
+            <Link href="/admin/overview" className={styles.navLink}>
+              Overview
+            </Link>
             <Link href="/admin/listings/routes" className={styles.navLink}>
               Field routes
             </Link>

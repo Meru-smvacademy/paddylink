@@ -1,0 +1,182 @@
+/* Overview desk — read-only oversight. Dense, brand tokens only. */
+
+.page {
+  font-size: 13px;
+  max-width: 1100px;
+}
+
+.title {
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--gadde-900);
+  margin-bottom: 16px;
+}
+
+.section {
+  background: #fff;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--gadde-900);
+  margin-bottom: 12px;
+}
+
+/* ── Counts ─────────────────────────────────────────────────────────── */
+
+.countGrid {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.statBig {
+  flex: 1;
+  min-width: 130px;
+  background: var(--hottu-100);
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statNum {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--gadde-700);
+  line-height: 1;
+}
+
+.statOf {
+  font-size: 17px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.statLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.breakdowns {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.breakdown {
+  flex: 1;
+  min-width: 220px;
+}
+
+.breakdownTitle {
+  font-family: var(--sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.chipLabel {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chipNum {
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Tables ─────────────────────────────────────────────────────────── */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--control-border);
+}
+
+.table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: top;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.detail {
+  color: var(--text-muted);
+}
+
+.empty {
+  color: var(--text-muted);
+  padding: 8px 0;
+  margin: 0;
+}
+
+.note {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.twoCol {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.twoCol > div {
+  flex: 1;
+  min-width: 280px;
+}
+
+.subTitle {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
