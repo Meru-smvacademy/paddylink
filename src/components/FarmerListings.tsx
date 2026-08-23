@@ -34,13 +34,12 @@ import styles from './FarmerListings.module.css';
  * unlocks but still offers no way to reach them. The empty state's padlock
  * icon reads as "locked" rather than "empty"; it is the frame's drawing.
  *
- * BADGE LIMITATION: the frame has three badge states, but nothing in the
- * schema records a quality check — there is no quality_checks table and no
- * moisture column anywhere. So no listing can honestly show
- * "ಗುಣಮಟ್ಟ ಪರಿಶೀಲಿತ · ತೇವಾಂಶ 13.2%", and every card reads
- * "ಪರಿಶೀಲನೆ ಬಾಕಿ — ಕೊಯ್ಲಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ", which is both true
- * and the promise the listing form makes. The verified and active badges stay
- * built and unused until a quality-check table exists.
+ * BADGES: migration 007 gave the schema real quality columns, and the admin
+ * quality desk is their only write path. A card reads
+ * "ಗುಣಮಟ್ಟ ಪರಿಶೀಲಿತ · ತೇವಾಂಶ 13.2%" the moment staff record a check — the
+ * same number the buyer sees, one truth on two screens — and
+ * "ಪರಿಶೀಲನೆ ಬಾಕಿ — ಕೊಯ್ಲಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಬರುತ್ತದೆ" until then, which is
+ * the promise the listing form makes.
  */
 
 import type { BadgeType, FarmerListingRow } from '@/lib/farmerListings';
@@ -135,7 +134,16 @@ function ListingCard({ listing }: { listing: FarmerListingRow }) {
       </div>
 
       <div className={styles.badgeRow}>
-        <Badge type={listing.badge} label={BADGE_LABELS[listing.badge]} />
+        {/* CEO ruling (Desk 3 gate): the verified badge carries the real
+            moisture reading, one decimal — the number IS the substance. */}
+        <Badge
+          type={listing.badge}
+          label={
+            listing.badge === 'verified' && listing.moisturePct
+              ? `${BADGE_LABELS.verified} · ತೇವಾಂಶ ${listing.moisturePct}%`
+              : BADGE_LABELS[listing.badge]
+          }
+        />
         {listing.buyersKn && (
           <span className={styles.buyers}>
             <PhoneIcon />

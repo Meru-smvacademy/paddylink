@@ -31,6 +31,9 @@ export interface FarmerListingRow {
   harvestKn: string;
   locationKn: string;
   badge: BadgeType;
+  /** One-decimal moisture reading when staff checked the crop (007), else
+   *  null. The same number the buyer sees — one truth, two screens. */
+  moisturePct: string | null;
   buyersKn: string | null;
 }
 
@@ -51,7 +54,9 @@ export async function getFarmerListings(mobile: string): Promise<FarmerListingRo
   const [{ data: rows, error: listErr }, reference] = await Promise.all([
     supabase
       .from('listings')
-      .select('id,variety_id,variety_other,quantity_quintals,harvest_month,status,unlock_count')
+      .select(
+        'id,variety_id,variety_other,quantity_quintals,harvest_month,status,unlock_count,moisture_pct,quality_checked_at',
+      )
       .eq('farmer_id', farmer.id)
       .in('status', VISIBLE_STATUSES)
       .order('created_at', { ascending: false }),
@@ -77,10 +82,10 @@ export async function getFarmerListings(mobile: string): Promise<FarmerListingRo
       quantityKn: `${r.quantity_quintals} ಕ್ವಿಂಟಾಲ್`,
       harvestKn: `ಕೊಯ್ಲು: ${MONTHS_KN[month - 1] ?? ''}`,
       locationKn,
-      // Every listing reads "check pending": nothing in the schema records a
-      // quality check yet, so no listing can honestly claim to be verified.
-      // See the note in FarmerListings.
-      badge: 'pending' as BadgeType,
+      // Verified the moment staff record a moisture check on the quality
+      // desk (migration 007); until then the card honestly reads pending.
+      badge: (r.quality_checked_at ? 'verified' : 'pending') as BadgeType,
+      moisturePct: r.moisture_pct != null ? Number(r.moisture_pct).toFixed(1) : null,
       buyersKn:
         r.unlock_count > 0
           ? `${r.unlock_count} ಖರೀದಿದಾರರು ನಿಮ್ಮ ಸಂಪರ್ಕ ತೆರೆದಿದ್ದಾರೆ`

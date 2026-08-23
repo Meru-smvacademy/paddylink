@@ -19,6 +19,13 @@
   color: var(--gadde-900);
 }
 
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .months {
   display: flex;
   gap: 4px;
@@ -151,7 +158,7 @@
 
 /* On paper: drop the chrome-ish bits, keep the plan. */
 @media print {
-  .months {
+  .controls {
     display: none;
   }
 }

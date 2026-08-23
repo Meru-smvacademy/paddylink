@@ -246,6 +246,9 @@ export interface RouteDistrict {
 export interface RoutePlan {
   months: string[]; // distinct harvest months with active listings, ascending
   month: string | null; // the month this plan covers
+  /** true → only listings still awaiting a quality check (the work queue,
+   *  and the default); false → every active listing in the month. */
+  pendingOnly: boolean;
   districts: RouteDistrict[];
   total: number;
   unchecked: number;
@@ -257,9 +260,14 @@ export interface RoutePlan {
  * staff-only surface and the team phones ahead. Unchecked listings are the
  * reason a visit exists, so each group carries its unchecked count.
  */
-export async function getRoutePlan(monthParam?: string): Promise<RoutePlan> {
+export async function getRoutePlan(
+  monthParam?: string,
+  pendingOnly = true, // CEO ruling: the route list defaults to the work queue
+): Promise<RoutePlan> {
   const all = (await listListings('active')).filter((l) => l.status === 'active');
 
+  // Months come from ALL active listings, so a fully-checked month still has
+  // a tab (showing an empty queue) rather than vanishing.
   const months = [...new Set(all.map((l) => l.harvest_month.slice(0, 7)))].sort();
   let month: string | null = null;
   if (monthParam && months.includes(monthParam)) {
@@ -270,7 +278,9 @@ export async function getRoutePlan(monthParam?: string): Promise<RoutePlan> {
     month = months.find((m) => m >= nowMonth) ?? months[months.length - 1];
   }
 
-  const inMonth = month ? all.filter((l) => l.harvest_month.slice(0, 7) === month) : [];
+  const inMonth = (month ? all.filter((l) => l.harvest_month.slice(0, 7) === month) : []).filter(
+    (l) => !pendingOnly || !l.quality_checked_at,
+  );
 
   const byDistrict = new Map<string, Map<string, Map<string, RouteListing[]>>>();
   for (const l of inMonth) {
@@ -326,6 +336,7 @@ export async function getRoutePlan(monthParam?: string): Promise<RoutePlan> {
   return {
     months,
     month,
+    pendingOnly,
     districts,
     total: inMonth.length,
     unchecked: inMonth.filter((l) => !l.quality_checked_at).length,

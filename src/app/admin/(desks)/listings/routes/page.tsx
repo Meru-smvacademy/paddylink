@@ -39,34 +39,66 @@ export default async function AdminRoutesPage({
 
   const params = await searchParams;
   const monthParam = typeof params.month === 'string' ? params.month : undefined;
-  const plan = await getRoutePlan(monthParam);
+  // CEO ruling (Desk 3 gate): default is the work queue — pending only.
+  const pendingOnly = params.view !== 'all';
+  const plan = await getRoutePlan(monthParam, pendingOnly);
+  const qs = (month: string | null, view: 'pending' | 'all') => {
+    const q = new URLSearchParams();
+    if (month) q.set('month', month);
+    if (view === 'all') q.set('view', 'all');
+    const s = q.toString();
+    return `/admin/listings/routes${s ? `?${s}` : ''}`;
+  };
 
   return (
     <div className={styles.page}>
       <div className={styles.headRow}>
         <h1 className={styles.title}>Field routes</h1>
-        {plan.months.length > 0 && (
-          <nav className={styles.months} aria-label="Harvest month">
-            {plan.months.map((m) => (
-              <Link
-                key={m}
-                href={`/admin/listings/routes?month=${m}`}
-                className={m === plan.month ? styles.monthActive : styles.month}
-              >
-                {fmtMonthKey(m)}
-              </Link>
-            ))}
+        <div className={styles.controls}>
+          {plan.months.length > 0 && (
+            <nav className={styles.months} aria-label="Harvest month">
+              {plan.months.map((m) => (
+                <Link
+                  key={m}
+                  href={qs(m, plan.pendingOnly ? 'pending' : 'all')}
+                  className={m === plan.month ? styles.monthActive : styles.month}
+                >
+                  {fmtMonthKey(m)}
+                </Link>
+              ))}
+            </nav>
+          )}
+          <nav className={styles.months} aria-label="Queue view">
+            <Link
+              href={qs(plan.month, 'pending')}
+              className={plan.pendingOnly ? styles.monthActive : styles.month}
+            >
+              Pending only
+            </Link>
+            <Link
+              href={qs(plan.month, 'all')}
+              className={!plan.pendingOnly ? styles.monthActive : styles.month}
+            >
+              All
+            </Link>
           </nav>
-        )}
+        </div>
       </div>
 
       {plan.month === null ? (
         <p className={styles.empty}>No active listings — nothing to route.</p>
+      ) : plan.total === 0 ? (
+        <p className={styles.empty}>
+          {fmtMonthKey(plan.month)} harvest — every active listing is quality-checked. Nothing
+          pending to route.
+        </p>
       ) : (
         <>
           <p className={styles.summary}>
-            {fmtMonthKey(plan.month)} harvest — {plan.total} active listing
-            {plan.total === 1 ? '' : 's'}, {plan.unchecked} awaiting quality check.
+            {fmtMonthKey(plan.month)} harvest —{' '}
+            {plan.pendingOnly
+              ? `${plan.total} listing${plan.total === 1 ? '' : 's'} awaiting quality check.`
+              : `${plan.total} active listing${plan.total === 1 ? '' : 's'}, ${plan.unchecked} awaiting quality check.`}
           </p>
 
           {plan.districts.map((d) => (
