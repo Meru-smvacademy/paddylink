@@ -1,6 +1,7 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { listListings, type AdminListingRow } from '@/lib/adminListings';
+import type { AdminRole } from '@/lib/adminSession';
 
 /**
  * Quality desk data layer — the ONLY write path for the three migration-007
@@ -89,6 +90,7 @@ export async function recordQualityCheck(
   moisturePct: number,
   checkedBy: string,
   checkedAtIso: string,
+  actorRole: AdminRole,
   ctx: CheckContext,
 ): Promise<{ ok: true; overwrote: boolean } | { ok: false; error: string }> {
   const db = createAdminClient();
@@ -121,8 +123,10 @@ export async function recordQualityCheck(
   if (uErr) return { ok: false, error: `listing update: ${uErr.message}` };
 
   const { error: aErr } = await db.from('audit_log').insert({
-    actor_id: null, // TEMP-SINGLE-ADMIN
-    actor_role: 'admin',
+    actor_id: null, // TEMP-TWO-TIER: no auth.users row yet; role is the actor
+    // The real role that recorded this — 'staff' when a field user did it, not
+    // a hardcoded 'admin'. checked_by carries the human name on top of this.
+    actor_role: actorRole,
     action: 'quality_check_record',
     entity: 'listings',
     entity_id: listingId,

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { requireAdminPage } from '@/lib/adminAuth';
+import { requireRole } from '@/lib/adminAuth';
 import {
   CAN_APPROVE,
   CAN_REJECT,
@@ -66,7 +66,9 @@ export default async function AdminListingsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await requireAdminPage();
+  // Admin-only: the listings table carries approve/remove. The route-list
+  // child (/admin/listings/routes) is separately open to staff.
+  await requireRole(['admin']);
 
   const params = await searchParams;
   const rawStatus = typeof params.status === 'string' ? params.status : '';

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { isAdminSession } from '@/lib/adminAuth';
+import { getAdminSession } from '@/lib/adminAuth';
 import { decideListing } from '@/lib/adminListings';
 
 /**
@@ -17,9 +17,10 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const MAX_REASON = 500;
 
 export async function POST(request: NextRequest) {
-  if (!(await isAdminSession())) {
-    return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
-  }
+  // Admin-only: approving/removing listings is not a staff action.
+  const session = await getAdminSession();
+  if (!session) return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
+  if (session.role !== 'admin') return NextResponse.json({ error: 'forbidden' }, { status: 403 });
 
   let form: FormData;
   try {

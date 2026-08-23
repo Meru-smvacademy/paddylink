@@ -69,7 +69,9 @@ export default async function AdminQualityPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await requireAdminPage();
+  // Open to both roles (admin + staff). The role only sets the checker-name
+  // default below.
+  const role = await requireAdminPage();
 
   const params = await searchParams;
   const str = (k: string) => (typeof params[k] === 'string' ? (params[k] as string) : '');
@@ -279,13 +281,18 @@ export default async function AdminQualityPage({
                 <label htmlFor="q-checker" className={own.formLabel}>
                   Checked by
                 </label>
+                {/* TEMP-TWO-TIER: under a shared password this required field
+                    is the accountability line — who actually held the meter.
+                    Defaults to the session role so a staff entry is never
+                    mislabelled 'admin'; always editable. Replaced by real
+                    per-staff identities after OTP. */}
                 <input
                   id="q-checker"
                   name="checked_by"
                   type="text"
                   maxLength={80}
                   required
-                  defaultValue={keptName || selected.quality_checked_by || 'admin'}
+                  defaultValue={keptName || selected.quality_checked_by || role}
                   className={own.formInput}
                 />
 

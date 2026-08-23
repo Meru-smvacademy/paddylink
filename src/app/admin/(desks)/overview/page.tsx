@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { requireAdminPage } from '@/lib/adminAuth';
+import { requireRole } from '@/lib/adminAuth';
 import { getOverview } from '@/lib/adminOverview';
 import styles from './overview.module.css';
 
@@ -61,7 +61,8 @@ function rupees(paise: number): string {
 }
 
 export default async function AdminOverviewPage() {
-  await requireAdminPage();
+  // Admin-only oversight desk. Staff are bounced to their own landing.
+  await requireRole(['admin']);
   const { counts, audit, wallets, ledger, unlocks, payments } = await getOverview();
 
   return (

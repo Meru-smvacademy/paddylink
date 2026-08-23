@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { requireAdminPage } from '@/lib/adminAuth';
+import { requireRole } from '@/lib/adminAuth';
 import {
   getBuyerDetail,
   listBuyers,
@@ -56,8 +56,9 @@ export default async function AdminBuyersPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Second lock behind the proxy gate — never rely on the matcher alone.
-  await requireAdminPage();
+  // Admin-only, re-checked behind the proxy gate — never rely on the matcher
+  // alone. Staff are bounced to their own desk.
+  await requireRole(['admin']);
 
   const params = await searchParams;
   const rawStatus = typeof params.status === 'string' ? params.status : '';

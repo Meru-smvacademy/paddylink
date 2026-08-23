@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { isAdminSession } from '@/lib/adminAuth';
+import { getAdminSession } from '@/lib/adminAuth';
 import { recordQualityCheck, SANE_MIN, SANE_MAX } from '@/lib/adminQuality';
 
 /**
@@ -26,7 +26,9 @@ function todayIst(): string {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await isAdminSession())) {
+  // Both roles may record checks; the role is stamped into the audit trail.
+  const session = await getAdminSession();
+  if (!session) {
     return NextResponse.json({ error: 'unauthenticated' }, { status: 401 });
   }
 
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
   const checkedAtIso =
     checkedOn === today ? new Date().toISOString() : `${checkedOn}T12:00:00+05:30`;
 
-  const result = await recordQualityCheck(listingId, moisture, checkedBy, checkedAtIso, {
+  const result = await recordQualityCheck(listingId, moisture, checkedBy, checkedAtIso, session.role, {
     ip: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
     userAgent: request.headers.get('user-agent'),
   });
