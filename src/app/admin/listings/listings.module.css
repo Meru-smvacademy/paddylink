@@ -1,0 +1,46 @@
+/* Listing status chips — one class per listings.status value. The desk's
+   layout classes come from the shared buyers.module.css. */
+
+.ls_draft,
+.ls_active,
+.ls_flagged,
+.ls_sold,
+.ls_expired,
+.ls_removed {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ls_draft {
+  background: var(--bhatta-200);
+  color: #7a5a14;
+}
+
+.ls_flagged {
+  background: #f3ded7;
+  color: var(--kemmannu-600);
+}
+
+.ls_active {
+  background: #dcefe0;
+  color: var(--gadde-700);
+}
+
+.ls_sold {
+  background: var(--hottu-200);
+  color: var(--masi-500);
+}
+
+.ls_expired {
+  background: var(--hottu-200);
+  color: var(--masi-500);
+}
+
+.ls_removed {
+  background: #eee;
+  color: var(--masi-500);
+}

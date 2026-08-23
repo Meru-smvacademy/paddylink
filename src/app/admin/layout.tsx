@@ -46,6 +46,12 @@ export default async function AdminLayout({
             <Link href="/admin/buyers" className={styles.navLink}>
               Buyer KYC
             </Link>
+            <Link href="/admin/listings" className={styles.navLink}>
+              Listings
+            </Link>
+            <Link href="/admin/listings/routes" className={styles.navLink}>
+              Field routes
+            </Link>
             <span className={styles.identity} title="TEMP-SINGLE-ADMIN">
               admin
             </span>
