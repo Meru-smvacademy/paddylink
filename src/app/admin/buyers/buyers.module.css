@@ -1,0 +1,322 @@
+/* KYC desk — dense master/detail. 13px working text, brand tokens only. */
+
+.desk {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  font-size: 13px;
+}
+
+.listPane {
+  flex: 1;
+  min-width: 0;
+}
+
+.headRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-family: var(--serif);
+  font-size: 20px;
+  color: var(--gadde-900);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab,
+.tabActive {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--control-border);
+  color: var(--text-muted);
+  background: #fff;
+}
+
+.tabActive {
+  background: var(--gadde-700);
+  border-color: var(--gadde-700);
+  color: var(--hottu-50);
+}
+
+.flashOk,
+.flashErr {
+  margin: 0 0 10px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.flashOk {
+  background: #e8f2ea;
+  color: var(--gadde-700);
+  border: 1px solid var(--gadde-300);
+}
+
+.flashErr {
+  background: #f7ebe6;
+  color: var(--kemmannu-600);
+  border: 1px solid var(--kemmannu-400);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--control-border);
+  background: var(--hottu-100);
+}
+
+.table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: top;
+}
+
+.rowSel td {
+  background: var(--gold-tint);
+}
+
+.rowLink {
+  color: var(--gadde-700);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.empty {
+  color: var(--text-muted);
+  padding: 14px 10px;
+}
+
+/* Status chips — one class per kyc_status value. */
+.st_pending,
+.st_under_review,
+.st_approved,
+.st_rejected {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.st_pending {
+  background: var(--bhatta-200);
+  color: #7a5a14;
+}
+
+.st_under_review {
+  background: var(--hottu-200);
+  color: var(--masi-500);
+}
+
+.st_approved {
+  background: #dcefe0;
+  color: var(--gadde-700);
+}
+
+.st_rejected {
+  background: #f3ded7;
+  color: var(--kemmannu-600);
+}
+
+/* Detail panel */
+.panel {
+  width: 360px;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: 16px;
+  position: sticky;
+  top: 16px;
+}
+
+.panelHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.panelTitle {
+  font-family: var(--serif);
+  font-size: 16px;
+  color: var(--gadde-900);
+  margin-bottom: 6px;
+}
+
+.panelClose {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 2px 6px;
+}
+
+.fields {
+  margin: 12px 0 0;
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  row-gap: 5px;
+  column-gap: 10px;
+}
+
+.fields dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding-top: 1px;
+}
+
+.fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.docsTitle {
+  font-family: var(--sans);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 16px 0 6px;
+}
+
+.docs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc {
+  border: 1px solid var(--hairline);
+  border-radius: 5px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.docType {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--masi-500);
+}
+
+.docLink {
+  color: var(--gadde-700);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.docBroken {
+  color: var(--kemmannu-600);
+  overflow-wrap: anywhere;
+}
+
+.docMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Decision forms */
+.actions {
+  margin-top: 16px;
+  border-top: 1px solid var(--control-border);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.approveForm {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.approveBtn {
+  background: var(--gadde-700);
+  color: var(--hottu-50);
+  font-weight: 700;
+  font-size: 13px;
+  border: none;
+  border-radius: 5px;
+  padding: 9px 0;
+  cursor: pointer;
+}
+
+.approveBtn:hover {
+  background: var(--gadde-600);
+}
+
+.noNotify {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.rejectForm {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rejectLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.reasonBox {
+  border: 1px solid var(--control-border);
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.rejectBtn {
+  align-self: flex-start;
+  background: #fff;
+  color: var(--kemmannu-600);
+  font-weight: 700;
+  font-size: 13px;
+  border: 1px solid var(--kemmannu-400);
+  border-radius: 5px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.rejectBtn:hover {
+  background: #f7ebe6;
+}

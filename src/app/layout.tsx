@@ -12,11 +12,7 @@ import {
   Nunito,
   Source_Sans_3,
 } from 'next/font/google';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { LanguageProvider, DEFAULT_LANG } from '@/lib/language';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { DEFAULT_LANG } from '@/lib/language';
 import './globals.css';
 
 /* Latin faces from the Figma design. */
@@ -119,24 +115,16 @@ const fontVars = [
   sourceSans3.variable,
 ].join(' ');
 
-/* Resolved at build time on the server. If the brand mark is missing from
-   public/brand/, the header renders no <img> rather than a broken image. */
-const hasMark = existsSync(
-  join(process.cwd(), 'public', 'brand', 'paddy-sheaf.png'),
-);
-
+/* The root layout carries only the document shell: fonts, tokens and the
+   <html>/<body> pair. The public chrome (Header/Footer/LanguageProvider)
+   lives in the (site) group layout so /admin never inherits it — the admin
+   portal has its own chrome and no ಕ|EN toggle. */
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang={DEFAULT_LANG} className={fontVars}>
-      <body>
-        <LanguageProvider>
-          <Header hasMark={hasMark} />
-          {children}
-          <Footer />
-        </LanguageProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

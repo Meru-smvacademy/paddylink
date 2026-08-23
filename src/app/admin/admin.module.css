@@ -1,0 +1,96 @@
+/* Admin chrome — dense and fast. Brand tokens only; none of the public
+   header's marketing treatments. */
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--page-bg);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 48px;
+  padding: 0 20px;
+  background: var(--gadde-900);
+  color: var(--hottu-50);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mark {
+  width: 23px;
+  height: 23px;
+}
+
+.wordmark {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+}
+
+.portalTag {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gadde-900);
+  background: var(--bhatta-400);
+  border-radius: 3px;
+  padding: 2px 6px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--sans);
+  font-size: 13px;
+}
+
+.navLink {
+  color: var(--hottu-50);
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.identity {
+  color: var(--gadde-300);
+  font-size: 12px;
+}
+
+.logout {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hottu-50);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.logout:hover {
+  border-color: var(--bhatta-400);
+  color: var(--bhatta-400);
+}
+
+.main {
+  flex: 1;
+  padding: 20px;
+}
