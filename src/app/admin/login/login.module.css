@@ -1,68 +1,321 @@
-.wrap {
+/* /admin/login — CEO-approved frame (Figma Make n8qhqk8eY7tC4Hek4y9iBY),
+   mapped onto existing brand tokens (no new colors, no new fonts):
+
+     frame #0B2418  -> --gadde-950      frame #FAF6ED -> --hottu-50
+     frame #C9963A  -> --bhatta-600     frame #E8D9B8 -> --bhatta-200
+     frame #9A7130  -> --gold-600       frame #B8832A -> --gold-600
+     frame #7A2E2E  -> --kemmannu-600   frame #D8CEBC -> --hottu-200
+     frame greens/inks -> --gadde-700 / --masi-500 / --masi-900 / --hottu-400
+     frame 'DM Sans' -> --inter         frame 'Lora'  -> --lora
+
+   Desktop is the frame's 55/45 split; below 900px it stacks per the CEO:
+   compact dark header band, card below. */
+
+.screen {
+  min-height: 100vh;
   display: flex;
+  font-family: var(--inter);
+}
+
+/* ── Left: dark brand panel ─────────────────────────────────────────── */
+
+.brandPanel {
+  width: 55%;
+  flex-shrink: 0;
+  background-color: var(--gadde-950);
+  /* The frame's faint gold field glows — brand gold at the frame's alphas. */
+  background-image:
+    radial-gradient(ellipse at 30% 20%, rgba(201, 150, 58, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(201, 150, 58, 0.04) 0%, transparent 50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  padding-top: 10vh;
+  position: relative;
+}
+
+.brandInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+/* CEO correction: the master file as it stands — no radius, no blend. */
+.logo {
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+}
+
+.wordmarkBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.wordmark {
+  font-family: var(--lora);
+  font-size: 42px;
+  font-weight: 600;
+  color: var(--bhatta-200);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.rule {
+  width: 160px;
+  height: 1px;
+  background-color: var(--bhatta-600);
+  opacity: 0.35;
+}
+
+.console {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--gold-600);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.legal {
+  position: absolute;
+  bottom: 28px;
+  left: 36px;
+  font-size: 10px;
+  color: var(--masi-500);
+  letter-spacing: 0.3px;
+  line-height: 1.5;
+}
+
+/* ── Right: cream panel with the card ───────────────────────────────── */
+
+.formPanel {
+  width: 45%;
+  flex-shrink: 0;
+  background-color: var(--hottu-50);
+  border-left: 1px solid var(--hottu-200); /* the frame's divider line */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
 }
 
 .card {
-  width: 320px;
-  background: #fff;
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  padding: 24px;
+  width: 100%;
+  max-width: 380px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+}
+
+.headingArea {
+  margin-bottom: 32px;
 }
 
 .title {
-  font-family: var(--serif);
-  font-size: 20px;
-  color: var(--gadde-900);
+  font-family: var(--lora);
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--gadde-950);
+  margin: 0 0 10px;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
 }
 
-.hint {
-  margin: 0 0 8px;
-  font-size: 12px;
-  color: var(--text-muted);
+.subtitle {
+  font-size: 13.5px;
+  color: var(--masi-500);
+  margin: 0;
+  line-height: 1.5;
+  font-weight: 300;
 }
 
-.error {
-  margin: 0 0 4px;
-  font-size: 13px;
-  color: var(--kemmannu-600);
+/* ── Form ───────────────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.field {
+  margin-bottom: 28px;
+}
+
+/* Frame: the field's gap collapses when the error row appears under it. */
+.fieldTight {
+  margin-bottom: 6px;
 }
 
 .label {
+  display: block;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 500;
+  color: var(--gadde-700);
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.inputWrap {
+  position: relative;
 }
 
 .input {
-  border: 1px solid var(--control-border);
-  border-radius: 5px;
-  padding: 8px 10px;
+  width: 100%;
+  height: 46px;
+  padding: 0 44px 0 14px;
   font-size: 14px;
+  font-family: var(--inter);
+  font-weight: 400;
+  color: var(--masi-900);
+  background-color: #fff;
+  border: 1px solid var(--hottu-200);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  letter-spacing: 2px; /* frame: spaced dots while masked */
+}
+
+.inputPlain {
+  letter-spacing: 0;
 }
 
 .input:focus {
-  outline: 2px solid var(--gold-focus);
-  outline-offset: 1px;
+  border-color: var(--bhatta-600);
+}
+
+.inputError,
+.inputError:focus {
+  border-color: var(--kemmannu-600);
+}
+
+.eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--masi-500);
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.eye:hover {
+  color: var(--gadde-700);
+}
+
+.errorRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 22px;
+  color: var(--kemmannu-600); /* icon strokes inherit via currentColor */
+}
+
+.errorText {
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
 }
 
 .submit {
-  margin-top: 10px;
-  background: var(--gadde-700);
-  color: var(--hottu-50);
-  font-weight: 600;
-  font-size: 14px;
+  width: 100%;
+  height: 46px;
+  background: linear-gradient(
+    135deg,
+    var(--bhatta-600) 0%,
+    var(--gold-600) 60%,
+    var(--bhatta-600) 100%
+  );
   border: none;
-  border-radius: 5px;
-  padding: 9px 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--inter);
+  font-weight: 500;
+  color: var(--masi-900);
+  letter-spacing: 0.3px;
   cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .submit:hover {
-  background: var(--gadde-600);
+  opacity: 0.92;
+}
+
+.submit:active {
+  transform: translateY(1px);
+}
+
+.sessionNote {
+  margin: 20px 0 0;
+  font-size: 11.5px;
+  color: var(--hottu-400);
+  text-align: center;
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+/* ── Below 900px: stack — compact brand band, card below (CEO) ──────── */
+
+@media (max-width: 899px) {
+  .screen {
+    flex-direction: column;
+  }
+
+  .brandPanel {
+    width: 100%;
+    padding: 24px 20px;
+  }
+
+  .brandInner {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .logo {
+    width: 56px;
+    height: 56px;
+  }
+
+  .wordmarkBlock {
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .wordmark {
+    font-size: 26px;
+  }
+
+  .rule {
+    width: 120px;
+  }
+
+  .console {
+    font-size: 9.5px;
+    letter-spacing: 3px;
+  }
+
+  .legal {
+    position: static;
+    margin-top: 16px;
+    text-align: center;
+  }
+
+  .formPanel {
+    width: 100%;
+    flex: 1;
+    border-left: none;
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
 }
