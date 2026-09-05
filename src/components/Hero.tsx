@@ -12,6 +12,14 @@ import styles from './Hero.module.css';
  * this mounts under the site header, which goes transparent over the hero at
  * the top of the home route.
  *
+ * COPY PASS (CEO): the frame's headline, subline, caption, microphone block
+ * and one trust item have all been overruled since the port. The
+ * headline no longer promises a price — PaddyLink neither sets prices nor
+ * runs a marketplace — the two stacked body lines collapse to one sans line,
+ * the mic comes out entirely, a quiet buyer door goes in beside the gold CTA,
+ * and the trust strip drops the blanket GST claim. Deviations from the frame
+ * are deliberate; the frame is no longer the authority on this copy.
+ *
  * LANGUAGE: the frame is Kannada-only — it holds `lang` state and renders
  * ಕ|EN buttons, but no string reads that state, so the frame's own toggle is
  * inert. The English strings below are the approved CEO addition, not frame
@@ -46,7 +54,11 @@ function GrainMark() {
 const TRUST: { kn: string; en: string }[] = [
   // EN-ADDED on each `en` below.
   { kn: 'ರೈತರಿಗೆ ಸದಾ ಉಚಿತ', en: 'Free for farmers, always' },
-  { kn: 'ಪ್ರತಿ ಖರೀದಿದಾರ GST ಪರಿಶೀಲಿತ', en: 'Every buyer GST-verified' },
+  /* KN-PENDING — the Kannada read "ಪ್ರತಿ ಖರೀದಿದಾರ GST ಪರಿಶೀಲಿತ" ("every buyer
+     GST-verified"), the same claim the English just dropped. Leaving it would
+     keep that claim standing in the language most of the audience reads, so
+     both slots carry the new English until the Kannada is supplied. */
+  { kn: 'Buyers verified before listing access', en: 'Buyers verified before listing access' },
   { kn: 'ಕರ್ನಾಟಕದ ಭತ್ತದ ನಾಡಿನಲ್ಲಿ', en: "Across Karnataka's rice belt" },
 ];
 
@@ -72,28 +84,27 @@ export default function Hero() {
       <div className={`${styles.layer} ${styles.hillLight}`} />
 
       <div className={styles.content}>
-        {/* Only the final word is gold, in both languages. */}
+        {/* Second line is gold, in both languages — the frame's treatment,
+            which put the gold on the closing word. That word is now the whole
+            of line two. */}
         <h1 className={styles.headline}>
-          <T kn="ನಿಮ್ಮ ಭತ್ತ," en="Your paddy," />
+          <T kn="ನಿಮ್ಮ ಭತ್ತಕ್ಕೆ ಖರೀದಿದಾರರು." en="Buyers for your paddy." />
           <br />
-          <T kn="ನಿಮ್ಮ " en="your " />
           <span className={styles.headlineAccent}>
-            <T kn="ಬೆಲೆ." en="price." />
+            <T kn="ನೇರವಾಗಿ." en="Direct." />
           </span>
         </h1>
 
+        {/* One subhead line in the body sans, replacing the Tiro subline and
+            the Inter caption that stood under it.
+            KN-PENDING — the caption this supersedes already carried the same
+            English in both states (the frame's own line); the Tiro subline it
+            also replaces had Kannada, but none exists for this new sentence
+            and none is invented here. */}
         <p className={styles.subline}>
           <T
-            kn="ನೇರ ಖರೀದಿದಾರರೊಂದಿಗೆ ನಿಮ್ಮ ಸುಗ್ಗಿಯನ್ನು ಸಂಪರ್ಕಿಸಿ."
-            en="Connect your harvest with direct buyers."
-          />
-        </p>
-
-        {/* The frame's own English line — same string in both states. */}
-        <p className={styles.caption}>
-          <T
-            kn="PaddyLink connects farmers directly with verified buyers across Karnataka — you talk, you decide, you deal."
-            en="PaddyLink connects farmers directly with verified buyers across Karnataka — you talk, you decide, you deal."
+            kn="PaddyLink puts verified buyers in touch with farmers across Karnataka. You talk, you decide, you deal."
+            en="PaddyLink puts verified buyers in touch with farmers across Karnataka. You talk, you decide, you deal."
           />
         </p>
 
@@ -102,53 +113,12 @@ export default function Hero() {
             <T kn="ನಿಮ್ಮ ಭತ್ತ ನೋಂದಾಯಿಸಿ" en="List Your Paddy" />
           </Link>
 
-          {/* Voice listing — rendered as designed, deliberately non-functional. */}
-          <div className={styles.voiceWrap}>
-            <button
-              type="button"
-              className={styles.voiceButton}
-              title="Voice listing"
-              aria-disabled="true"
-            >
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="9" y="2" width="6" height="12" rx="3" fill="var(--bhatta-400)" />
-                <path
-                  d="M5 11a7 7 0 0 0 14 0"
-                  stroke="var(--bhatta-400)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="12"
-                  y1="18"
-                  x2="12"
-                  y2="22"
-                  stroke="var(--bhatta-400)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="8"
-                  y1="22"
-                  x2="16"
-                  y2="22"
-                  stroke="var(--bhatta-400)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-
-            {/* Caption sits to the RIGHT of the mic, two stacked lines. */}
-            <div className={styles.voiceCaption}>
-              <span className={styles.voiceLabel}>
-                <T kn="ಧ್ವನಿ ನೋಂದಣಿ" en="Voice listing" />
-              </span>
-              <span className={styles.voiceSoon}>
-                <T kn="ಶೀಘ್ರದಲ್ಲಿ" en="Coming soon" />
-              </span>
-            </div>
-          </div>
+          {/* Secondary door, deliberately quieter than the gold CTA: text only,
+              no fill. /buyers is the existing buyer route — the "For Buyers"
+              page the header already links, which opens the verification flow. */}
+          <Link href="/buyers" className={styles.ctaBuyer}>
+            <T kn="ನಾನು ಖರೀದಿದಾರ →" en="I'm a buyer →" />
+          </Link>
         </div>
       </div>
 

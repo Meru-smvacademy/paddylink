@@ -15,11 +15,15 @@
 
 .hero {
   position: relative;
-  /* Frame value. The site header is a transparent fixed overlay on the home
-     route, matching the frame's own fixed header, so the hero owns the full
-     first screen rather than height-minus-header. */
-  height: 100vh;
-  min-height: 700px;
+  /* The site header is a transparent fixed overlay on the home route,
+     matching the frame's own fixed header, so the hero owns the top of the
+     first screen rather than height-minus-header.
+     80vh, down from the frame's 100vh, so the section below breaks the fold
+     and the page reads as having somewhere to go. min-height drops with it —
+     at 700px the floor would have won back most of the 20% on a short
+     laptop viewport. */
+  height: 80vh;
+  min-height: 600px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -123,11 +127,17 @@
 .content {
   position: relative;
   z-index: 10;
-  padding-left: clamp(40px, 5vw, 88px);
+  /* The right half of the frame is empty by design — there is nothing to put
+     there and the brief forbids inventing something. So the block is widened
+     and pushed off the left edge instead: its optical centre lands near a
+     third of the viewport, which reads as a composition rather than as text
+     shoved into a corner. The scrim is dark to ~48% and fading to nothing by
+     75%, so the column stops short of that to keep the type on its ground. */
+  padding-left: clamp(40px, 8vw, 136px);
   padding-top: 76px;
   padding-bottom: 80px;
-  width: 50%;
-  max-width: 640px;
+  width: 66%;
+  max-width: 1020px;
 }
 
 .headline {
@@ -144,23 +154,17 @@
   color: var(--bhatta-400);
 }
 
+/* One line now, in the body sans rather than Tiro — this absorbs both the
+   frame's serif subline and the Inter caption under it. Colour and margin are
+   the subline's; the face and measure are the caption's. */
 .subline {
-  font-family: var(--tiro);
-  font-size: clamp(17px, 1.7vw, 21px);
+  font-family: var(--inter);
+  font-size: clamp(16px, 1.5vw, 19px);
   color: color-mix(in srgb, var(--hottu-50) 80%, transparent);
-  margin: 0 0 10px 0;
+  margin: 0 0 44px 0;
   line-height: 1.6;
   font-weight: 400;
-  max-width: 480px;
-}
-
-.caption {
-  font-family: var(--inter);
-  font-size: 14.5px;
-  color: var(--gadde-300);
-  margin: 0 0 44px 0;
-  line-height: 1.65;
-  max-width: 400px;
+  max-width: 560px;
 }
 
 /* --- CTA row --- */
@@ -196,63 +200,27 @@
   box-shadow: 0 12px 48px rgba(200, 135, 10, 0.7), 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
-/* --- Voice listing: mic + caption to its right (non-functional, as designed) --- */
-.voiceWrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.voiceButton {
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--gadde-950) 75%, transparent) 0%,
-    color-mix(in srgb, var(--gadde-950) 88%, transparent) 100%
-  );
-  border: 2.5px solid color-mix(in srgb, var(--bhatta-400) 55%, transparent);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 24px rgba(200, 135, 10, 0.3),
-    0 0 0 6px color-mix(in srgb, var(--bhatta-400) 10%, transparent);
-  transition: all 0.25s ease;
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.voiceButton:hover,
-.voiceButton:focus-visible {
-  transform: scale(1.08);
-  box-shadow: 0 8px 40px rgba(200, 135, 10, 0.5),
-    0 0 0 8px color-mix(in srgb, var(--bhatta-400) 18%, transparent);
-}
-
-.voiceCaption {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.voiceLabel {
+/* --- Secondary door: text only, no fill ---
+   Quieter than the gold CTA on purpose, so the farmer's action stays the one
+   thing the eye lands on. Cream at 82%, the same --hottu-50 the subline uses;
+   nothing gold, no border, no ground. Vertical padding clears 44px. */
+.ctaBuyer {
   font-family: var(--tiro);
-  font-size: 14px;
-  color: var(--hottu-50);
-  line-height: 1.4;
+  font-size: 18px;
   font-weight: 400;
+  color: color-mix(in srgb, var(--hottu-50) 82%, transparent);
+  text-decoration: none;
+  padding: 12px 4px;
+  letter-spacing: 0.02em;
   white-space: nowrap;
+  transition: color 0.2s ease;
 }
 
-.voiceSoon {
-  font-family: var(--tiro);
-  font-size: 12px;
-  color: var(--gadde-300);
-  line-height: 1.4;
-  white-space: nowrap;
+.ctaBuyer:hover,
+.ctaBuyer:focus-visible {
+  color: var(--hottu-50);
+  text-decoration: underline;
+  text-underline-offset: 5px;
 }
 
 /* --- Trust strip, pinned to the hero's bottom edge --- */
@@ -288,15 +256,94 @@
   flex-shrink: 0;
 }
 
+/* ============================ TABLET ============================
+   768–1023px. The 62% column and the desktop indent both assume a wide
+   frame; below 1024 the scrim's dark end is a bigger share of the screen,
+   so the column takes more of it and the indent comes back in. */
+@media (max-width: 1023px) {
+  .content {
+    width: 76%;
+    max-width: 560px;
+    padding-left: clamp(32px, 5vw, 56px);
+    padding-top: 64px;
+    padding-bottom: 96px;
+  }
+
+  .subline {
+    max-width: 460px;
+  }
+}
+
+/* ============================ MOBILE ============================
+   Below 768px. The hero had no mobile rules at all: .content held width:50%,
+   which left a 188px ribbon at 375px with the headline breaking every word or
+   two and the CTA wider than its own column. The column goes full-bleed here
+   and the hero grows to its content instead of cropping it — the headline
+   keeps the clamp's 50px floor, unchanged. */
+@media (max-width: 767px) {
+  .hero {
+    height: auto;
+    min-height: 88vh;
+  }
+
+  .content {
+    width: 100%;
+    max-width: none;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 104px;
+    padding-bottom: 132px; /* clears the pinned trust strip */
+  }
+
+  .subline {
+    max-width: none;
+    margin-bottom: 32px;
+  }
+
+  /* Stacked, so neither door has to shrink to fit the other. */
+  .ctaRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .ctaFarmer {
+    padding: 18px 24px;
+    text-align: center;
+  }
+
+  .ctaBuyer {
+    text-align: center;
+    padding: 14px 4px;
+  }
+
+  /* Three nowrap items and 56px side padding overflowed the viewport here
+     before any copy changed; the longer verification line would have pushed
+     it further. Wrapping is the fix that keeps every item readable. */
+  .trust {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px 16px;
+    row-gap: 2px;
+    /* The grain is hidden below, so the gap has to carry the separation —
+       without it two items sharing a row butt straight into each other. */
+    column-gap: 18px;
+  }
+
+  /* With one item per line the grain no longer separates anything — it just
+     dangles off the end of each row. The line break is the separator here. */
+  .grain {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ctaFarmer,
-  .voiceButton {
+  .ctaBuyer {
     transition: none;
   }
   .ctaFarmer:hover,
-  .ctaFarmer:focus-visible,
-  .voiceButton:hover,
-  .voiceButton:focus-visible {
+  .ctaFarmer:focus-visible {
     transform: none;
   }
 }
