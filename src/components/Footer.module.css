@@ -49,20 +49,14 @@
 }
 
 .logoImg {
-  /* The sheaf is the whole mark now — no cream tile behind it. */
-  width: 46px;
-  height: 46px;
+  /* The white/gold lockup is the whole mark now — no cream tile behind it,
+     and no text wordmark beside it. Sized by height with the width following
+     the 1700x900 aspect; the file's own ~8% transparent margin is the optical
+     inset. The .wordmark rule that stood here went with the text span. */
+  height: 64px;
+  width: auto;
   object-fit: contain;
   display: block;
-}
-
-.wordmark {
-  color: var(--hottu-50);
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  font-family: var(--inter);
-  white-space: nowrap;
 }
 
 /* Centre: two stacked link rows, Kannada above English */

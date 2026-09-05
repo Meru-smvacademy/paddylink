@@ -150,18 +150,24 @@ export default function Header({ hasMark }: { hasMark: boolean }) {
         .join(' ')}
     >
       <div className={styles.shell}>
-        <Link href="/" className={styles.brand}>
+        <Link href="/" className={styles.brand} aria-label={t('PaddyLink', 'ಪ್ಯಾಡಿಲಿಂಕ್')}>
           {hasMark && (
             <Image
-              src="/brand/paddy-sheaf.png"
-              alt="PaddyLink paddy sheaf logo"
-              width={74}
-              height={74}
+              /* The green/gold lockup is unreadable on the dark hero, so the
+                 transparent state takes the white/gold cut — the same swap the
+                 .transparent rules already make for every other control. */
+              src={
+                overHero
+                  ? '/brand/paddylink-logo-dark.png'
+                  : '/brand/paddylink-logo.png'
+              }
+              alt={t('PaddyLink', 'ಪ್ಯಾಡಿಲಿಂಕ್')}
+              width={1700}
+              height={900}
               className={styles.mark}
               priority
             />
           )}
-          <span className={styles.wordmark}>{t('PaddyLink', 'ಪ್ಯಾಡಿಲಿಂಕ್')}</span>
         </Link>
 
         {/* Desktop + tablet nav; hidden below 768px, where it moves into the drawer. */}

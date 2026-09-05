@@ -15,7 +15,12 @@
   gap: 24px;
 }
 
-/* --- Logo + wordmark --- */
+/* --- Logo ---
+   One lockup image now; the wordmark is drawn inside it, so the text <span>
+   that used to sit beside the square sheaf is gone. Height is set per
+   breakpoint against the unchanged bar height and the width follows the
+   1700x900 aspect. The file carries ~8% transparent margin of its own, which
+   is what keeps the ink clear of the bar edges at these heights. */
 .brand {
   display: flex;
   align-items: center;
@@ -25,24 +30,12 @@
 }
 
 .mark {
-  width: 74px;
-  height: 74px;
+  height: 100px;
+  width: auto;
   object-fit: contain;
   display: block;
   flex-shrink: 0;
   filter: drop-shadow(0 1px 6px var(--gold-glow));
-}
-
-.wordmark {
-  font-family: var(--serif);
-  font-weight: 700;
-  font-size: 38px;
-  letter-spacing: -0.02em;
-  color: var(--emerald-900);
-  white-space: nowrap;
-  line-height: 1;
-  align-self: center;
-  padding-top: 4px;
 }
 
 /* --- Primary nav --- */
@@ -206,9 +199,7 @@
     gap: 6px;
   }
 
-  .mark { width: 56px; height: 56px; }
-
-  .wordmark { font-size: 30px; }
+  .mark { height: 78px; }
 
   .brand { gap: 6px; }
 
@@ -243,9 +234,7 @@
     position: relative;
   }
 
-  .mark { width: 40px; height: 40px; }
-
-  .wordmark { font-size: 22px; padding-top: 2px; }
+  .mark { height: 56px; }
 
   .brand { gap: 8px; }
 
@@ -361,11 +350,9 @@
 }
 
 /* Light treatment over the dark hero. Values are the hero frame's own
-   header, so nothing here is invented. */
-
-.header.transparent .wordmark {
-  color: var(--bhatta-400);
-}
+   header, so nothing here is invented. The wordmark rule that used to live
+   here is gone with the text wordmark — Header.tsx serves the white/gold
+   lockup in this state instead. */
 
 .header.transparent .navLink {
   color: color-mix(in srgb, var(--hottu-50) 70%, transparent);

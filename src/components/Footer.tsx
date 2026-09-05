@@ -18,9 +18,9 @@ import styles from './Footer.module.css';
  *
  * The frame's logo is the parked burst crest (logo_png_paddy_link_v8.png),
  * originally dropped into the frame's 46x46 cream tile. That tile was there
- * to give the old light-needing crescent a ground; the official sheaf brings
- * its own dark tile and gold ring, so the wrapper is gone and the sheaf sits
- * at 46x46 directly on the footer. Marked TILE-REMOVED below.
+ * to give the old light-needing crescent a ground; the official lockup needs
+ * no ground of its own, so the wrapper is gone and the logo sits directly on
+ * the footer. Marked TILE-REMOVED below.
  *
  * The frame leaves every legal href as "#"; the real routes are wired here
  * per brief. Marked HREF-WIRED below.
@@ -65,18 +65,19 @@ export default function Footer() {
       <div className={styles.inner}>
         {/* ── Row 1: brand · links · contact ── */}
         <div className={styles.top}>
-          <Link href="/" className={styles.brand}>
-            {/* TILE-REMOVED — the sheaf's own dark tile and gold ring are the
-                mark, so it sits straight on the footer ground. The frame's
-                46x46 cream tile existed for the old crescent and is obsolete. */}
+          <Link href="/" className={styles.brand} aria-label="PaddyLink">
+            {/* TILE-REMOVED — the white/gold cut is drawn for a dark ground, so
+                it sits straight on the footer's --gadde-950. The frame's 46x46
+                cream tile existed for the old crescent and is obsolete.
+                The lockup carries the wordmark, so the text <span> beside it
+                is gone. */}
             <Image
-              src="/brand/paddy-sheaf.png"
-              alt="PaddyLink paddy sheaf"
-              width={46}
-              height={46}
+              src="/brand/paddylink-logo-dark.png"
+              alt="PaddyLink"
+              width={1700}
+              height={900}
               className={styles.logoImg}
             />
-            <span className={styles.wordmark}>PaddyLink</span>
           </Link>
 
           <div className={styles.links}>

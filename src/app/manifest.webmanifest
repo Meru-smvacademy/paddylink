@@ -1,0 +1,29 @@
+{
+  "name": "PaddyLink",
+  "short_name": "PaddyLink",
+  "description": "Connecting paddy farmers in Karnataka with verified buyers.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDF6E3",
+  "theme_color": "#0B2418",
+  "icons": [
+    {
+      "src": "/brand/paddylink-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/paddylink-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/paddylink-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

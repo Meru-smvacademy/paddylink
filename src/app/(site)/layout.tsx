@@ -11,7 +11,7 @@ import Footer from '@/components/Footer';
 /* Resolved at build time on the server. If the brand mark is missing from
    public/brand/, the header renders no <img> rather than a broken image. */
 const hasMark = existsSync(
-  join(process.cwd(), 'public', 'brand', 'paddy-sheaf.png'),
+  join(process.cwd(), 'public', 'brand', 'paddylink-logo.png'),
 );
 
 export default function SiteLayout({
