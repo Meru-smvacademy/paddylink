@@ -1,0 +1,445 @@
+/* Buyer wallet. NO new frame exists for this page, and none is invented: every
+   value below is lifted from the buyer listings frame (Figma Make
+   8Wf4G4tW7lGRmd8LI2LyKw) and reused by role. The map, so each borrowing is
+   traceable:
+
+     from BuyerListings.module.css        used here for
+     .page      hottu-50 ground        -> .page
+     .topBar    1rem 2rem, hottu-200   -> .topBar
+     .titleKn   1.875rem/700 gadde-950 -> .titleKn
+     .titleEn   0.875rem outfit        -> .titleEn, .backLink
+     .card      hottu-50 / hottu-200,
+                0.75rem radius, stripe -> .card + .stripe
+     .cta       bhatta-600 gold button -> .cta
+     .safety    hottu-100 on bhatta-200-> .notice
+     .badge     0.375rem radius pill   -> .soldTag
+     coin disc  bhatta-400/600         -> <Coin>, unchanged
+
+   DEV-PALETTE holds as written there: GREEN (gadde) = verified/trust,
+   GOLD (bhatta) = spend. A wallet is entirely a spend surface, so it is gold
+   throughout, and the only green is the credited confirmation. No new token,
+   no new colour. */
+
+.page {
+  background: var(--hottu-50);
+  min-height: 60vh;
+}
+
+/* ── Top bar — the listings bar, same metrics ────────────────────────── */
+
+.topBar {
+  border-bottom: 1px solid var(--hottu-200);
+  background: var(--hottu-50);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.titleKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.875rem;
+  line-height: 1.25;
+  margin: 0;
+  color: var(--gadde-950);
+}
+
+.titleEn {
+  font-family: var(--outfit);
+  font-size: 0.875rem;
+  margin: 0.125rem 0 0;
+  color: var(--hottu-400);
+}
+
+.backLink {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bhatta-600);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.backLink:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+/* ── Body ───────────────────────────────────────────────────────────── */
+
+.body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Card — the listings card, stripe and all ───────────────────────── */
+
+.card {
+  position: relative;
+  background: var(--hottu-50);
+  border: 1px solid var(--hottu-200);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.stripe {
+  height: 3px;
+  background: linear-gradient(90deg, var(--bhatta-400), var(--bhatta-200));
+}
+
+.cardBody {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cardLabel {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.cardLabelKn {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--gadde-950);
+}
+
+.cardLabelEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  color: var(--hottu-400);
+}
+
+/* ── Balance ────────────────────────────────────────────────────────── */
+
+.balance {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0.25rem 0 0;
+}
+
+.balanceNum {
+  font-family: var(--outfit);
+  font-weight: 700;
+  font-size: 2.5rem;
+  line-height: 1;
+  color: var(--bhatta-600);
+}
+
+.balanceUnit {
+  font-family: var(--noto-kannada);
+  font-weight: 600;
+  font-size: 1.125rem;
+  color: var(--gadde-950);
+}
+
+.balanceNote {
+  margin: 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  color: var(--hottu-400);
+}
+
+.balanceNoteEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+  color: var(--hottu-300);
+}
+
+/* ── Pack ───────────────────────────────────────────────────────────── */
+
+.pack {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--hottu-200);
+  border-radius: 0.5rem;
+  background: var(--hottu-100);
+}
+
+.packTokens {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--gadde-950);
+}
+
+.packPrice {
+  font-family: var(--outfit);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--bhatta-600);
+}
+
+/* The listings CTA, unchanged in role and metrics. */
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: var(--bhatta-600);
+  color: var(--hottu-50);
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cta:hover {
+  background: var(--gold-600);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
+.ctaDisabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.ctaEn {
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* ── Waiting / credited / failed ────────────────────────────────────── */
+
+/* Deliberately NOT an error treatment: a pending payment is a wait, and the
+   frame's neutral panel is what a wait looks like. */
+.waiting {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--hottu-100);
+  border: 1px solid var(--bhatta-200);
+}
+
+.waitingDot {
+  flex-shrink: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  margin-top: 0.25rem;
+  border-radius: 9999px;
+  background: var(--bhatta-400);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.waitingKn {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--gadde-950);
+}
+
+.waitingEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  margin-top: 0.125rem;
+  color: var(--hottu-400);
+}
+
+.credited {
+  margin: 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gadde-700);
+}
+
+.packError {
+  margin: 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--kemmannu-600);
+}
+
+.packErrorEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.125rem;
+  color: var(--kemmannu-600);
+}
+
+/* ── Unlock history ─────────────────────────────────────────────────── */
+
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.historyRow {
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--hottu-200);
+}
+
+.historyRow:first-child {
+  border-top: none;
+  padding-top: 0.25rem;
+}
+
+.historyMain {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.historyVariety {
+  font-family: var(--noto-kannada);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--gadde-950);
+}
+
+/* Same pill the listings card uses for a sold listing. */
+.soldTag {
+  font-family: var(--outfit);
+  font-size: 0.625rem;
+  font-weight: 600;
+  background: var(--hottu-200);
+  border: 1px solid var(--hottu-300);
+  color: var(--gadde-950);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.historyMeta {
+  margin: 0.125rem 0 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.8125rem;
+  color: var(--hottu-400);
+}
+
+.recredit {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0.375rem 0 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--gadde-700);
+}
+
+.recreditReason {
+  font-family: var(--outfit);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--hottu-400);
+}
+
+.empty {
+  margin: 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  color: var(--hottu-400);
+}
+
+.emptyEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+  color: var(--hottu-300);
+}
+
+/* ── Standing notices — the frame's safety panel, same treatment ────── */
+
+.notice {
+  background: var(--hottu-100);
+  border: 1px solid var(--bhatta-200);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Inside the unlock modal, where space is tighter. */
+.noticeCompact {
+  padding: 0.75rem 0.875rem;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.noticeItem {
+  margin: 0;
+}
+
+.noticeKn {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--gadde-900);
+}
+
+.noticeEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  margin-top: 0.125rem;
+  color: var(--hottu-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+  .waitingDot {
+    animation: none;
+  }
+}

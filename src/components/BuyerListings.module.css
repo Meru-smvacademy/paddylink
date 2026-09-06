@@ -672,6 +672,10 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  /* The standing notices made this sheet taller than the frame's. Scroll
+     inside it rather than letting it run off a short screen. */
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
 }
 
 .modalIconRow {
@@ -739,27 +743,6 @@
   font-weight: 600;
   margin: 0.5rem 0 0;
   color: var(--kemmannu-600);
-}
-
-/* The 12-hour re-credit line. A quiet note, not a promise banner: it sits
-   between the price and the safety panel at the modal's own muted weight. */
-.recreditKn {
-  font-family: var(--noto-kannada);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.5;
-  margin: 0;
-  text-align: center;
-  color: var(--hottu-400);
-}
-
-.recreditEn {
-  display: block;
-  font-family: var(--outfit);
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  margin-top: 0.125rem;
-  color: var(--hottu-300);
 }
 
 .safety {

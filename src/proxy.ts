@@ -26,6 +26,8 @@ function isAdminOnly(pathname: string): boolean {
   if (pathname === '/admin') return true;
   if (pathname.startsWith('/admin/buyers')) return true;
   if (pathname.startsWith('/admin/overview')) return true;
+  // Pending token orders: buyer names, mobiles and amounts. Admin only.
+  if (pathname.startsWith('/admin/orders')) return true;
   if (pathname === '/admin/api/kyc') return true;
   if (pathname === '/admin/api/listings') return true;
   if (pathname.startsWith('/admin/listings') && !pathname.startsWith('/admin/listings/routes')) {

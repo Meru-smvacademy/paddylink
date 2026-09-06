@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
   browseClient,
   getBrowseListings,
@@ -9,6 +10,7 @@ import {
 } from '@/lib/browseListings';
 import type { RefDistrict, RefVariety } from '@/lib/reference';
 import T from './T';
+import { PositioningNotice } from './BuyerWallet';
 import styles from './BuyerListings.module.css';
 
 /**
@@ -33,6 +35,13 @@ import styles from './BuyerListings.module.css';
  * paid for that contact, so it stays in his history with a sold tag rather
  * than disappearing. Whether it sold is read from public.listings_sold,
  * scoped to the ids he already holds.
+ *
+ * THE BALANCE IS REAL. It is the sum of this buyer's token_ledger deltas,
+ * read on the server — purchases credited by the Razorpay webhook, unlocks
+ * debited, 12-hour re-credits added back. Nothing in this file computes it,
+ * adjusts it, or remembers a number of its own; the demo constant it used to
+ * carry is gone. The "+ ಸೇರಿಸಿ / Add" control now goes to the wallet, where a
+ * pack can actually be bought.
  *
  * UNLOCK IS STILL DEMO, and deliberately so. A real unlock spends a token and
  * releases a farmer's contact, which needs an authenticated buyer, a wallet
@@ -115,10 +124,11 @@ function harvestKn(isoDate: string) {
    handed it as a prop, read on the server, and has no default to fall back
    on. See src/lib/unlockPricing.ts. */
 
-/* AWAITING-BACKEND: the DEMO wallet, sized to exactly one real pack —
-   migration 012 made token_packs a single 50-token pack. It is a stand-in for
-   a balance, not a price, and it goes when buyer_wallets is wired. */
-const START_BALANCE = 50;
+/* No START_BALANCE constant. The demo wallet is gone: the balance shown here
+   is the sum of this buyer's token_ledger rows, read on the server and passed
+   in. token_ledger is append-only by trigger, so it is the one figure that
+   cannot be edited into being wrong, and it is the same figure the wallet
+   page shows. */
 
 /* DEV-GLYPH: the frame put ₮ inside this disc. It ships bare. */
 function Coin({ size = 16 }: { size?: number }) {
@@ -461,22 +471,13 @@ function UnlockModal({
           )}
         </div>
 
-        {/* The 12-hour promise, said before the token is spent rather than
-            after. If the farmer marks the paddy sold inside that window the
-            re-credit is automatic — no dispute to file, nothing to ask for.
-            Backed by mark_listing_sold() in migration 011. */}
-        <p className={styles.recreditKn}>
-          <T
-            kn="ರೈತ 12 ಗಂಟೆಗಳ ಒಳಗೆ ಭತ್ತ ಮಾರಾಟವಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿದರೆ, ಟೋಕನ್ ತಾನಾಗಿಯೇ ಮರಳುತ್ತದೆ."
-            en="ರೈತ 12 ಗಂಟೆಗಳ ಒಳಗೆ ಭತ್ತ ಮಾರಾಟವಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿದರೆ, ಟೋಕನ್ ತಾನಾಗಿಯೇ ಮರಳುತ್ತದೆ."
-          />
-          <span className={styles.recreditEn}>
-            <T
-              kn="/ If the farmer marks the paddy sold within 12 hours, your token is returned automatically."
-              en="/ If the farmer marks the paddy sold within 12 hours, your token is returned automatically."
-            />
-          </span>
-        </p>
+        {/* What PaddyLink is, what to check, and the one refund rule — said
+            before the token is spent rather than after. The same three lines
+            the wallet carries, rendered from the same source so the two
+            screens cannot drift apart. The refund line is the 12-hour promise
+            mark_listing_sold() (011) actually keeps, now stating plainly that
+            it is the only one. */}
+        <PositioningNotice compact />
 
         <div className={styles.safety}>
           <p className={styles.safetyKn}>
@@ -556,6 +557,7 @@ function EmptyState({ onClear }: { onClear: () => void }) {
 export default function BuyerListings({
   initialListings,
   unlockCost,
+  balance,
   districts,
   varieties,
 }: {
@@ -563,6 +565,9 @@ export default function BuyerListings({
   /** config.unlock.cost, read on the server. null means the read failed:
    *  the page shows an error and unlocking is blocked. There is no default. */
   unlockCost: number | null;
+  /** Sum of token_ledger.delta for this buyer, read on the server. null when
+   *  we cannot tell which buyer this is — shown as such, never as a number. */
+  balance: number | null;
   districts: RefDistrict[];
   varieties: RefVariety[];
 }) {
@@ -580,7 +585,6 @@ export default function BuyerListings({
      public.listings_sold, asked only about ids this buyer already holds. */
   const [soldIds, setSoldIds] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(false);
-  const [tokenBalance, setTokenBalance] = useState(START_BALANCE);
   /* Filters hold canonical English names and a month number — what the view
      is queried by. The dropdowns show Kannada. */
   const [districtFilter, setDistrictFilter] = useState('');
@@ -669,10 +673,10 @@ export default function BuyerListings({
     ],
     [rows, unlockedRows, soldIds, history],
   );
-  /* No price, no unlocking. The balance check only means anything once there
-     is a cost to check it against. */
+  /* No price, no unlocking; no known buyer, no unlocking either. The balance
+     check only means anything once there is a cost to check it against. */
   const priced = unlockCost !== null;
-  const affordable = priced && tokenBalance >= unlockCost;
+  const affordable = priced && balance !== null && balance >= unlockCost;
 
   const clearFilters = useCallback(() => {
     setDistrictFilter('');
@@ -693,7 +697,10 @@ export default function BuyerListings({
     // The row is snapshotted, not just its id: this is the buyer's copy of
     // what he unlocked, and it has to outlive the listing leaving the market.
     setUnlockedRows((prev) => new Map(prev).set(unlockTarget, row));
-    setTokenBalance((b) => b - unlockCost);
+    // The balance is NOT decremented here, and that is the point: a DEMO
+    // unlock spends nothing, so the ledger has not moved and neither should
+    // the number on screen. When unlock_contact() is wired the balance comes
+    // back from the server, the same way the wallet gets it.
     setUnlockTarget(null);
   }
 
@@ -715,16 +722,19 @@ export default function BuyerListings({
           <div className={styles.tokenChip}>
             <Coin size={15} />
             <span className={`${styles.tokenCount} ${affordable ? '' : styles.tokenLow}`}>
-              <T kn={`${tokenBalance} ಟೋಕನ್`} en={`${tokenBalance} ಟೋಕನ್`} />
+              <T
+                kn={balance === null ? '— ಟೋಕನ್' : `${balance} ಟೋಕನ್`}
+                en={balance === null ? '— ಟೋಕನ್' : `${balance} ಟೋಕನ್`}
+              />
             </span>
           </div>
-          {/* AWAITING-BACKEND: no top-up flow exists, so this does nothing. */}
-          <button type="button" className={styles.addLink}>
+          {/* Now goes somewhere: the wallet, where a pack can be bought. */}
+          <Link href="/buyer/wallet" className={styles.addLink}>
             <T kn="+ ಸೇರಿಸಿ " en="+ ಸೇರಿಸಿ " />
             <span className={styles.addLinkEn}>
               <T kn="/ Add" en="/ Add" />
             </span>
-          </button>
+          </Link>
         </div>
       </div>
 

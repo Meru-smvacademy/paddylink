@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { BUYER_MOBILE_COOKIE, BUYER_COOKIE_OPTIONS } from '@/app/api/buyer/session/route';
 
 /**
  * POST /api/buyer/register — create a buyer's KYC registration.
@@ -167,9 +168,17 @@ export async function POST(request: Request) {
     });
     if (docErr) throw docErr;
 
-    return NextResponse.json({
+    /* TEMP-PRE-AUTH: remember this buyer server-side, so the wallet knows
+       whose balance to show without a second step. Same httpOnly cookie the
+       farmer flow uses, and the same caveat — it is a convenience, not proof
+       of identity. The buyer branch of the OTP flow should set it too; that
+       file is out of scope here, so a buyer arriving on a fresh device has no
+       session and the wallet says so rather than guessing. */
+    const response = NextResponse.json({
       buyer: { id: buyer.id, kyc_status: buyer.kyc_status },
     });
+    response.cookies.set(BUYER_MOBILE_COOKIE, mobile, BUYER_COOKIE_OPTIONS);
+    return response;
   } catch (e) {
     // Supabase errors are plain objects, not Error instances — String(e) on
     // one yields "[object Object]" and hides the cause. Pull the fields out.

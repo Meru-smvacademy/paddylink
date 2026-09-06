@@ -60,9 +60,15 @@ export default async function DeskLayout({
               Field routes
             </Link>
             {role === 'admin' && (
-              <Link href="/admin/overview" className={styles.navLink}>
-                Overview
-              </Link>
+              <>
+                {/* Read-only: token orders whose webhook never landed. */}
+                <Link href="/admin/orders" className={styles.navLink}>
+                  Pending orders
+                </Link>
+                <Link href="/admin/overview" className={styles.navLink}>
+                  Overview
+                </Link>
+              </>
             )}
             <span className={styles.identity} title="TEMP-TWO-TIER">
               {role}
