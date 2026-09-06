@@ -40,11 +40,21 @@ import styles from './FarmerListings.module.css';
  * Nothing here deletes. The toggle has two destinations, 'active' and 'sold',
  * and both keep the row and the history attached to it.
  *
- * Logged, built as designed: ಎಡಿಟ್ and ತೆಗೆದುಹಾಕಿ have no handlers in the
- * frame either and ship inert and aria-disabled — a farmer clicking ಎಡಿಟ್
- * gets nothing, and no message says why. The buyers pill now counts real
- * unlocks but still offers no way to reach them. The empty state's padlock
- * icon reads as "locked" rather than "empty"; it is the frame's drawing.
+ * DELIBERATE DEVIATION FROM THE FRAME — the frame's second row action, a
+ * remove link, is gone, and its label is deliberately not repeated anywhere
+ * in this file. It was inert and aria-disabled, but a delete control sitting
+ * in the markup is a delete control waiting for someone to wire it, and the
+ * standing ruling is that this product has no delete path. A farmer who is
+ * done with a listing marks it ಮಾರಾಟವಾಗಿದೆ; a listing that is genuinely
+ * wrong is staff work through listing_removals, which is not reachable from
+ * this screen. Removing the control rather than disabling it is the point:
+ * there is nothing here left to enable by accident.
+ *
+ * Logged, built as designed: ಎಡಿಟ್ has no handler in the frame either and
+ * ships inert and aria-disabled — a farmer clicking it gets nothing, and no
+ * message says why. The buyers pill now counts real unlocks but still offers
+ * no way to reach them. The empty state's padlock icon reads as "locked"
+ * rather than "empty"; it is the frame's drawing.
  *
  * BADGES: migration 007 gave the schema real quality columns, and the admin
  * quality desk is their only write path. A card reads
@@ -139,12 +149,11 @@ function ListingCard({ listing }: { listing: FarmerListingRow }) {
         <div className={styles.actions}>
           {/* The one action on this row that does anything. Confirms first. */}
           <FarmerSoldControl listingId={listing.id} status={listing.status} />
-          {/* Inert in the frame too. aria-disabled so neither pretends to work. */}
+          {/* Inert in the frame too. aria-disabled so it does not pretend to
+              work. The frame's remove link that sat beside it is gone — see
+              the note at the top of this file. */}
           <button type="button" className={styles.edit} aria-disabled="true">
             ಎಡಿಟ್
-          </button>
-          <button type="button" className={styles.remove} aria-disabled="true">
-            ತೆಗೆದುಹಾಕಿ
           </button>
         </div>
       </div>

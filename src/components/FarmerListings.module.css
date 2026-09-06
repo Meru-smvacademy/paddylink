@@ -188,8 +188,9 @@
   padding-top: 0.25rem;
 }
 
-/* Inert in the frame too — no handlers behind either control. They ship
-   aria-disabled so nothing pretends to work. */
+/* Inert in the frame too — no handler behind it. Ships aria-disabled so it
+   does not pretend to work. The frame's remove link had a rule here as well;
+   both the control and its style are gone, per the no-delete ruling. */
 .edit {
   font-family: var(--noto-kannada);
   font-size: 1rem;
@@ -201,18 +202,7 @@
   cursor: default;
 }
 
-.remove {
-  font-family: var(--noto-kannada);
-  font-size: 1rem;
-  color: var(--masi-500);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: default;
-}
-
-.edit:focus-visible,
-.remove:focus-visible {
+.edit:focus-visible {
   outline: 2px solid var(--gadde-700);
   outline-offset: 3px;
 }
