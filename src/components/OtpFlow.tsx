@@ -134,7 +134,21 @@ export default function OtpFlow({
       setPhase('form');
       return;
     }
-    router.push('/buyer/listings');
+    // TEMP-PRE-AUTH: remember the number server-side so /buyer/listings and
+    // /buyer/wallet know whose balance to show. Not proof of identity — see
+    // the route. The twin of the farmer call above, with one difference: the
+    // navigation waits for the request to settle rather than firing and
+    // forgetting. The buyer lands on a page that reads the cookie immediately,
+    // so pushing first would race the Set-Cookie and show a wallet that says
+    // it does not know who this is. .finally, not .then, because a failed
+    // write must still let him through to the listings.
+    fetch('/api/buyer/session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile: phone }),
+    })
+      .catch(() => {})
+      .finally(() => router.push('/buyer/listings'));
   }
 
   function handleOtpChange(i: number, raw: string) {
