@@ -558,6 +558,7 @@ export default function BuyerListings({
   initialListings,
   unlockCost,
   balance,
+  signedIn,
   districts,
   varieties,
 }: {
@@ -568,6 +569,11 @@ export default function BuyerListings({
   /** Sum of token_ledger.delta for this buyer, read on the server. null when
    *  we cannot tell which buyer this is — shown as such, never as a number. */
   balance: number | null;
+  /** Whether this device carries a buyer session. Unlike /buyer/wallet and the
+   *  farmer pages, this route does not redirect without one — a buyer can
+   *  browse the market signed out — so the sign-out control is conditional
+   *  here and offered only when there is something to sign out of. */
+  signedIn: boolean;
   districts: RefDistrict[];
   varieties: RefVariety[];
 }) {
@@ -735,6 +741,20 @@ export default function BuyerListings({
               <T kn="/ Add" en="/ Add" />
             </span>
           </Link>
+          {/* Sign out — the admin chrome's pattern, form-posted to a route
+              that clears the cookie and redirects. Wears .addLink, the bar's
+              own link treatment, which is already written to sit on a
+              <button>; no new class and no new colour. */}
+          {signedIn && (
+            <form method="post" action="/buyer/logout">
+              <button type="submit" className={styles.addLink}>
+                <T kn="ಹೊರಬನ್ನಿ " en="ಹೊರಬನ್ನಿ " />
+                <span className={styles.addLinkEn}>
+                  <T kn="/ Sign out" en="/ Sign out" />
+                </span>
+              </button>
+            </form>
+          )}
         </div>
       </div>
 

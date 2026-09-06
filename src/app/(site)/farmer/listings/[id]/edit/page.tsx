@@ -51,7 +51,7 @@ export default async function FarmerListingEditPage({
   return (
     <main className={shell.page}>
       <div className={`${shell.main} ${shell.mainForm}`}>
-        <div className={`${shell.backRow} ${shell.backRowForm}`}>
+        <div className={`${shell.backRow} ${shell.backRowForm} ${shell.backRowSpread}`}>
           <Link href="/farmer/listings" className={shell.back}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <path
@@ -64,6 +64,16 @@ export default async function FarmerListingEditPage({
             </svg>
             ಹಿಂದೆ
           </Link>
+          {/* Sign out, the admin chrome's pattern. Sited at the far end of the
+              row, away from ಹಿಂದೆ and well away from the form's own submit:
+              this screen holds unsaved edits, and the two controls must not
+              sit next to each other. The page is only served to a farmer with
+              a session, so it is unconditional. */}
+          <form method="post" action="/farmer/logout">
+            <button type="submit" className={shell.signOut}>
+              ಹೊರಬನ್ನಿ
+            </button>
+          </form>
         </div>
 
         <FarmerListingEdit reference={reference} target={target} />

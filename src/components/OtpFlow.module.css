@@ -81,6 +81,36 @@
   max-width: 720px;
 }
 
+/* The edit screen puts a sign-out at the far end of the back row. Its own
+   modifier rather than a change to .backRow, so the OTP flow's single-child
+   rows are untouched. */
+.backRowSpread {
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ಹೊರಬನ್ನಿ — .back's treatment on a <button>, since the control is a form
+   submit rather than a link. Same family, same colour, no new language. */
+.signOut {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--gadde-700);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+}
+.signOut:hover {
+  opacity: 0.7;
+}
+.signOut:focus-visible {
+  outline: 2px solid var(--gadde-700);
+  outline-offset: 3px;
+}
+
 /* ── Card ───────────────────────────────────────────────────────────── */
 
 .card {

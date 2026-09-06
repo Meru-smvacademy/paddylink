@@ -231,15 +231,28 @@ export default function FarmerListings({ listings }: { listings: FarmerListingRo
             It carried a different product name. */}
         <div className={styles.headRow}>
           <h1 className={styles.title}>ನನ್ನ ಪಟ್ಟಿಗಳು</h1>
-          {/* The frame hides this button in the empty state. */}
-          {!empty && (
-            <Link href={FORM_HREF} className={styles.newBtn}>
-              <span className={styles.plus} aria-hidden="true">
-                +
-              </span>
-              ಹೊಸ ಪಟ್ಟಿ
-            </Link>
-          )}
+          <div className={styles.headActions}>
+            {/* The frame hides this button in the empty state. */}
+            {!empty && (
+              <Link href={FORM_HREF} className={styles.newBtn}>
+                <span className={styles.plus} aria-hidden="true">
+                  +
+                </span>
+                ಹೊಸ ಪಟ್ಟಿ
+              </Link>
+            )}
+            {/* Sign out — the admin chrome's pattern, form-posted to a route
+                that clears the cookie and redirects. No client JS, and the
+                page is only ever served to a farmer who has a session (the
+                route redirects to /login/farmer without one), so the control
+                is unconditional here. Wears .edit, the frame's own quiet
+                row-action treatment, rather than a new one. */}
+            <form method="post" action="/farmer/logout">
+              <button type="submit" className={styles.edit}>
+                ಹೊರಬನ್ನಿ
+              </button>
+            </form>
+          </div>
         </div>
 
         {empty ? (

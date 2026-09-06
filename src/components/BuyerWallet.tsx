@@ -244,9 +244,21 @@ export default function BuyerWallet({ wallet }: { wallet: Wallet }) {
             <T kn="My tokens" en="My tokens" />
           </p>
         </div>
-        <Link href="/buyer/listings" className={styles.backLink}>
-          <T kn="ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂದೆ / Back to listings" en="ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂದೆ / Back to listings" />
-        </Link>
+        <div className={styles.topBarLinks}>
+          <Link href="/buyer/listings" className={styles.backLink}>
+            <T kn="ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂದೆ / Back to listings" en="ಪಟ್ಟಿಗಳಿಗೆ ಹಿಂದೆ / Back to listings" />
+          </Link>
+          {/* Sign out — the admin chrome's pattern, form-posted to a route
+              that clears the cookie and redirects. This component only ever
+              renders for a buyer the server resolved from the cookie (the
+              page renders a separate "not recognised" panel otherwise), so
+              the control is unconditional. */}
+          <form method="post" action="/buyer/logout">
+            <button type="submit" className={styles.signOut}>
+              <T kn="ಹೊರಬನ್ನಿ / Sign out" en="ಹೊರಬನ್ನಿ / Sign out" />
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className={styles.body}>

@@ -62,6 +62,14 @@
   color: var(--gadde-900);
 }
 
+/* Holds ಹೊಸ ಪಟ್ಟಿ and ಹೊರಬನ್ನಿ at the right of the head row. The gap is
+   .actions', the row-action spacing this page already uses. */
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
 .newBtn {
   display: inline-flex;
   align-items: center;

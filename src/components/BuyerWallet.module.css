@@ -54,6 +54,34 @@
   color: var(--hottu-400);
 }
 
+/* Holds ಹಿಂದೆ and ಹೊರಬನ್ನಿ at the right of the top bar. */
+.topBarLinks {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* ಹೊರಬನ್ನಿ — .backLink's treatment on a <button>, since the control is a form
+   submit rather than a link. Same font, size, weight and colour; the only
+   additions are the resets a button needs. No new visual language. */
+.signOut {
+  font-family: var(--noto-kannada);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--bhatta-600);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.signOut:hover {
+  text-decoration: underline;
+}
+.signOut:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
 .backLink {
   font-family: var(--noto-kannada);
   font-size: 0.875rem;

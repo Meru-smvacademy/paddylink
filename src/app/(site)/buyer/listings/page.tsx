@@ -44,6 +44,10 @@ export default async function BuyerListingsPage() {
       initialListings={initialListings}
       unlockCost={unlockCost}
       balance={wallet?.balance ?? null}
+      /* The same cookie the balance was read with. This route serves a signed-
+         out browser too, so the sign-out control is only offered when there
+         is a session to end. */
+      signedIn={wallet !== null}
       /* Every district, not just the operational three: a buyer filters by
          where the paddy is, and that grows as operations do. */
       districts={reference.districts}
