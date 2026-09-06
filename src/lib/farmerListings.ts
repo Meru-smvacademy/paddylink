@@ -24,6 +24,11 @@ const MONTHS_KN = [
 
 export type BadgeType = 'verified' | 'pending' | 'active';
 
+/** The two statuses a farmer's own page shows, and the two his toggle moves
+ *  between. Everything else (draft, expired, removed, flagged) is staff and
+ *  cron territory and never reaches this screen. */
+export type FarmerListingStatus = 'active' | 'sold';
+
 export interface FarmerListingRow {
   id: string;
   varietyKn: string;
@@ -35,6 +40,10 @@ export interface FarmerListingRow {
    *  null. The same number the buyer sees — one truth, two screens. */
   moisturePct: string | null;
   buyersKn: string | null;
+  /** 'sold' once the farmer has marked it so. The card renders muted and the
+   *  listing is gone from listings_browse, but it stays here and stays in the
+   *  database — this page is his record, not the market. */
+  status: FarmerListingStatus;
 }
 
 /** Statuses a farmer should see on his own listings page. */
@@ -86,6 +95,7 @@ export async function getFarmerListings(mobile: string): Promise<FarmerListingRo
       // desk (migration 007); until then the card honestly reads pending.
       badge: (r.quality_checked_at ? 'verified' : 'pending') as BadgeType,
       moisturePct: r.moisture_pct != null ? Number(r.moisture_pct).toFixed(1) : null,
+      status: (r.status === 'sold' ? 'sold' : 'active') as FarmerListingStatus,
       buyersKn:
         r.unlock_count > 0
           ? `${r.unlock_count} ಖರೀದಿದಾರರು ನಿಮ್ಮ ಸಂಪರ್ಕ ತೆರೆದಿದ್ದಾರೆ`

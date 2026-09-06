@@ -369,6 +369,32 @@
   color: var(--bhatta-600);
 }
 
+/* Two tags can sit here at once — sold and unlocked — so they stack rather
+   than fight for the corner. */
+.tags {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+/* The farmer has sold this paddy. Same pill as .unlockedTag so the pair read
+   as one row of state, but unfilled — this one is a fact about the listing,
+   not a thing the buyer bought. No new token: the cream ramp's own steps. */
+.soldTag {
+  flex-shrink: 0;
+  font-family: var(--outfit);
+  font-size: 0.625rem;
+  font-weight: 600;
+  background: var(--hottu-200);
+  border: 1px solid var(--hottu-300);
+  color: var(--gadde-950);
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
 .unlockedTag {
   flex-shrink: 0;
   font-family: var(--outfit);
@@ -684,6 +710,27 @@
   font-weight: 600;
   margin: 0.5rem 0 0;
   color: var(--kemmannu-600);
+}
+
+/* The 12-hour re-credit line. A quiet note, not a promise banner: it sits
+   between the price and the safety panel at the modal's own muted weight. */
+.recreditKn {
+  font-family: var(--noto-kannada);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+  color: var(--hottu-400);
+}
+
+.recreditEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  margin-top: 0.125rem;
+  color: var(--hottu-300);
 }
 
 .safety {

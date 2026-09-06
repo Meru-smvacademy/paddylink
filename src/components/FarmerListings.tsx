@@ -28,6 +28,18 @@ import styles from './FarmerListings.module.css';
  *                    warning-* and red-700 mapped by role onto the existing
  *                    ramp; no new tokens. Map in the stylesheet header.
  *
+ * SOLD TOGGLE: each active card carries ಮಾರಾಟವಾಗಿದೆ, which goes through a
+ * confirm sheet before it writes — never on a single tap. A sold card stays
+ * here, muted, badged ಮಾರಾಟವಾಗಿದೆ, and offers the way back; the reversal is
+ * unlimited and uses the same sheet. What changes is only where it is shown:
+ * migration 011 took sold listings out of listings_browse, so the buyer's
+ * market no longer carries it, while the farmer's own record still does. The
+ * control and the sheet live in FarmerSoldControl, the one client component
+ * this page loads.
+ *
+ * Nothing here deletes. The toggle has two destinations, 'active' and 'sold',
+ * and both keep the row and the history attached to it.
+ *
  * Logged, built as designed: ಎಡಿಟ್ and ತೆಗೆದುಹಾಕಿ have no handlers in the
  * frame either and ship inert and aria-disabled — a farmer clicking ಎಡಿಟ್
  * gets nothing, and no message says why. The buyers pill now counts real
@@ -43,6 +55,7 @@ import styles from './FarmerListings.module.css';
  */
 
 import type { BadgeType, FarmerListingRow } from '@/lib/farmerListings';
+import FarmerSoldControl from './FarmerSoldControl';
 
 /* The form step of the farmer flow. */
 const FORM_HREF = '/login/farmer';
@@ -105,8 +118,9 @@ function Badge({ type, label }: { type: BadgeType; label: string }) {
 }
 
 function ListingCard({ listing }: { listing: FarmerListingRow }) {
+  const sold = listing.status === 'sold';
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${sold ? styles.cardSold : ''}`}>
       <div className={styles.cardTop}>
         <div className={styles.cardHead}>
           <h2 className={styles.variety}>
@@ -122,8 +136,10 @@ function ListingCard({ listing }: { listing: FarmerListingRow }) {
           </div>
         </div>
 
-        {/* Inert in the frame too. aria-disabled so neither pretends to work. */}
         <div className={styles.actions}>
+          {/* The one action on this row that does anything. Confirms first. */}
+          <FarmerSoldControl listingId={listing.id} status={listing.status} />
+          {/* Inert in the frame too. aria-disabled so neither pretends to work. */}
           <button type="button" className={styles.edit} aria-disabled="true">
             ಎಡಿಟ್
           </button>
@@ -134,6 +150,14 @@ function ListingCard({ listing }: { listing: FarmerListingRow }) {
       </div>
 
       <div className={styles.badgeRow}>
+        {/* Sold reads first, because it is the fact that changes what the
+            card means. Muted rather than alarming: a sale is good news. */}
+        {sold && (
+          <span className={`${styles.badge} ${styles.badgeSold}`}>
+            <span className={`${styles.dot} ${styles.dotSold}`} aria-hidden="true" />
+            ಮಾರಾಟವಾಗಿದೆ
+          </span>
+        )}
         {/* CEO ruling (Desk 3 gate): the verified badge carries the real
             moisture reading, one decimal — the number IS the substance. */}
         <Badge

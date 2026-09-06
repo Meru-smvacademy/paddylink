@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   browseClient,
   getBrowseListings,
+  getSoldIds,
   type BrowseListing,
 } from '@/lib/browseListings';
 import type { RefDistrict, RefVariety } from '@/lib/reference';
@@ -24,6 +25,14 @@ import styles from './BuyerListings.module.css';
  * runs the same anon-key query the server does, against the one object anon
  * is allowed to read. The view carries no identity at all: no farmer id, no
  * name, no mobile, no village.
+ *
+ * SOLD LISTINGS ARE NOT FILTERED HERE, and that is deliberate. Migration 011
+ * took them out of listings_browse, so a sold listing never arrives in the
+ * first place — there is nothing on this page that could show one by
+ * mistake. The one exception is a listing this buyer already unlocked: he
+ * paid for that contact, so it stays in his history with a sold tag rather
+ * than disappearing. Whether it sold is read from public.listings_sold,
+ * scoped to the ids he already holds.
  *
  * UNLOCK IS STILL DEMO, and deliberately so. A real unlock spends a token and
  * releases a farmer's contact, which needs an authenticated buyer, a wallet
@@ -67,8 +76,9 @@ import styles from './BuyerListings.module.css';
 
 type QualityStatus = 'checked' | 'pending';
 
-/** A real browse row, plus the DEMO unlock flag which lives only in state. */
-type Card = BrowseListing & { unlocked: boolean };
+/** A real browse row, plus the DEMO unlock flag which lives only in state,
+ *  and whether the farmer has since marked the paddy sold. */
+type Card = BrowseListing & { unlocked: boolean; sold: boolean };
 
 /* The demo identities a DEMO unlock reveals. These are NOT farmers: the
    browse view carries no identity, and a real unlock needs auth, a wallet and
@@ -217,11 +227,21 @@ function ListingCard({
               />
             </p>
           </div>
-          {listing.unlocked && (
-            <span className={styles.unlockedTag}>
-              <T kn="ತೆರೆಯಲಾಗಿದೆ / Unlocked" en="ತೆರೆಯಲಾಗಿದೆ / Unlocked" />
-            </span>
-          )}
+          <div className={styles.tags}>
+            {/* The farmer has marked this paddy sold. The card is kept
+                because this buyer unlocked it — it is his history, and he
+                paid for it — but the tag has to say so before he calls. */}
+            {listing.sold && (
+              <span className={styles.soldTag}>
+                <T kn="ಮಾರಾಟವಾಗಿದೆ / Sold" en="ಮಾರಾಟವಾಗಿದೆ / Sold" />
+              </span>
+            )}
+            {listing.unlocked && (
+              <span className={styles.unlockedTag}>
+                <T kn="ತೆರೆಯಲಾಗಿದೆ / Unlocked" en="ತೆರೆಯಲಾಗಿದೆ / Unlocked" />
+              </span>
+            )}
+          </div>
         </div>
 
         <p className={styles.metaRow}>
@@ -393,6 +413,23 @@ function UnlockModal({
           )}
         </div>
 
+        {/* The 12-hour promise, said before the token is spent rather than
+            after. If the farmer marks the paddy sold inside that window the
+            re-credit is automatic — no dispute to file, nothing to ask for.
+            Backed by mark_listing_sold() in migration 011. */}
+        <p className={styles.recreditKn}>
+          <T
+            kn="ರೈತ 12 ಗಂಟೆಗಳ ಒಳಗೆ ಭತ್ತ ಮಾರಾಟವಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿದರೆ, ಟೋಕನ್ ತಾನಾಗಿಯೇ ಮರಳುತ್ತದೆ."
+            en="ರೈತ 12 ಗಂಟೆಗಳ ಒಳಗೆ ಭತ್ತ ಮಾರಾಟವಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿದರೆ, ಟೋಕನ್ ತಾನಾಗಿಯೇ ಮರಳುತ್ತದೆ."
+          />
+          <span className={styles.recreditEn}>
+            <T
+              kn="/ If the farmer marks the paddy sold within 12 hours, your token is returned automatically."
+              en="/ If the farmer marks the paddy sold within 12 hours, your token is returned automatically."
+            />
+          </span>
+        </p>
+
         <div className={styles.safety}>
           <p className={styles.safetyKn}>
             <T kn="ನೆನಪಿಡಿ: ಪಾವತಿ ಮೊದಲು, ನಂತರ ಭತ್ತ." en="ನೆನಪಿಡಿ: ಪಾವತಿ ಮೊದಲು, ನಂತರ ಭತ್ತ." />
@@ -480,8 +517,16 @@ export default function BuyerListings({
   const [rows, setRows] = useState<BrowseListing[]>(initialListings);
   /* DEMO unlocks live in their own state, not derived from the current
      result set: filtering a card out must not forget that it was unlocked,
-     or the state vanishes the moment a buyer looks at another district. */
-  const [unlockedIds, setUnlockedIds] = useState<Set<string>>(() => new Set());
+     or the state vanishes the moment a buyer looks at another district.
+     The whole ROW is kept, not just the id — once the farmer marks the paddy
+     sold it leaves listings_browse for good, and this snapshot is then the
+     only copy of what he unlocked. History is never dropped. */
+  const [unlockedRows, setUnlockedRows] = useState<Map<string, BrowseListing>>(
+    () => new Map(),
+  );
+  /* Which of those the farmer has since marked sold. Read from
+     public.listings_sold, asked only about ids this buyer already holds. */
+  const [soldIds, setSoldIds] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(false);
   const [tokenBalance, setTokenBalance] = useState(START_BALANCE);
   /* Filters hold canonical English names and a month number — what the view
@@ -523,9 +568,54 @@ export default function BuyerListings({
     };
   }, [districtFilter, varietyFilter, monthFilter, qualityOnly, supabase]);
 
+  /* Re-checked whenever the market moves or a new unlock is added: a listing
+     that has dropped out of the result set may simply not match the filter,
+     or the farmer may have marked it sold, and only the database knows
+     which. Scoped to this buyer's own unlocked ids — never a sweep of the
+     market. */
+  const unlockedKey = [...unlockedRows.keys()].sort().join(',');
+  useEffect(() => {
+    const ids = unlockedKey ? unlockedKey.split(',') : [];
+    if (ids.length === 0) return;
+    let cancelled = false;
+    getSoldIds(ids, supabase)
+      .then((next) => {
+        if (!cancelled) setSoldIds(next);
+      })
+      .catch((e) => console.error('[buyer listings] sold check failed', e));
+    return () => {
+      cancelled = true;
+    };
+  }, [unlockedKey, rows, supabase]);
+
+  /* An unlocked-and-sold listing is no longer in the query result, so it is
+     re-joined from the snapshot. It still answers to the filters — a buyer
+     narrowing to one district should not be shown paddy from another — so
+     the same four rules are applied to the snapshot row, which carries every
+     column they test. Nothing sold and unpaid-for can arrive this way: the
+     only ids in the map are ones this buyer unlocked himself. */
+  const history: Card[] = useMemo(() => {
+    const live = new Set(rows.map((r) => r.id));
+    const month = monthFilter ? Number(monthFilter) : 0;
+    return [...unlockedRows.values()]
+      .filter((r) => soldIds.has(r.id) && !live.has(r.id))
+      .filter((r) => !districtFilter || r.district_en === districtFilter)
+      .filter((r) => !varietyFilter || r.variety_en === varietyFilter)
+      .filter((r) => !month || Number(r.harvest_month.slice(5, 7)) === month)
+      .filter((r) => !qualityOnly || r.quality_checked_at != null)
+      .map((r) => ({ ...r, unlocked: true, sold: true }));
+  }, [rows, unlockedRows, soldIds, districtFilter, varietyFilter, monthFilter, qualityOnly]);
+
   const filtered: Card[] = useMemo(
-    () => rows.map((r) => ({ ...r, unlocked: unlockedIds.has(r.id) })),
-    [rows, unlockedIds],
+    () => [
+      ...rows.map((r) => ({
+        ...r,
+        unlocked: unlockedRows.has(r.id),
+        sold: soldIds.has(r.id),
+      })),
+      ...history,
+    ],
+    [rows, unlockedRows, soldIds, history],
   );
   const affordable = tokenBalance >= UNLOCK_COST;
 
@@ -543,7 +633,11 @@ export default function BuyerListings({
     // authenticated buyer and a wallet — neither exists before OTP auth. This
     // spends nothing, releases nothing, and resets on reload.
     if (unlockTarget === null || !affordable) return;
-    setUnlockedIds((prev) => new Set(prev).add(unlockTarget));
+    const row = rows.find((r) => r.id === unlockTarget);
+    if (!row) return;
+    // The row is snapshotted, not just its id: this is the buyer's copy of
+    // what he unlocked, and it has to outlive the listing leaving the market.
+    setUnlockedRows((prev) => new Map(prev).set(unlockTarget, row));
     setTokenBalance((b) => b - UNLOCK_COST);
     setUnlockTarget(null);
   }

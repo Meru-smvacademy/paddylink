@@ -13,7 +13,10 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  *
  * Migration 010 put the status and expiry rules inside the view, so nothing
  * here has to remember them: a removed, draft, flagged or past-harvest
- * listing simply is not in the result.
+ * listing simply is not in the result. Migration 011 added sold to that list
+ * — the moment a farmer marks his paddy sold it is out of the view, so it is
+ * out of every query below by construction. There is no client-side sift to
+ * get wrong.
  */
 
 export interface BrowseListing {
@@ -87,4 +90,29 @@ export async function getBrowseListings(
   const { data, error } = await query.order('created_at', { ascending: false });
   if (error) throw new Error(`Could not load listings: ${error.message}`);
   return (data ?? []) as unknown as BrowseListing[];
+}
+
+/**
+ * Which of these listings have been sold — public.listings_sold, ids only.
+ *
+ * A buyer who has unlocked a contact keeps that listing in his history even
+ * after the farmer marks the paddy sold: he paid for it, and a card that
+ * simply vanished would read as the platform taking it back. But a sold
+ * listing is no longer in listings_browse, so the client cannot tell "sold"
+ * from "a filter moved" without asking.
+ *
+ * This asks, narrowly. The call is scoped to ids the caller already holds —
+ * his own unlocks — and the view carries nothing but the id and the sale
+ * time. No variety, no quantity, no location, no farmer. Nothing that the
+ * masked browse view was built to withhold.
+ */
+export async function getSoldIds(
+  ids: string[],
+  client?: SupabaseClient,
+): Promise<Set<string>> {
+  if (ids.length === 0) return new Set();
+  const supabase = client ?? browseClient();
+  const { data, error } = await supabase.from('listings_sold').select('id').in('id', ids);
+  if (error) throw new Error(`Could not check sold listings: ${error.message}`);
+  return new Set((data ?? []).map((r) => (r as { id: string }).id));
 }
