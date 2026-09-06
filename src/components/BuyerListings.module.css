@@ -130,6 +130,35 @@
   font-weight: 400;
 }
 
+/* FAIL CLOSED — not in the frame. Shown only when config.unlock.cost could
+   not be read. Uses the ramp's own alert colour (kemmannu, the same the
+   modal's insufficient-balance line uses) over the page ground; no new
+   token, no new colour. */
+.priceError {
+  margin: 0;
+  padding: 0.875rem 2rem;
+  background: color-mix(in srgb, var(--kemmannu-400) 12%, var(--hottu-50));
+  border-bottom: 1px solid color-mix(in srgb, var(--kemmannu-400) 35%, var(--hottu-50));
+  text-align: center;
+}
+
+.priceErrorKn {
+  display: block;
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--kemmannu-600);
+}
+
+.priceErrorEn {
+  display: block;
+  font-family: var(--outfit);
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+  color: var(--kemmannu-600);
+}
+
 /* ── Filter row ─────────────────────────────────────────────────────── */
 
 .filters {

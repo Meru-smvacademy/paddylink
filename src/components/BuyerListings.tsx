@@ -45,6 +45,14 @@ import styles from './BuyerListings.module.css';
  * AWAITING-BACKEND: the token balance, the "+ ಸೇರಿಸಿ / Add" control and the
  * unlock itself.
  *
+ * THE PRICE IS NOT WRITTEN DOWN HERE. It was, and it was wrong: this file
+ * hardcoded 5 while config.unlock.cost said 1, so every screen quoted a
+ * price the database would not have charged. The cost now arrives as a prop
+ * read from config on the server, and there is no constant and no default
+ * left to drift. If that read fails the page says so and blocks unlocking —
+ * it never guesses, because a guessed price either overcharges a buyer or
+ * promises him a discount that does not exist.
+ *
  * LANGUAGE: the frame prints Kannada with a smaller English twin and has no
  * working toggle. That stack is preserved and the site ಕ|EN control does not
  * flip it, so every <T> carries the same string in both slots.
@@ -102,8 +110,15 @@ function harvestKn(isoDate: string) {
   return MONTHS_KN[Number(isoDate.slice(5, 7)) - 1] ?? '';
 }
 
-const UNLOCK_COST = 5;
-const START_BALANCE = 32;
+/* No UNLOCK_COST constant lives here any more, deliberately. The price of a
+   farmer's contact is config.unlock.cost and nothing else; this component is
+   handed it as a prop, read on the server, and has no default to fall back
+   on. See src/lib/unlockPricing.ts. */
+
+/* AWAITING-BACKEND: the DEMO wallet, sized to exactly one real pack —
+   migration 012 made token_packs a single 50-token pack. It is a stand-in for
+   a balance, not a price, and it goes when buyer_wallets is wired. */
+const START_BALANCE = 50;
 
 /* DEV-GLYPH: the frame put ₮ inside this disc. It ships bare. */
 function Coin({ size = 16 }: { size?: number }) {
@@ -203,10 +218,14 @@ function QualityBadge({ quality, moisture }: { quality: QualityStatus; moisture?
 
 function ListingCard({
   listing,
+  unlockCost,
   affordable,
   onUnlockClick,
 }: {
   listing: Card;
+  /** null when the price could not be read. The CTA then quotes nothing and
+   *  does nothing — see the banner at the top of the page. */
+  unlockCost: number | null;
   affordable: boolean;
   onUnlockClick: (id: string) => void;
 }) {
@@ -309,7 +328,9 @@ function ListingCard({
             </span>
           </a>
         ) : (
-          /* DEV-GUARD: the frame had no affordability check. */
+          /* DEV-GUARD: the frame had no affordability check. With no price
+             read there is nothing to quote, so the button carries no number
+             and is disabled — fail closed, never a fallback figure. */
           <button
             type="button"
             onClick={() => onUnlockClick(listing.id)}
@@ -318,11 +339,32 @@ function ListingCard({
           >
             <Coin size={14} />
             <T
-              kn={`ಸಂಪರ್ಕ ತೆರೆಯಿರಿ · ${UNLOCK_COST} ಟೋಕನ್ `}
-              en={`ಸಂಪರ್ಕ ತೆರೆಯಿರಿ · ${UNLOCK_COST} ಟೋಕನ್ `}
+              kn={
+                unlockCost === null
+                  ? 'ಸಂಪರ್ಕ ತೆರೆಯಿರಿ '
+                  : `ಸಂಪರ್ಕ ತೆರೆಯಿರಿ · ${unlockCost} ಟೋಕನ್ `
+              }
+              en={
+                unlockCost === null
+                  ? 'ಸಂಪರ್ಕ ತೆರೆಯಿರಿ '
+                  : `ಸಂಪರ್ಕ ತೆರೆಯಿರಿ · ${unlockCost} ಟೋಕನ್ `
+              }
             />
             <span className={styles.ctaEn}>
-              <T kn={`/ Unlock · ${UNLOCK_COST} tokens`} en={`/ Unlock · ${UNLOCK_COST} tokens`} />
+              {/* The cost is data now, so the English twin has to agree with
+                  it: at cost 1 the frame's hardcoded "tokens" was wrong. */}
+              <T
+                kn={
+                  unlockCost === null
+                    ? '/ Unlock'
+                    : `/ Unlock · ${unlockCost} ${unlockCost === 1 ? 'token' : 'tokens'}`
+                }
+                en={
+                  unlockCost === null
+                    ? '/ Unlock'
+                    : `/ Unlock · ${unlockCost} ${unlockCost === 1 ? 'token' : 'tokens'}`
+                }
+              />
             </span>
           </button>
         )}
@@ -332,10 +374,13 @@ function ListingCard({
 }
 
 function UnlockModal({
+  unlockCost,
   affordable,
   onConfirm,
   onCancel,
 }: {
+  /** Never null here: the modal cannot be opened without a price. */
+  unlockCost: number;
   affordable: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -397,13 +442,16 @@ function UnlockModal({
             <Coin size={16} />
             <span className={styles.modalCostKn}>
               <T
-                kn={`${UNLOCK_COST} ಟೋಕನ್ ಬಳಕೆಯಾಗುತ್ತದೆ`}
-                en={`${UNLOCK_COST} ಟೋಕನ್ ಬಳಕೆಯಾಗುತ್ತದೆ`}
+                kn={`${unlockCost} ಟೋಕನ್ ಬಳಕೆಯಾಗುತ್ತದೆ`}
+                en={`${unlockCost} ಟೋಕನ್ ಬಳಕೆಯಾಗುತ್ತದೆ`}
               />
             </span>
           </div>
           <p className={styles.modalCostEn}>
-            <T kn={`${UNLOCK_COST} tokens will be used`} en={`${UNLOCK_COST} tokens will be used`} />
+            <T
+              kn={`${unlockCost} ${unlockCost === 1 ? 'token' : 'tokens'} will be used`}
+              en={`${unlockCost} ${unlockCost === 1 ? 'token' : 'tokens'} will be used`}
+            />
           </p>
           {/* DEV-GUARD */}
           {!affordable && (
@@ -507,10 +555,14 @@ function EmptyState({ onClear }: { onClear: () => void }) {
 
 export default function BuyerListings({
   initialListings,
+  unlockCost,
   districts,
   varieties,
 }: {
   initialListings: BrowseListing[];
+  /** config.unlock.cost, read on the server. null means the read failed:
+   *  the page shows an error and unlocking is blocked. There is no default. */
+  unlockCost: number | null;
   districts: RefDistrict[];
   varieties: RefVariety[];
 }) {
@@ -617,7 +669,10 @@ export default function BuyerListings({
     ],
     [rows, unlockedRows, soldIds, history],
   );
-  const affordable = tokenBalance >= UNLOCK_COST;
+  /* No price, no unlocking. The balance check only means anything once there
+     is a cost to check it against. */
+  const priced = unlockCost !== null;
+  const affordable = priced && tokenBalance >= unlockCost;
 
   const clearFilters = useCallback(() => {
     setDistrictFilter('');
@@ -632,13 +687,13 @@ export default function BuyerListings({
     // DEMO ONLY. A real unlock calls unlock_contact(), which needs an
     // authenticated buyer and a wallet — neither exists before OTP auth. This
     // spends nothing, releases nothing, and resets on reload.
-    if (unlockTarget === null || !affordable) return;
+    if (unlockTarget === null || !affordable || unlockCost === null) return;
     const row = rows.find((r) => r.id === unlockTarget);
     if (!row) return;
     // The row is snapshotted, not just its id: this is the buyer's copy of
     // what he unlocked, and it has to outlive the listing leaving the market.
     setUnlockedRows((prev) => new Map(prev).set(unlockTarget, row));
-    setTokenBalance((b) => b - UNLOCK_COST);
+    setTokenBalance((b) => b - unlockCost);
     setUnlockTarget(null);
   }
 
@@ -757,6 +812,27 @@ export default function BuyerListings({
         </div>
       </div>
 
+      {/* FAIL CLOSED — not in the frame. The price of a contact comes from
+          config.unlock.cost; if that read failed there is no honest number to
+          put on the button, so unlocking stops rather than quoting a guess.
+          Browsing is unaffected: the listings themselves are still true. */}
+      {!priced && (
+        <p className={styles.priceError} role="alert">
+          <span className={styles.priceErrorKn}>
+            <T
+              kn="ಟೋಕನ್ ದರ ಸದ್ಯ ಓದಲಾಗಲಿಲ್ಲ. ಸಂಪರ್ಕ ತೆರೆಯುವುದು ತಾತ್ಕಾಲಿಕವಾಗಿ ನಿಂತಿದೆ."
+              en="ಟೋಕನ್ ದರ ಸದ್ಯ ಓದಲಾಗಲಿಲ್ಲ. ಸಂಪರ್ಕ ತೆರೆಯುವುದು ತಾತ್ಕಾಲಿಕವಾಗಿ ನಿಂತಿದೆ."
+            />
+          </span>
+          <span className={styles.priceErrorEn}>
+            <T
+              kn="/ The token price could not be read, so unlocking is paused. Listings below are unaffected."
+              en="/ The token price could not be read, so unlocking is paused. Listings below are unaffected."
+            />
+          </span>
+        </p>
+      )}
+
       {/* Grid */}
       <div className={styles.main}>
         {filtered.length > 0 && (
@@ -782,6 +858,7 @@ export default function BuyerListings({
               <ListingCard
                 key={listing.id}
                 listing={listing}
+                unlockCost={unlockCost}
                 affordable={affordable}
                 onUnlockClick={setUnlockTarget}
               />
@@ -790,8 +867,11 @@ export default function BuyerListings({
         </div>
       </div>
 
-      {unlockTarget !== null && (
+      {/* unlockCost is re-tested here, not just at the button: the modal
+          quotes the price, so it must not exist without one. */}
+      {unlockTarget !== null && unlockCost !== null && (
         <UnlockModal
+          unlockCost={unlockCost}
           affordable={affordable}
           onConfirm={handleUnlockConfirm}
           onCancel={closeModal}

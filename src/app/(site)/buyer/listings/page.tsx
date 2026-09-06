@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import BuyerListings from '@/components/BuyerListings';
 import { getBrowseListings } from '@/lib/browseListings';
 import { getReferenceData } from '@/lib/reference';
+import { getUnlockCost } from '@/lib/unlockPricing';
 
 /* Private route: reached only by finishing the buyer OTP flow at
    /login/buyer. Nothing public links here, and it stays out of search. */
@@ -15,15 +16,24 @@ export const dynamic = 'force-dynamic';
 
 export default async function BuyerListingsPage() {
   /* First paint comes from the server so the grid is never empty-then-filled.
-     Every filter change afterwards is the same query from the browser. */
-  const [initialListings, reference] = await Promise.all([
+     Every filter change afterwards is the same query from the browser.
+
+     The unlock price is read here rather than carried as a constant, so the
+     screen quotes what the database would actually charge. It is read on the
+     server: config also holds token_packs, which carries rupee prices that
+     004 keeps away from the anon key, so only the single integer crosses to
+     the client. null means the read failed — the component says so and
+     blocks unlocking rather than guessing a price. */
+  const [initialListings, reference, unlockCost] = await Promise.all([
     getBrowseListings(),
     getReferenceData(),
+    getUnlockCost(),
   ]);
 
   return (
     <BuyerListings
       initialListings={initialListings}
+      unlockCost={unlockCost}
       /* Every district, not just the operational three: a buyer filters by
          where the paddy is, and that grows as operations do. */
       districts={reference.districts}
