@@ -43,16 +43,22 @@ import styles from './BuyerListings.module.css';
  * carry is gone. The "+ ಸೇರಿಸಿ / Add" control now goes to the wallet, where a
  * pack can actually be bought.
  *
- * UNLOCK IS STILL DEMO, and deliberately so. A real unlock spends a token and
- * releases a farmer's contact, which needs an authenticated buyer, a wallet
- * and the unlock_contact() function — none of which is reachable before OTP
- * auth lands. So the modal flips a card in component state, decrements a
- * demo balance, and touches nothing in the database. No token is spent and no
- * contact is released. The names and numbers a demo unlock reveals are
- * fixtures, not real farmers.
+ * UNLOCK IS REAL. It posts to /api/buyer/unlock, which calls
+ * unlock_contact_for_buyer() (migration 015) — one transaction that writes
+ * the unlock row, debits token_ledger, moves buyer_wallets and writes an
+ * audit row. The fixture name and phone number this file used to reveal are
+ * gone; what a card shows after an unlock is the farmer's real contact,
+ * returned by that call and by nothing else.
  *
- * AWAITING-BACKEND: the token balance, the "+ ಸೇರಿಸಿ / Add" control and the
- * unlock itself.
+ * THE BROWSER NEVER WRITES A BALANCE, the rule BuyerWallet already states.
+ * There is no arithmetic on the token count here: the number on screen is
+ * replaced by the balance the server read back from the row it updated, and
+ * a failed unlock leaves it exactly as it was. A second unlock of the same
+ * listing is answered with already: true and tokens_spent 0, so the figure
+ * does not move.
+ *
+ * AWAITING-BACKEND: nothing on this screen. The balance, the "+ ಸೇರಿಸಿ / Add"
+ * control and the unlock are all wired.
  *
  * THE PRICE IS NOT WRITTEN DOWN HERE. It was, and it was wrong: this file
  * hardcoded 5 while config.unlock.cost said 1, so every screen quoted a
@@ -93,18 +99,14 @@ import styles from './BuyerListings.module.css';
 
 type QualityStatus = 'checked' | 'pending';
 
-/** A real browse row, plus the DEMO unlock flag which lives only in state,
- *  and whether the farmer has since marked the paddy sold. */
-type Card = BrowseListing & { unlocked: boolean; sold: boolean };
+/** The farmer's contact, as the unlock call returns it. Held only for
+ *  listings this buyer has actually paid to open. */
+type Contact = { name: string | null; mobile: string | null };
 
-/* The demo identities a DEMO unlock reveals. These are NOT farmers: the
-   browse view carries no identity, and a real unlock needs auth, a wallet and
-   unlock_contact(). Until then an unlocked card shows this placeholder pair
-   so the state is reviewable, and it is obviously not a real person. */
-const DEMO_IDENTITY = {
-  farmerFull: 'ರೈತ: ಪರೀಕ್ಷಾ ಹೆಸರು',
-  phoneFull: '90000 00000',
-};
+/** A real browse row, plus whether this buyer has unlocked it in this
+ *  session, the contact that unlock released, and whether the farmer has
+ *  since marked the paddy sold. */
+type Card = BrowseListing & { unlocked: boolean; sold: boolean; contact: Contact | null };
 
 const MASKED_FARMER = 'ರೈತ: *****';
 const MASKED_PHONE = '9X XXX XXXXX';
@@ -299,16 +301,20 @@ function ListingCard({
         </div>
 
         <div className={styles.identity}>
-          {/* The browse view carries no identity, so there is nothing real to
-              reveal. A DEMO unlock shows an obviously fake pair. */}
-          {listing.unlocked ? (
+          {/* listings_browse carries no identity by design. What is shown
+              here came back from the unlock call, which released it only
+              after the token was spent. */}
+          {listing.unlocked && listing.contact ? (
             <>
               <p className={styles.farmerFull}>
-                <T kn={DEMO_IDENTITY.farmerFull} en={DEMO_IDENTITY.farmerFull} />
+                <T
+                  kn={`ರೈತ: ${listing.contact.name ?? '—'}`}
+                  en={`ರೈತ: ${listing.contact.name ?? '—'}`}
+                />
               </p>
               <p className={styles.phoneFull}>
                 <PhoneIcon />
-                <T kn={DEMO_IDENTITY.phoneFull} en={DEMO_IDENTITY.phoneFull} />
+                <T kn={listing.contact.mobile ?? '—'} en={listing.contact.mobile ?? '—'} />
               </p>
             </>
           ) : (
@@ -325,10 +331,10 @@ function ListingCard({
       </div>
 
       <div className={styles.cardFoot}>
-        {listing.unlocked ? (
+        {listing.unlocked && listing.contact?.mobile ? (
           /* DEV-ICON: the frame's tel: dropped the country code. */
           <a
-            href={`tel:+91${DEMO_IDENTITY.phoneFull.replace(/\s/g, '')}`}
+            href={`tel:+91${listing.contact.mobile.replace(/\D/g, '')}`}
             className={styles.cta}
           >
             <PhoneIcon size={15} />
@@ -386,12 +392,21 @@ function ListingCard({
 function UnlockModal({
   unlockCost,
   affordable,
+  busy,
+  failure,
   onConfirm,
   onCancel,
 }: {
   /** Never null here: the modal cannot be opened without a price. */
   unlockCost: number;
   affordable: boolean;
+  /** An unlock is in flight. Both buttons lock so a second tap cannot start
+   *  a second call while the first is still deciding. */
+  busy: boolean;
+  /** The server's refusal code, or null. Distinct from `affordable`, which is
+   *  what the screen believed before asking: the server has the last word,
+   *  and a balance spent on another device lands here. */
+  failure: string | null;
   onConfirm: () => void;
   onCancel: () => void;
 }) {
@@ -463,12 +478,56 @@ function UnlockModal({
               en={`${unlockCost} ${unlockCost === 1 ? 'token' : 'tokens'} will be used`}
             />
           </p>
-          {/* DEV-GUARD */}
-          {!affordable && (
+          {/* DEV-GUARD — what the screen knew before asking. */}
+          {!affordable && !failure && (
             <p className={styles.modalShort}>
               <T kn="ಟೋಕನ್ ಸಾಲದು / Not enough tokens" en="ಟೋಕನ್ ಸಾಲದು / Not enough tokens" />
             </p>
           )}
+          {/* What the server said. A short balance is named, and the way to
+              fix it is a link rather than an instruction — nothing was spent,
+              so the only thing missing is tokens. */}
+          {failure === 'insufficient_balance' && (
+            <p className={styles.modalShort} role="alert">
+              <T
+                kn="ಟೋಕನ್ ಸಾಲದು. ಯಾವ ಟೋಕನ್ ಕೂಡ ಖರ್ಚಾಗಿಲ್ಲ. "
+                en="ಟೋಕನ್ ಸಾಲದು. ಯಾವ ಟೋಕನ್ ಕೂಡ ಖರ್ಚಾಗಿಲ್ಲ. "
+              />
+              <Link href="/buyer/wallet" className={styles.modalShortLink}>
+                <T
+                  kn="ಟೋಕನ್ ಸೇರಿಸಿ / Not enough tokens — nothing was spent. Add tokens"
+                  en="ಟೋಕನ್ ಸೇರಿಸಿ / Not enough tokens — nothing was spent. Add tokens"
+                />
+              </Link>
+            </p>
+          )}
+          {failure === 'unlock_cost_unavailable' && (
+            <p className={styles.modalShort} role="alert">
+              <T
+                kn="ಬೆಲೆ ಸದ್ಯ ಓದಲಾಗಲಿಲ್ಲ. / The price could not be read — nothing was spent."
+                en="ಬೆಲೆ ಸದ್ಯ ಓದಲಾಗಲಿಲ್ಲ. / The price could not be read — nothing was spent."
+              />
+            </p>
+          )}
+          {failure === 'listing_not_active' && (
+            <p className={styles.modalShort} role="alert">
+              <T
+                kn="ಈ ಪಟ್ಟಿ ಈಗ ಲಭ್ಯವಿಲ್ಲ. / This listing is no longer available — nothing was spent."
+                en="ಈ ಪಟ್ಟಿ ಈಗ ಲಭ್ಯವಿಲ್ಲ. / This listing is no longer available — nothing was spent."
+              />
+            </p>
+          )}
+          {failure !== null &&
+            failure !== 'insufficient_balance' &&
+            failure !== 'unlock_cost_unavailable' &&
+            failure !== 'listing_not_active' && (
+              <p className={styles.modalShort} role="alert">
+                <T
+                  kn="ಆಗಲಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ. / That did not work — nothing was spent."
+                  en="ಆಗಲಿಲ್ಲ. ಮತ್ತೊಮ್ಮೆ ಪ್ರಯತ್ನಿಸಿ. / That did not work — nothing was spent."
+                />
+              </p>
+            )}
         </div>
 
         {/* What PaddyLink is, what to check, and the one refund rule — said
@@ -489,7 +548,12 @@ function UnlockModal({
         </div>
 
         <div className={styles.actions}>
-          <button type="button" onClick={onCancel} className={styles.cancel}>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={busy}
+            className={styles.cancel}
+          >
             <T kn="ರದ್ದು " en="ರದ್ದು " />
             <span className={styles.actionEn}>
               <T kn="/ Cancel" en="/ Cancel" />
@@ -499,12 +563,12 @@ function UnlockModal({
             type="button"
             ref={confirmRef}
             onClick={onConfirm}
-            disabled={!affordable}
-            className={`${styles.confirm} ${affordable ? '' : styles.confirmDisabled}`}
+            disabled={!affordable || busy}
+            className={`${styles.confirm} ${affordable && !busy ? '' : styles.confirmDisabled}`}
           >
-            <T kn="ಒಪ್ಪಿಗೆ " en="ಒಪ್ಪಿಗೆ " />
+            <T kn={busy ? 'ತೆರೆಯುತ್ತಿದೆ ' : 'ಒಪ್ಪಿಗೆ '} en={busy ? 'ತೆರೆಯುತ್ತಿದೆ ' : 'ಒಪ್ಪಿಗೆ '} />
             <span className={styles.actionEn}>
-              <T kn="/ Confirm" en="/ Confirm" />
+              <T kn={busy ? '/ Opening…' : '/ Confirm'} en={busy ? '/ Opening…' : '/ Confirm'} />
             </span>
           </button>
         </div>
@@ -557,7 +621,7 @@ function EmptyState({ onClear }: { onClear: () => void }) {
 export default function BuyerListings({
   initialListings,
   unlockCost,
-  balance,
+  balance: initialBalance,
   signedIn,
   districts,
   varieties,
@@ -578,15 +642,29 @@ export default function BuyerListings({
   varieties: RefVariety[];
 }) {
   const [rows, setRows] = useState<BrowseListing[]>(initialListings);
-  /* DEMO unlocks live in their own state, not derived from the current
-     result set: filtering a card out must not forget that it was unlocked,
-     or the state vanishes the moment a buyer looks at another district.
-     The whole ROW is kept, not just the id — once the farmer marks the paddy
-     sold it leaves listings_browse for good, and this snapshot is then the
-     only copy of what he unlocked. History is never dropped. */
-  const [unlockedRows, setUnlockedRows] = useState<Map<string, BrowseListing>>(
-    () => new Map(),
-  );
+  /* Unlocks live in their own state, not derived from the current result
+     set: filtering a card out must not forget that it was unlocked, or the
+     state vanishes the moment a buyer looks at another district. The whole
+     ROW is kept, not just the id — once the farmer marks the paddy sold it
+     leaves listings_browse for good, and this snapshot is then the only copy
+     of what he unlocked. History is never dropped.
+
+     The contact is kept beside the row because it arrives with the unlock
+     and lives nowhere else on this page: listings_browse carries no
+     identity. A reload empties this map, and the card goes back to masked —
+     the buyer opens it again and the server answers already: true, charging
+     nothing. He is never charged twice for the same listing. */
+  const [unlockedRows, setUnlockedRows] = useState<
+    Map<string, { row: BrowseListing; contact: Contact }>
+  >(() => new Map());
+  /* The ledger's number. Seeded from the server read and only ever REPLACED
+     by another server read — never incremented or decremented here. */
+  const [balance, setBalance] = useState<number | null>(initialBalance);
+  /* Set while an unlock is in flight, and cleared when the server answers. */
+  const [unlocking, setUnlocking] = useState(false);
+  /* Why the last unlock did not happen. 'insufficient_balance' gets its own
+     wording and a way to the wallet; anything else is the generic failure. */
+  const [unlockError, setUnlockError] = useState<string | null>(null);
   /* Which of those the farmer has since marked sold. Read from
      public.listings_sold, asked only about ids this buyer already holds. */
   const [soldIds, setSoldIds] = useState<Set<string>>(() => new Set());
@@ -660,12 +738,12 @@ export default function BuyerListings({
     const live = new Set(rows.map((r) => r.id));
     const month = monthFilter ? Number(monthFilter) : 0;
     return [...unlockedRows.values()]
-      .filter((r) => soldIds.has(r.id) && !live.has(r.id))
-      .filter((r) => !districtFilter || r.district_en === districtFilter)
-      .filter((r) => !varietyFilter || r.variety_en === varietyFilter)
-      .filter((r) => !month || Number(r.harvest_month.slice(5, 7)) === month)
-      .filter((r) => !qualityOnly || r.quality_checked_at != null)
-      .map((r) => ({ ...r, unlocked: true, sold: true }));
+      .filter(({ row: r }) => soldIds.has(r.id) && !live.has(r.id))
+      .filter(({ row: r }) => !districtFilter || r.district_en === districtFilter)
+      .filter(({ row: r }) => !varietyFilter || r.variety_en === varietyFilter)
+      .filter(({ row: r }) => !month || Number(r.harvest_month.slice(5, 7)) === month)
+      .filter(({ row: r }) => !qualityOnly || r.quality_checked_at != null)
+      .map(({ row: r, contact }) => ({ ...r, unlocked: true, sold: true, contact }));
   }, [rows, unlockedRows, soldIds, districtFilter, varietyFilter, monthFilter, qualityOnly]);
 
   const filtered: Card[] = useMemo(
@@ -674,6 +752,7 @@ export default function BuyerListings({
         ...r,
         unlocked: unlockedRows.has(r.id),
         sold: soldIds.has(r.id),
+        contact: unlockedRows.get(r.id)?.contact ?? null,
       })),
       ...history,
     ],
@@ -691,23 +770,56 @@ export default function BuyerListings({
     setQualityOnly(false);
   }, []);
 
-  const closeModal = useCallback(() => setUnlockTarget(null), []);
+  const closeModal = useCallback(() => {
+    if (unlocking) return;
+    setUnlockTarget(null);
+    setUnlockError(null);
+  }, [unlocking]);
 
-  function handleUnlockConfirm() {
-    // DEMO ONLY. A real unlock calls unlock_contact(), which needs an
-    // authenticated buyer and a wallet — neither exists before OTP auth. This
-    // spends nothing, releases nothing, and resets on reload.
-    if (unlockTarget === null || !affordable || unlockCost === null) return;
+  async function handleUnlockConfirm() {
+    if (unlockTarget === null || unlockCost === null || unlocking) return;
     const row = rows.find((r) => r.id === unlockTarget);
     if (!row) return;
-    // The row is snapshotted, not just its id: this is the buyer's copy of
-    // what he unlocked, and it has to outlive the listing leaving the market.
-    setUnlockedRows((prev) => new Map(prev).set(unlockTarget, row));
-    // The balance is NOT decremented here, and that is the point: a DEMO
-    // unlock spends nothing, so the ledger has not moved and neither should
-    // the number on screen. When unlock_contact() is wired the balance comes
-    // back from the server, the same way the wallet gets it.
-    setUnlockTarget(null);
+
+    setUnlocking(true);
+    setUnlockError(null);
+    try {
+      /* The listing id and nothing else. The price is not sent — the server
+         reads it from config and the function reads it again, so there is no
+         amount here for a browser to argue with. */
+      const res = await fetch('/api/buyer/unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: unlockTarget }),
+      });
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        /* Nothing was spent and nothing is revealed. The balance on screen is
+           left exactly as the last server read left it. */
+        setUnlockError(typeof body?.error === 'string' ? body.error : `HTTP ${res.status}`);
+        setUnlocking(false);
+        return;
+      }
+
+      /* The row is snapshotted, not just its id: this is the buyer's copy of
+         what he unlocked, and it has to outlive the listing leaving the
+         market. The contact rides with it. */
+      setUnlockedRows((prev) =>
+        new Map(prev).set(unlockTarget, {
+          row,
+          contact: { name: body.farmerName ?? null, mobile: body.farmerMobile ?? null },
+        }),
+      );
+      /* REPLACED, not decremented. This is the figure the server read back
+         from the wallet row it updated; on an already-unlocked listing it
+         comes back unchanged, which is exactly right. */
+      if (typeof body.balance === 'number') setBalance(body.balance);
+      setUnlockTarget(null);
+    } catch {
+      setUnlockError('network');
+    }
+    setUnlocking(false);
   }
 
   return (
@@ -903,6 +1015,8 @@ export default function BuyerListings({
         <UnlockModal
           unlockCost={unlockCost}
           affordable={affordable}
+          busy={unlocking}
+          failure={unlockError}
           onConfirm={handleUnlockConfirm}
           onCancel={closeModal}
         />

@@ -745,6 +745,24 @@
   color: var(--kemmannu-600);
 }
 
+/* The way out of a short balance. Inherits the message's own size and
+   weight and takes the bar's link colour, the one .addLink already uses for
+   "+ ಸೇರಿಸಿ / Add" — the control this points at. No new colour. */
+.modalShortLink {
+  color: var(--bhatta-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.modalShortLink:hover {
+  color: color-mix(in srgb, var(--bhatta-600) 78%, var(--gadde-950));
+}
+
+.modalShortLink:focus-visible {
+  outline: 2px solid var(--bhatta-600);
+  outline-offset: 3px;
+}
+
 .safety {
   background: var(--hottu-100);
   border: 1px solid var(--bhatta-200);
