@@ -249,7 +249,7 @@ export default function FarmerListings({ listings }: { listings: FarmerListingRo
                 row-action treatment, rather than a new one. */}
             <form method="post" action="/farmer/logout">
               <button type="submit" className={styles.edit}>
-                ಹೊರಬನ್ನಿ
+                ಲಾಗ್ ಔಟ್
               </button>
             </form>
           </div>

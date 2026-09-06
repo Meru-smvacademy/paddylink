@@ -4,7 +4,7 @@ import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
 /**
  * /farmer/logout — clears the farmer session cookie and returns to the farmer
  * sign-in screen. The twin of /admin/logout and of /buyer/logout, the same
- * shape as both: POST is what the surfaces' ಹೊರಬನ್ನಿ button sends, GET is kept
+ * shape as both: POST is what the surfaces' ಲಾಗ್ ಔಟ್ button sends, GET is kept
  * so a typed /farmer/logout also works, and neither checks for a session
  * first because clearing a cookie is idempotent.
  *

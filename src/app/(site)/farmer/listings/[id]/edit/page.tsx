@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import FarmerListingEdit from '@/components/FarmerListingEdit';
+import FarmerLogoutControl from '@/components/FarmerLogoutControl';
 import { getEditableListing } from '@/lib/farmerListingEdit';
 import { getReferenceData } from '@/lib/reference';
 import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
@@ -64,16 +65,13 @@ export default async function FarmerListingEditPage({
             </svg>
             ಹಿಂದೆ
           </Link>
-          {/* Sign out, the admin chrome's pattern. Sited at the far end of the
-              row, away from ಹಿಂದೆ and well away from the form's own submit:
-              this screen holds unsaved edits, and the two controls must not
-              sit next to each other. The page is only served to a farmer with
-              a session, so it is unconditional. */}
-          <form method="post" action="/farmer/logout">
-            <button type="submit" className={shell.signOut}>
-              ಹೊರಬನ್ನಿ
-            </button>
-          </form>
+          {/* Sign out, the admin chrome's pattern — but this screen alone puts
+              a confirm step in front of it, because it holds unsaved edits and
+              a mis-tap here throws away typed work. The sheet is the sold
+              toggle's, class for class. Still sited at the far end of the row,
+              away from ಹಿಂದೆ and from the form's own submit. The page is only
+              served to a farmer with a session, so it is unconditional. */}
+          <FarmerLogoutControl />
         </div>
 
         <FarmerListingEdit reference={reference} target={target} />

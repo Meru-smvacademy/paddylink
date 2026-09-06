@@ -89,7 +89,7 @@
   align-items: center;
 }
 
-/* ಹೊರಬನ್ನಿ — .back's treatment on a <button>, since the control is a form
+/* ಲಾಗ್ ಔಟ್ — .back's treatment on a <button>, since the control is a form
    submit rather than a link. Same family, same colour, no new language. */
 .signOut {
   font-family: var(--noto-kannada);

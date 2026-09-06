@@ -62,7 +62,7 @@
   color: var(--gadde-900);
 }
 
-/* Holds ಹೊಸ ಪಟ್ಟಿ and ಹೊರಬನ್ನಿ at the right of the head row. The gap is
+/* Holds ಹೊಸ ಪಟ್ಟಿ and ಲಾಗ್ ಔಟ್ at the right of the head row. The gap is
    .actions', the row-action spacing this page already uses. */
 .headActions {
   display: flex;
