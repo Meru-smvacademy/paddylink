@@ -54,7 +54,47 @@ import styles from './FarmerListingFormV2.module.css';
  * Also logged as a deliberate divergence: this Make file ships its own
  * success screen ("ಯಶಸ್ವಿಯಾಗಿ ಪಟ್ಟಿ ಆಯಿತು!"), which is NOT built. The flow
  * keeps the existing FarmerSuccess screen, per brief.
+ *
+ * EDIT MODE. The same component, the same fields, the same order, the same
+ * validation — the farmer edit screen at /farmer/listings/[id]/edit passes an
+ * `edit` target and this renders pre-filled. There is no second form, because
+ * a second form is how two screens start disagreeing about what a listing is.
+ *
+ * What edit mode changes, and nothing else:
+ * - the mic tile and its "ಅಥವಾ ಕೆಳಗೆ ಬರೆಯಿರಿ" divider are hidden. Both belong
+ *   to making a new listing; neither means anything when correcting one.
+ * - the mobile number is rendered, read-only. It is the only thing on this
+ *   screen a farmer cannot change: it is his identity, not a field. It is not
+ *   an input, it is not submitted, and the route never reads one.
+ * - consent is hidden and not required. It was given when the listing was
+ *   created and contact_share_consent_at records that moment; asking again
+ *   would either overwrite that record or ask for something already held.
+ * - a warning appears above the button when saving would drop a quality
+ *   check, so the farmer is told before he saves, not after.
+ * - the heading and the button say what the screen does.
+ *
+ * No new field, no new colour, no reordering. The one thing edit mode adds to
+ * the frame is the read-only mobile row, which the brief requires.
  */
+
+/** Everything the edit screen pre-fills from the database. */
+export interface ListingEditTarget {
+  id: string;
+  /** Read-only on the form. Never submitted. */
+  mobile: string;
+  name: string;
+  districtId: string;
+  talukId: string;
+  village: string;
+  varietyId: string;
+  varietyOther: string;
+  quintals: string;
+  /** 1-12. */
+  harvestMonth: number;
+  photoUrl: string | null;
+  qualityChecked: boolean;
+  status: string;
+}
 
 /* Districts, taluks and varieties now come from the database (migration 005's
    reference views), not from a list in this file. That is what fixes the
@@ -106,24 +146,34 @@ export default function FarmerListingFormV2({
   reference,
   mobile,
   onSubmitted,
+  edit,
+  onSaved,
 }: {
   reference: ReferenceData;
   /** TEMP-PRE-AUTH: carried from the OTP step in component state, not a
       verified session. The server route re-validates the shape but cannot
-      yet prove the number belongs to whoever is typing. */
+      yet prove the number belongs to whoever is typing. In edit mode it is
+      the stored number, shown read-only and never submitted. */
   mobile: string;
-  onSubmitted: (listing: CreatedListing) => void;
+  onSubmitted?: (listing: CreatedListing) => void;
+  /** Present only on the edit screen. Its presence is what switches modes. */
+  edit?: ListingEditTarget;
+  onSaved?: () => void;
 }) {
+  const editing = edit !== undefined;
+
   const [form, setForm] = useState({
-    name: '',
-    district: '',
-    taluk: '',
-    village: '',
-    variety: '',
-    varietyOther: '',
-    quintals: '',
-    harvestMonth: '',
-    consent: false,
+    name: edit?.name ?? '',
+    district: edit?.districtId ?? '',
+    taluk: edit?.talukId ?? '',
+    village: edit?.village ?? '',
+    variety: edit?.varietyId ?? '',
+    varietyOther: edit?.varietyOther ?? '',
+    quintals: edit?.quintals ?? '',
+    harvestMonth: edit ? (HARVEST_MONTHS[edit.harvestMonth - 1] ?? '') : '',
+    // Recorded at creation and not re-asked on a correction. Pre-set so the
+    // shared submit gate below passes; the edit route never reads it.
+    consent: editing,
   });
   const [submitting, setSubmitting] = useState(false);
   const [submitFailed, setSubmitFailed] = useState(false);
@@ -215,6 +265,22 @@ export default function FarmerListingFormV2({
      required field must also be valid. */
   const canSubmit = !Object.values(invalid).some(Boolean) && form.consent;
 
+  /* Will saving drop this listing's quality check? The same rule the route
+     applies, computed here only so the farmer is warned BEFORE he saves —
+     the route decides, this just tells the truth about what it will decide.
+     Narrow on purpose: correcting a village or a harvest month does not
+     change which crop was checked, so a valid check survives that. */
+  const qualityWillReset =
+    edit !== undefined &&
+    edit.qualityChecked &&
+    (form.variety !== edit.varietyId ||
+      (otherChosen ? form.varietyOther.trim() : '') !== edit.varietyOther ||
+      Number(form.quintals) !== Number(edit.quintals));
+
+  /* Existing photo until a new file is chosen. Choosing one replaces it;
+     nothing here removes a stored photo. */
+  const shownPreview = photoPreview ?? edit?.photoUrl ?? null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit || submitting) return;
@@ -222,7 +288,10 @@ export default function FarmerListingFormV2({
     setSubmitFailed(false);
 
     const body = new FormData();
-    body.set('mobile', mobile);
+    // Create only. In edit mode the farmer comes from the httpOnly cookie and
+    // the route reads no mobile at all — sending one would change nothing.
+    if (!editing) body.set('mobile', mobile);
+    if (edit) body.set('listing_id', edit.id);
     body.set('name', form.name.trim());
     body.set('village', form.village.trim());
     body.set('district_id', form.district);
@@ -232,16 +301,20 @@ export default function FarmerListingFormV2({
     body.set('quantity_quintals', form.quintals);
     // The grid is ordered January-first, so its index is the month number.
     body.set('harvest_month', String(HARVEST_MONTHS.indexOf(form.harvestMonth) + 1));
-    body.set('consent', String(form.consent));
+    if (!editing) body.set('consent', String(form.consent));
     if (photo) body.set('photo', photo);
 
     try {
-      const res = await fetch('/api/farmer/listings', { method: 'POST', body });
+      const res = await fetch(
+        editing ? '/api/farmer/listings/edit' : '/api/farmer/listings',
+        { method: 'POST', body },
+      );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { listing } = await res.json();
-      onSubmitted(listing);
+      if (editing) onSaved?.();
+      else onSubmitted?.(listing);
     } catch (err) {
-      console.error('[listing form] submit failed', err);
+      console.error(`[listing form] ${editing ? 'save' : 'submit'} failed`, err);
       setSubmitFailed(true);
       setSubmitting(false);
     }
@@ -258,12 +331,18 @@ export default function FarmerListingFormV2({
             </svg>
             ರೈತ
           </span>
-          <h1 className={styles.title}>ನಿಮ್ಮ ಭತ್ತ ಪಟ್ಟಿ ಮಾಡಿ</h1>
-          <p className={styles.subLine}>ಕೇವಲ ೨ ನಿಮಿಷದಲ್ಲಿ ಮುಗಿಸಿ · ಉಚಿತ · ಯಾವ ಕಮಿಷನ್ ಇಲ್ಲ</p>
+          <h1 className={styles.title}>{editing ? 'ಪಟ್ಟಿ ಸರಿಪಡಿಸಿ' : 'ನಿಮ್ಮ ಭತ್ತ ಪಟ್ಟಿ ಮಾಡಿ'}</h1>
+          {/* The sub-line is a pitch for making a listing. It has nothing to
+              say to a farmer correcting one he already made. */}
+          {!editing && (
+            <p className={styles.subLine}>ಕೇವಲ ೨ ನಿಮಿಷದಲ್ಲಿ ಮುಗಿಸಿ · ಉಚಿತ · ಯಾವ ಕಮಿಷನ್ ಇಲ್ಲ</p>
+          )}
         </div>
 
         {/* Mic tile — DEV-A11Y: keeps the designed look, but is marked
-            disabled and does not present itself as tappable. */}
+            disabled and does not present itself as tappable. Create only:
+            "ಧ್ವನಿಯಿಂದ ಪಟ್ಟಿ ಮಾಡಿ" is an offer to make a listing. */}
+        {!editing && (
         <button type="button" className={styles.mic} aria-disabled="true" aria-label="ಧ್ವನಿಯಿಂದ ಪಟ್ಟಿ ಮಾಡಿ">
           <span className={styles.micGlow} aria-hidden="true" />
           <span className={styles.micIcon}>
@@ -300,13 +379,16 @@ export default function FarmerListingFormV2({
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </button>
+        )}
 
-        {/* Divider */}
-        <div className={styles.divider}>
-          <span className={styles.dividerLine} aria-hidden="true" />
-          <span className={styles.dividerText}>ಅಥವಾ ಕೆಳಗೆ ಬರೆಯಿರಿ</span>
-          <span className={styles.dividerLine} aria-hidden="true" />
-        </div>
+        {/* Divider — belongs to the mic tile above it. */}
+        {!editing && (
+          <div className={styles.divider}>
+            <span className={styles.dividerLine} aria-hidden="true" />
+            <span className={styles.dividerText}>ಅಥವಾ ಕೆಳಗೆ ಬರೆಯಿರಿ</span>
+            <span className={styles.dividerLine} aria-hidden="true" />
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
           {/* 1. Name */}
@@ -325,6 +407,23 @@ export default function FarmerListingFormV2({
               className={`${styles.control} ${showError('name') ? styles.controlError : ''}`}
             />
           </div>
+
+          {/* 1b. Mobile — EDIT ONLY, and read-only by requirement. This is
+              the farmer's identity, not a field: it is rendered so he can see
+              whose listing he is correcting, it is not an <input>, it is not
+              in the submitted body, and the route reads no mobile from a
+              request at all. The only addition edit mode makes to the frame. */}
+          {editing && (
+            <div className={styles.field}>
+              <span className={styles.label} id="fl-mobile-label">
+                ಮೊಬೈಲ್ ನಂಬರ್
+              </span>
+              <p className={styles.controlReadonly} aria-labelledby="fl-mobile-label">
+                {edit.mobile}
+              </p>
+              <p className={styles.readonlyHint}>ಈ ನಂಬರ್ ಬದಲಾಯಿಸಲು ಆಗುವುದಿಲ್ಲ</p>
+            </div>
+          )}
 
           {/* 2 + 3. District and taluk. The frame makes taluk a free-text
               box and carries no taluk data, so there is no dependency. */}
@@ -502,10 +601,10 @@ export default function FarmerListingFormV2({
             <label className={styles.label} htmlFor="fl-photo">
               ಭತ್ತದ ಫೋಟೋ (ಐಚ್ಛಿಕ)
             </label>
-            <label className={`${styles.drop} ${photoPreview ? styles.dropFilled : ''}`}>
-              {photoPreview ? (
+            <label className={`${styles.drop} ${shownPreview ? styles.dropFilled : ''}`}>
+              {shownPreview ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={photoPreview} alt="ಭತ್ತದ ಫೋಟೋ" className={styles.preview} />
+                <img src={shownPreview} alt="ಭತ್ತದ ಫೋಟೋ" className={styles.preview} />
               ) : (
                 <>
                   <span className={styles.dropIcon}>
@@ -550,15 +649,21 @@ export default function FarmerListingFormV2({
                 onChange={(e) => handlePhoto(e.target.files?.[0] ?? null)}
               />
             </label>
+            {/* Cancels a newly chosen file only. In edit mode that reverts to
+                the stored photo — there is deliberately no control here that
+                removes a stored photo, and no route that would accept one. */}
             {photoPreview && (
               <button type="button" onClick={clearPhoto} className={styles.removePhoto}>
-                ಫೋಟೋ ತೆಗೆಯಿರಿ
+                {editing ? 'ಈ ಆಯ್ಕೆ ರದ್ದು' : 'ಫೋಟೋ ತೆಗೆಯಿರಿ'}
               </button>
             )}
           </div>
 
           {/* Consent — DEV-CONSENT: the frame's sentence named a different
-              platform and misdescribed what is shown. CEO's wording. */}
+              platform and misdescribed what is shown. CEO's wording.
+              Create only: consent is recorded once, at creation, and
+              contact_share_consent_at is the record of that moment. */}
+          {!editing && (
           <div className={styles.consent}>
             <label className={styles.consentLabel}>
               <span className={styles.consentBoxWrap}>
@@ -593,6 +698,34 @@ export default function FarmerListingFormV2({
               </p>
             </label>
           </div>
+          )}
+
+          {/* QUALITY RESET WARNING — edit only, and shown before the button
+              rather than after the save. Changing which crop this is, or how
+              much of it there is, makes the recorded moisture reading a
+              measurement of something else, so it is cleared and the badge
+              honestly returns to ಪರಿಶೀಲನೆ ಬಾಕಿ. The sentence reuses the
+              badge's own promise rather than inventing new copy. */}
+          {qualityWillReset && (
+            <div className={styles.qualityWarn} role="status">
+              <span className={styles.qualityWarnIcon} aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M10 3.2 2.6 16a1 1 0 0 0 .87 1.5h13.06A1 1 0 0 0 17.4 16L10 3.2Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                  <path d="M10 8v3.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                  <circle cx="10" cy="14.2" r="0.9" fill="currentColor" />
+                </svg>
+              </span>
+              <p className={styles.qualityWarnText}>
+                ತಳಿ ಅಥವಾ ಪ್ರಮಾಣ ಬದಲಾಗಿದೆ. ಉಳಿಸಿದರೆ ಈ ಪಟ್ಟಿಯ ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ ರದ್ದಾಗುತ್ತದೆ —
+                ಕೊಯ್ಲಿನ ಸಮಯದಲ್ಲಿ ನಮ್ಮ ತಂಡ ಮತ್ತೆ ಬಂದು ಪರಿಶೀಲಿಸುತ್ತದೆ.
+              </p>
+            </div>
+          )}
 
           {/* Submit — the frame places nothing beneath it. */}
           <div className={styles.submitWrap}>
@@ -601,7 +734,7 @@ export default function FarmerListingFormV2({
               disabled={!canSubmit || submitting}
               className={`${styles.submit} ${canSubmit && !submitting ? styles.submitReady : ''}`}
             >
-              ಪಟ್ಟಿ ಮಾಡಿ
+              {editing ? 'ಉಳಿಸಿ' : 'ಪಟ್ಟಿ ಮಾಡಿ'}
             </button>
             {/* The frame has no failure state. "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ" is reused
                 verbatim from the OTP screen's error in the same flow, rather

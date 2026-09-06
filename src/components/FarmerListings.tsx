@@ -50,11 +50,14 @@ import styles from './FarmerListings.module.css';
  * this screen. Removing the control rather than disabling it is the point:
  * there is nothing here left to enable by accident.
  *
- * Logged, built as designed: ಎಡಿಟ್ has no handler in the frame either and
- * ships inert and aria-disabled — a farmer clicking it gets nothing, and no
- * message says why. The buyers pill now counts real unlocks but still offers
- * no way to reach them. The empty state's padlock icon reads as "locked"
- * rather than "empty"; it is the frame's drawing.
+ * EDIT: the frame's row action is wired. ಸರಿಪಡಿಸಿ opens the same listing
+ * form the create flow uses, pre-filled from the database, with the mobile
+ * number shown read-only because it is the farmer's identity rather than a
+ * field. A sold listing can be corrected too and stays sold.
+ *
+ * Logged, built as designed: the buyers pill counts real unlocks but still
+ * offers no way to reach them. The empty state's padlock icon reads as
+ * "locked" rather than "empty"; it is the frame's drawing.
  *
  * BADGES: migration 007 gave the schema real quality columns, and the admin
  * quality desk is their only write path. A card reads
@@ -149,12 +152,13 @@ function ListingCard({ listing }: { listing: FarmerListingRow }) {
         <div className={styles.actions}>
           {/* The one action on this row that does anything. Confirms first. */}
           <FarmerSoldControl listingId={listing.id} status={listing.status} />
-          {/* Inert in the frame too. aria-disabled so it does not pretend to
-              work. The frame's remove link that sat beside it is gone — see
-              the note at the top of this file. */}
-          <button type="button" className={styles.edit} aria-disabled="true">
-            ಎಡಿಟ್
-          </button>
+          {/* The frame's second row action, now real. It kept the frame's
+              treatment and lost its aria-disabled: it goes to the listing
+              form, pre-filled from the database. Label is ಸರಿಪಡಿಸಿ —
+              "correct this" — which is what a farmer is actually doing. */}
+          <Link href={`/farmer/listings/${listing.id}/edit`} className={styles.edit}>
+            ಸರಿಪಡಿಸಿ
+          </Link>
         </div>
       </div>
 

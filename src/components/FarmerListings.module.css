@@ -188,9 +188,11 @@
   padding-top: 0.25rem;
 }
 
-/* Inert in the frame too — no handler behind it. Ships aria-disabled so it
-   does not pretend to work. The frame's remove link had a rule here as well;
-   both the control and its style are gone, per the no-delete ruling. */
+/* The frame's row action, now a working link to the edit screen. Same
+   family, size, weight and green the frame gave it; only the cursor changes,
+   because unlike the inert original this one goes somewhere. The frame's
+   remove link had a rule here as well; both the control and its style are
+   gone, per the no-delete ruling. */
 .edit {
   font-family: var(--noto-kannada);
   font-size: 1rem;
@@ -199,7 +201,13 @@
   background: none;
   border: none;
   padding: 0;
-  cursor: default;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.edit:hover {
+  color: var(--gadde-900);
 }
 
 .edit:focus-visible {
@@ -556,6 +564,7 @@
   .newBtn,
   .emptyBtn,
   .soldBtn,
+  .edit,
   .sheetCancel,
   .sheetConfirm {
     transition: none;

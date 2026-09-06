@@ -260,6 +260,60 @@ select.control {
 /* Validation is not in the frame — kemmannu border and aria-invalid only,
    as on the previous form. The frame supplies no error copy, so none is
    invented. */
+/* EDIT ONLY — the read-only mobile row. Same geometry as .control so it sits
+   in the field rhythm exactly, filled and toned down so it does not read as
+   something you can type in. hottu-100 on hottu-300 is the same muted pair
+   the rest of this ramp uses; no new token. */
+.controlReadonly {
+  width: 100%;
+  margin: 0;
+  background: var(--hottu-200);
+  border: 1px solid var(--hottu-300);
+  color: var(--masi-500);
+  font-family: var(--noto-kannada);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+}
+
+.readonlyHint {
+  margin: 0.375rem 0 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--hottu-400);
+}
+
+/* EDIT ONLY — the quality-reset warning. Amber, which this stylesheet's own
+   palette map already assigns to attention (the mic badge's --bhatta-400),
+   and the same panel shape the farmer listings advisory uses. No new colour. */
+.qualityWarn {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--bhatta-200) 45%, var(--hottu-50));
+  border: 1px solid var(--bhatta-200);
+}
+
+.qualityWarnIcon {
+  flex-shrink: 0;
+  color: var(--bhatta-600);
+  margin-top: 0.0625rem;
+}
+
+.qualityWarnText {
+  margin: 0;
+  font-family: var(--noto-kannada);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--gadde-950);
+}
+
 .controlError,
 .controlError:focus {
   border-color: var(--kemmannu-600);
