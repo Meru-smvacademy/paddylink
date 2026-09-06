@@ -255,7 +255,7 @@ export default function BuyerWallet({ wallet }: { wallet: Wallet }) {
               the control is unconditional. */}
           <form method="post" action="/buyer/logout">
             <button type="submit" className={styles.signOut}>
-              <T kn="ಹೊರಬನ್ನಿ / Sign out" en="ಹೊರಬನ್ನಿ / Sign out" />
+              <T kn="ಲಾಗ್ ಔಟ್ / Sign out" en="ಲಾಗ್ ಔಟ್ / Sign out" />
             </button>
           </form>
         </div>

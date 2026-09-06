@@ -748,7 +748,7 @@ export default function BuyerListings({
           {signedIn && (
             <form method="post" action="/buyer/logout">
               <button type="submit" className={styles.addLink}>
-                <T kn="ಹೊರಬನ್ನಿ " en="ಹೊರಬನ್ನಿ " />
+                <T kn="ಲಾಗ್ ಔಟ್ " en="ಲಾಗ್ ಔಟ್ " />
                 <span className={styles.addLinkEn}>
                   <T kn="/ Sign out" en="/ Sign out" />
                 </span>
