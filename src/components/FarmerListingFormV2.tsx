@@ -134,6 +134,24 @@ type Field =
   | 'quintals'
   | 'harvestMonth';
 
+/**
+ * The farmer's own details, carried into a CREATE so a man who has posted
+ * before does not type his name, village and taluk again.
+ *
+ * DELIBERATELY NOT `edit`. Passing `edit` is what switches this component
+ * into correction mode — it changes the heading, the button, the endpoint,
+ * pre-grants consent and hides the mic. A second listing is a new listing,
+ * so it takes the create path in full and only the identity fields arrive
+ * ahead of the farmer. Crop fields stay blank: a pre-filled variety and
+ * quantity is how last season gets posted twice.
+ */
+export interface ListingPrefill {
+  name: string;
+  districtId: string;
+  talukId: string;
+  village: string;
+}
+
 export interface CreatedListing {
   id: string;
   quantity_quintals: number;
@@ -147,6 +165,7 @@ export default function FarmerListingFormV2({
   reference,
   mobile,
   onSubmitted,
+  prefill,
   edit,
   onSaved,
 }: {
@@ -157,17 +176,31 @@ export default function FarmerListingFormV2({
       the stored number, shown read-only and never submitted. */
   mobile: string;
   onSubmitted?: (listing: CreatedListing) => void;
+  /** Create mode only — the farmer's identity, already known. Does NOT
+      switch modes; see ListingPrefill. Ignored when `edit` is present,
+      which carries its own stored values. */
+  prefill?: ListingPrefill;
   /** Present only on the edit screen. Its presence is what switches modes. */
   edit?: ListingEditTarget;
   onSaved?: () => void;
 }) {
   const editing = edit !== undefined;
 
+  /* The number to show read-only, or null when it is not established
+     yet. Edit carries its own stored value; a pre-filled create is a
+     farmer who has already proven this number, so the session's copy is
+     shown. A first listing shows nothing — there is no row yet and
+     nothing to confirm. */
+  const knownMobile = edit ? edit.mobile : prefill ? mobile : null;
+
   const [form, setForm] = useState({
-    name: edit?.name ?? '',
-    district: edit?.districtId ?? '',
-    taluk: edit?.talukId ?? '',
-    village: edit?.village ?? '',
+    /* edit wins where it exists — it is this listing's stored value.
+       prefill fills the identity fields on a create, and neither touches
+       the crop fields below. */
+    name: edit?.name ?? prefill?.name ?? '',
+    district: edit?.districtId ?? prefill?.districtId ?? '',
+    taluk: edit?.talukId ?? prefill?.talukId ?? '',
+    village: edit?.village ?? prefill?.village ?? '',
     variety: edit?.varietyId ?? '',
     varietyOther: edit?.varietyOther ?? '',
     quintals: edit?.quintals ?? '',
@@ -409,18 +442,18 @@ export default function FarmerListingFormV2({
             />
           </div>
 
-          {/* 1b. Mobile — EDIT ONLY, and read-only by requirement. This is
+          {/* 1b. Mobile — read-only wherever it is already known. This is
               the farmer's identity, not a field: it is rendered so he can see
               whose listing he is correcting, it is not an <input>, it is not
               in the submitted body, and the route reads no mobile from a
               request at all. The only addition edit mode makes to the frame. */}
-          {editing && (
+          {knownMobile !== null && (
             <div className={styles.field}>
               <span className={styles.label} id="fl-mobile-label">
                 ಮೊಬೈಲ್ ನಂಬರ್
               </span>
               <p className={styles.controlReadonly} aria-labelledby="fl-mobile-label">
-                {edit.mobile}
+                {knownMobile}
               </p>
               <p className={styles.readonlyHint}>ಈ ನಂಬರ್ ಬದಲಾಯಿಸಲು ಆಗುವುದಿಲ್ಲ</p>
             </div>

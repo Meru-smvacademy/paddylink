@@ -612,6 +612,35 @@ select.control {
   outline-offset: 3px;
 }
 
+/* ── Phones ────────────────────────────────────────────────────
+   Pre-existing, and not introduced by the new-listing route — this is the
+   same component the first-listing form has always rendered. Measured at
+   360px: the month grid ran to 400px and the page scrolled sideways. A 1fr
+   track will not shrink below its content and ಏಪ್ರಿಲ್ is a wide word, so
+   four across cannot fit once .card has taken 2.5rem a side. Three across,
+   and the card gives the width back. The district/taluk pair stacks for the
+   same reason. Same 767px tier as the rest of the site. */
+@media (max-width: 767px) {
+  .card {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .pair {
+    grid-template-columns: 1fr;
+  }
+
+  .months {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.375rem;
+  }
+
+  .month {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.8125rem;
+    min-width: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .control,
   .month,

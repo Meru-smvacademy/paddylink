@@ -71,8 +71,14 @@ import styles from './FarmerListings.module.css';
 import type { BadgeType, FarmerListingRow } from '@/lib/farmerListings';
 import FarmerSoldControl from './FarmerSoldControl';
 
-/* The form step of the farmer flow. */
-const FORM_HREF = '/login/farmer';
+/* The listing form, for a farmer who is already signed in.
+ *
+ * This used to be '/login/farmer' for both buttons below, which sent a
+ * farmer who already had a session back through the OTP screens — and
+ * /api/otp/verify, seeing that he has listings, returned him to this very
+ * page. The button was a loop, and the form was reachable only by farmers
+ * with nothing to their name. /farmer/listings/new is the door. */
+const FORM_HREF = '/farmer/listings/new';
 
 /* DEV-ICON: replaces the frame's 📞 emoji. */
 function PhoneIcon() {
@@ -233,13 +239,17 @@ export default function FarmerListings({ listings }: { listings: FarmerListingRo
         <div className={styles.headRow}>
           <h1 className={styles.title}>ನನ್ನ ಪಟ್ಟಿಗಳು</h1>
           <div className={styles.headActions}>
-            {/* The frame hides this button in the empty state. */}
+            {/* The frame hides this button in the empty state, where the
+                empty panel carries its own. Shown for every farmer who has
+                listings — including one whose listings are all SOLD, which
+                getFarmerListings returns (VISIBLE_STATUSES) and which is
+                exactly the farmer most likely to be posting again. */}
             {!empty && (
               <Link href={FORM_HREF} className={styles.newBtn}>
                 <span className={styles.plus} aria-hidden="true">
                   +
                 </span>
-                ಹೊಸ ಪಟ್ಟಿ
+                ಹೊಸ ಭತ್ತ ಸೇರಿಸಿ
               </Link>
             )}
             {/* Sign out — the admin chrome's pattern, form-posted to a route

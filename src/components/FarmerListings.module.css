@@ -567,6 +567,78 @@
   cursor: default;
 }
 
+/* ── Phones ────────────────────────────────────────────────────
+   This file is desktop-first at 1440px and had no width breakpoint, so the
+   head row kept the title and both actions on one line at 360px. The new
+   listing button is the reason a farmer comes back to this page, so on a
+   phone it gets the full width and sits under the title where a thumb
+   reaches it, with sign-out kept quiet beneath. Same 767px tier the rest of
+   the site uses. */
+@media (max-width: 767px) {
+  .wrap {
+    padding: 2rem 1rem;
+  }
+
+  .headRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .headActions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .newBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.9375rem 1rem;
+  }
+
+  .emptyBtn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+  }
+
+  .empty {
+    padding: 4rem 0;
+  }
+
+  /* The card itself. .cardTop is a row of head + actions, and .actions is
+     flex-shrink: 0 at 185px, so with 2rem of card padding a side there was
+     never room at 360px — the actions ran to 434px and took the page with
+     them. Stacked: the crop reads first, ಮಾರಾಟವಾಗಿದೆ and ಸರಿಪಡಿಸಿ sit under
+     it on their own line. */
+  .card {
+    padding: 1.25rem 1rem;
+  }
+
+  .cardTop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .actions {
+    padding-top: 0;
+    gap: 1.5rem;
+  }
+
+  /* Variety, quantity and harvest on one line do not fit either. */
+  .meta {
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card,
   .newBtn,
