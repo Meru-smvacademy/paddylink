@@ -17,7 +17,7 @@ import 'server-only';
  *
  * THE APPROVED TEMPLATE, at Jio, one variable — the six-digit code:
  *
- *   Your PaddyLink verification code is {#number#}. Valid for 10 minutes.
+ *   Your PaddyLink verification code is ##OTP##. Valid for 10 minutes.
  *   Do not share it with anyone. - KALBANTT TECH (OPC) PRIVATE LIMITED
  *
  * "Valid for 10 minutes" is a promise printed on a farmer's phone, so the

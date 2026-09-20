@@ -362,6 +362,17 @@ export default function OtpFlow({
     }
   }
 
+  /**
+   * The button under the boxes. Auto-submit on the sixth digit stays — this
+   * is the same call by another route, for a farmer whose code arrived by
+   * paste or SMS autofill in one event, or who simply looked for something
+   * to press. check() re-checks the length and the in-flight flag, so a click
+   * that races the timer is a no-op rather than a second verify.
+   */
+  function handleVerify() {
+    void check(otp);
+  }
+
   function handleResend() {
     if (!canResend || sending) return;
     /* The same request the send button makes. The server supersedes the
@@ -371,6 +382,7 @@ export default function OtpFlow({
   }
 
   const ready = phone.length === PHONE_LENGTH;
+  const codeReady = otp.every((d) => d);
   const clock = `0:${String(countdown).padStart(2, '0')}`;
   const pill = door === 'farmer' ? 'ರೈತ / Farmer' : 'ಖರೀದಿದಾರ / Buyer';
 
@@ -519,6 +531,35 @@ export default function OtpFlow({
                 </div>
 
                 {notice && <NoticePanel notice={notice} />}
+
+                {/* The frame had no such control — the code submitted itself
+                    on the sixth digit and nothing else. That left a farmer
+                    whose code arrived in one paste or one SMS autofill with a
+                    screen that did nothing and no way to ask it to. Same
+                    primary button as the phone screen, same disabled
+                    treatment; the auto-submit above is untouched. */}
+                <button
+                  type="button"
+                  onClick={handleVerify}
+                  disabled={!codeReady || verifying}
+                  className={`${styles.sendBtn} ${codeReady && !verifying ? styles.sendBtnReady : ''}`}
+                >
+                  {verifying ? (
+                    <>
+                      <T kn="ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…" en="ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…" />
+                      <span className={styles.sendBtnEn}>
+                        <T kn="/ Verifying…" en="/ Verifying…" />
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <T kn="ದೃಢೀಕರಿಸಿ" en="ದೃಢೀಕರಿಸಿ" />
+                      <span className={styles.sendBtnEn}>
+                        <T kn="/ Verify" en="/ Verify" />
+                      </span>
+                    </>
+                  )}
+                </button>
 
                 <div className={styles.resendRow}>
                   <button
