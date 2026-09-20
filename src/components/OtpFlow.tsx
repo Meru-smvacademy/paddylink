@@ -335,16 +335,85 @@ export default function OtpFlow({
     }
   }
 
-  function handleOtpChange(i: number, raw: string) {
-    const val = raw.replace(/\D/g, '').slice(-1);
-    if (raw !== '' && val === '') return;
+  /**
+   * Write digits into the boxes from `start` rightward — the one path by
+   * which a code enters this screen, whether it was typed one key at a time,
+   * pasted, or dropped in whole by Android's SMS autofill.
+   *
+   * Focus lands on the box after the last one written, so typing continues
+   * where it left off and a short paste leaves the cursor where the farmer
+   * has to carry on. A complete six submits itself on the same 300ms timer
+   * the sixth typed digit has always used — one rule, so a pasted code and a
+   * typed one behave identically and neither needs the button.
+   */
+  function fillFrom(start: number, digits: string) {
+    if (!digits) return;
     const next = [...otp];
-    next[i] = val;
+    let i = start;
+    for (const d of digits) {
+      if (i >= OTP_LENGTH) break;
+      next[i] = d;
+      i += 1;
+    }
     setOtp(next);
     setNotice(null);
     setCodeError(false);
-    if (val && i < OTP_LENGTH - 1) inputRefs.current[i + 1]?.focus();
-    if (val && next.every((d) => d)) setTimeout(() => void check(next), 300);
+    inputRefs.current[Math.min(i, OTP_LENGTH - 1)]?.focus();
+    if (next.every((d) => d)) setTimeout(() => void check(next), 300);
+  }
+
+  /**
+   * ONE EVENT CAN CARRY THE WHOLE CODE. Android Chrome fills the field that
+   * advertises autocomplete="one-time-code" with all six digits at once, and
+   * iOS Safari's keyboard suggestion does the same; both arrive here as a
+   * single onChange whose value is longer than one character. The old
+   * slice(-1) kept the LAST digit and dropped the other five, which left one
+   * box filled, the every() guard false, and a screen that did nothing.
+   * Anything longer than a keystroke is now spread across the boxes.
+   *
+   * The one ambiguity is a two-character value: it can be a code fragment, or
+   * it can be a keystroke appended to a box that already held a digit (which
+   * maxLength={1} normally prevents, but a composing or autocorrecting
+   * keyboard can still produce). When the first character is what this box
+   * already showed, it is the latter, and only the new digit is taken.
+   */
+  function handleOtpChange(i: number, raw: string) {
+    const digits = raw.replace(/\D/g, '');
+
+    if (digits === '') {
+      /* A non-digit keystroke changes nothing; an emptied box is a delete. */
+      if (raw !== '') return;
+      const next = [...otp];
+      next[i] = '';
+      setOtp(next);
+      setNotice(null);
+      setCodeError(false);
+      return;
+    }
+
+    if (digits.length === 2 && digits[0] === otp[i]) {
+      fillFrom(i, digits[1]);
+      return;
+    }
+
+    /* A full code is written from the first box wherever it was dropped —
+       filling from box 4 would keep two digits and discard four. */
+    const whole = digits.length >= OTP_LENGTH;
+    fillFrom(whole ? 0 : i, digits.slice(0, OTP_LENGTH));
+  }
+
+  /**
+   * maxLength={1} truncates a pasted code to its first digit before React is
+   * told anything, so the paste is taken here and the browser's own handling
+   * prevented. The clipboard is stripped to digits first: a farmer forwards
+   * or long-presses the whole SMS as often as he selects the six characters,
+   * and the code is the first number in it.
+   */
+  function handleOtpPaste(i: number, e: React.ClipboardEvent<HTMLInputElement>) {
+    const digits = e.clipboardData.getData('text').replace(/\D/g, '');
+    if (!digits) return;
+    e.preventDefault();
+    fillFrom(digits.length >= OTP_LENGTH ? 0 : i, digits.slice(0, OTP_LENGTH));
   }
 
   function handleOtpKeyDown(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
@@ -515,6 +584,7 @@ export default function OtpFlow({
                       maxLength={1}
                       value={d}
                       onChange={(e) => handleOtpChange(i, e.target.value)}
+                      onPaste={(e) => handleOtpPaste(i, e)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
                       aria-label={`OTP digit ${i + 1}`}
                       aria-invalid={codeError}
