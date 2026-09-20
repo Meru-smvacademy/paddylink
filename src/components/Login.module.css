@@ -210,6 +210,27 @@
   color: var(--gadde-300);
 }
 
+/* ── Phones ────────────────────────────────────────────────────
+   Two 1fr cards at 2.5rem padding cannot both fit a 360px screen, and this
+   file had no width breakpoint, so the door chooser ran off the side. The
+   doors stack — they are the first choice a farmer makes and neither should
+   be the half he has to scroll to find. */
+@media (max-width: 767px) {
+  .main {
+    padding: 2.5rem 1rem;
+  }
+
+  .cards {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .card {
+    padding: 1.75rem 1.5rem;
+    gap: 1.25rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card,
   .cardCta,

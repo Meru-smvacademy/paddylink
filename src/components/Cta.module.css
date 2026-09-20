@@ -88,6 +88,29 @@
   border-bottom-color: var(--bhatta-400);
 }
 
+/* ── Phones ────────────────────────────────────────────────────
+   white-space: nowrap and 44px of side padding made this 371px wide, which
+   is wider than a 360px handset: the button ran off the screen rather than
+   being squashed by anything. Full width and allowed to wrap — a farmer's
+   primary action should be the widest thing on the screen, not the one
+   thing he cannot see the end of. */
+@media (max-width: 767px) {
+  .gold {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    white-space: normal;
+    text-align: center;
+    padding: 16px 20px;
+  }
+
+  .link {
+    white-space: normal;
+    text-align: center;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gold,
   .link {

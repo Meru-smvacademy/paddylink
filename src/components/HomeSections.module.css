@@ -164,6 +164,42 @@
   background: var(--hottu-50);
 }
 
+/* ── Phones ────────────────────────────────────────────────────
+   repeat(3, 1fr) held at every width. A 1fr track will not shrink below its
+   content, so three pillars with 44px of side padding each demanded far more
+   than a phone has and pushed the page sideways. One per row, and the
+   divider moves from the right edge to the bottom where the stack puts it. */
+@media (max-width: 767px) {
+  .pillarSection {
+    padding: 56px 16px 48px;
+  }
+
+  .pillarGrid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .pillar {
+    padding: 32px 20px;
+    border-right: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--hottu-50) 7%, transparent);
+  }
+
+  .pillar:last-child {
+    border-bottom: none;
+  }
+
+  .messageSection {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .ctaRow {
+    gap: 20px;
+    margin-top: 32px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ctaRow {
     transition: none;

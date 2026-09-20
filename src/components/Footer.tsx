@@ -86,8 +86,8 @@ export default function Footer() {
           </div>
 
           <div className={styles.contact}>
-            <a href="tel:+919108540960" className={styles.phone}>
-              +91 91085 40960
+            <a href="tel:+917483759960" className={styles.phone}>
+              +91 74837 59960
             </a>
             <a href="mailto:founder@kalbantt.in" className={styles.email}>
               founder@kalbantt.in

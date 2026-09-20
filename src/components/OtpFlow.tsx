@@ -600,7 +600,16 @@ export default function OtpFlow({
                   ))}
                 </div>
 
-                {notice && <NoticePanel notice={notice} />}
+                {/* RESERVED, NOT CONDITIONAL. Rendering the notice straight
+                    into the column made the card grow by its full height the
+                    instant a code was refused, which pushed the Verify button
+                    down 91px and dragged the boxes up as the card re-centred
+                    — measured, at 360px. The slot is always here and always
+                    the same height, so a wrong code changes the words on the
+                    screen and nothing else. */}
+                <div className={styles.noticeSlot}>
+                  {notice && <NoticePanel notice={notice} />}
+                </div>
 
                 {/* The frame had no such control — the code submitted itself
                     on the sixth digit and nothing else. That left a farmer

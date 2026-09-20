@@ -50,7 +50,7 @@ export const REFUND_SECTIONS: Section[] = [
     title: 'How to request',
     clauses: [
       {
-        text: 'Write to founder@kalbantt.in or WhatsApp +91 91085 40960 with the registered mobile number and payment reference. Grievance escalation as per the Terms (48-hour acknowledgement, 15-day resolution).',
+        text: 'Write to founder@kalbantt.in or WhatsApp +91 74837 59960 with the registered mobile number and payment reference. Grievance escalation as per the Terms (48-hour acknowledgement, 15-day resolution).',
       },
     ],
   },

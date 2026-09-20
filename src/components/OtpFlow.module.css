@@ -204,6 +204,10 @@
 .sendBtn {
   width: 100%;
   padding: 1rem 0;
+  /* Fixed, so swapping the label for its in-flight wording
+     (ದೃಢೀಕರಿಸಿ -> ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ, Send -> Sending) cannot
+     change the button's height and move everything under it. */
+  min-height: 3.6875rem;
   border-radius: 0.75rem;
   border: none;
   font-family: var(--noto-kannada);
@@ -355,6 +359,61 @@
   font-size: 0.75rem;
   margin: 0.125rem 0 0;
   color: var(--gadde-600);
+}
+
+/* The always-present home for the notice. Height is reserved rather than
+   discovered, so nothing below it moves when a code is refused. */
+.noticeSlot {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ── Phones ────────────────────────────────────────────────────
+   Measured at 360px before this block existed: the card's 3rem padding left
+   196px of inner width, so the six boxes came out 23px wide and 36px tall —
+   not square, barely tappable, and nothing like the frame. And .main centres
+   the card vertically, so the moment a notice appeared the card grew 129px
+   and the whole thing re-centred: the boxes jumped 38px UP while the button
+   went 91px DOWN, under the farmer's thumb mid-tap.
+
+   Three separate causes, three fixes: give the card back its width, pin the
+   boxes to a size that does not depend on the container, and stop centring
+   so growth pushes down instead of moving what is already on screen. */
+@media (max-width: 767px) {
+  .main {
+    /* Was centred. Top-anchored, the boxes do not move when anything
+       below them appears or disappears. */
+    justify-content: flex-start;
+    padding-top: 1.5rem;
+  }
+
+  .card {
+    padding: 1.5rem 1.25rem;
+    gap: 1.25rem;
+  }
+
+  .boxes {
+    gap: 0.5rem;
+  }
+
+  .noticeSlot {
+    /* 97px is the tallest of the five notices this screen can show,
+       measured at 360px and 390px across every branch of check().
+       Reserved so the button below never moves. */
+    min-height: 6.0625rem;
+  }
+
+  .box {
+    /* Equal share of the row with a fixed height and a cap, instead of
+       width: 100% + aspect-ratio — an aspect ratio makes the height a
+       function of the container, so every width change resized them. */
+    flex: 1 1 0;
+    max-width: 3rem;
+    height: 3.25rem;
+    aspect-ratio: auto;
+    min-width: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

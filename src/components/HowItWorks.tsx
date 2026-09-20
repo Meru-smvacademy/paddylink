@@ -173,7 +173,7 @@ const points = [
   { n: '೩', kn: 'ಪಾವತಿ ಮೊದಲು, ನಂತರ ಭತ್ತ', en: 'Payment first, then paddy' },
   {
     n: '೪',
-    kn: 'ಸಮಸ್ಯೆ ಇದ್ದರೆ ತಿಳಿಸಿ — WhatsApp +91 91085 40960; ಸಂಹಿತೆ ಮುರಿದ ಖರೀದಿದಾರರ ಪರಿಶೀಲನೆ ರದ್ದು',
+    kn: 'ಸಮಸ್ಯೆ ಇದ್ದರೆ ತಿಳಿಸಿ — WhatsApp +91 74837 59960; ಸಂಹಿತೆ ಮುರಿದ ಖರೀದಿದಾರರ ಪರಿಶೀಲನೆ ರದ್ದು',
     en: 'Any problem, tell us — buyers who break the code lose their PaddyLink verification',
   },
 ];

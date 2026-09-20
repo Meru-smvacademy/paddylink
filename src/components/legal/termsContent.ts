@@ -23,7 +23,7 @@ export const TERMS_SECTIONS: Section[] = [
     title: 'Who we are',
     clauses: [
       {
-        text: 'PaddyLink ("the Platform", "we", "us") is operated by Kalbantt Tech (OPC) Private Limited, CIN U85500KA2026OPC224772, registered office: Unit 101, Oxford Towers, 139/88 Old Airport Road, Kodihalli, Bangalore, Karnataka 560008. Contact: founder@kalbantt.in, +91 91085 40960.',
+        text: 'PaddyLink ("the Platform", "we", "us") is operated by Kalbantt Tech (OPC) Private Limited, CIN U85500KA2026OPC224772, registered office: Unit 101, Oxford Towers, 139/88 Old Airport Road, Kodihalli, Bangalore, Karnataka 560008. Contact: founder@kalbantt.in, +91 74837 59960.',
       },
     ],
   },
@@ -168,7 +168,7 @@ export const TERMS_SECTIONS: Section[] = [
       },
       {
         n: '11.2',
-        text: 'Grievance Officer: Mounesh Tegginamani, founder@kalbantt.in, +91 91085 40960. Acknowledgement within 48 hours; resolution target 15 days.',
+        text: 'Grievance Officer: Mounesh Tegginamani, founder@kalbantt.in, +91 74837 59960. Acknowledgement within 48 hours; resolution target 15 days.',
       },
     ],
   },

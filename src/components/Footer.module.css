@@ -34,6 +34,7 @@
 
 .top {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 40px;
@@ -227,6 +228,37 @@
   font-family: var(--inter);
   letter-spacing: 0.025em;
   line-height: 1.6;
+}
+
+/* ── Phones ────────────────────────────────────────────────────
+   This file had no width breakpoint at all. .top is one row of three
+   flex-shrink: 0 columns, so at 360px it demanded 683px, the document
+   scrolled sideways, and the white strip appeared down the side of every
+   page — the footer is on all of them. Chrome then widens the layout
+   viewport to the overflowing content, which is what stretched the fixed
+   header to 683px as well; that symptom goes when this cause does.
+   Stacked and centred rather than shrunk, because the phone number and
+   the address are white-space: nowrap and have nowhere to give. */
+@media (max-width: 767px) {
+  .top {
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    text-align: center;
+    padding-bottom: 28px;
+  }
+
+  .links,
+  .contact {
+    align-items: center;
+  }
+
+  /* Four legal links plus separators do not fit one 360px line. */
+  .linkRow {
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 6px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -11,7 +11,7 @@ export const PRIVACY_SUMMARY = [
   'ನೀವು ಕೊಟ್ಟ ಮಾಹಿತಿ ಪಟ್ಟಿ ತೋರಿಸಲು ಮತ್ತು ಸಂಪರ್ಕ ಜೋಡಿಸಲು ಮಾತ್ರ ಬಳಸುತ್ತೇವೆ.',
   'ರೈತನ ನಂಬರ್ ಸಾರ್ವಜನಿಕವಲ್ಲ — ಪರಿಶೀಲಿತ ಖರೀದಿದಾರ ತೆರೆದಾಗ ಮಾತ್ರ ಸಿಗುತ್ತದೆ.',
   'ನಿಮ್ಮ ಮಾಹಿತಿ ಮಾರಾಟ ಮಾಡುವುದಿಲ್ಲ.',
-  'ಅಳಿಸಬೇಕಿದ್ದರೆ ಕರೆ/WhatsApp ಮಾಡಿ: 91085 40960.',
+  'ಅಳಿಸಬೇಕಿದ್ದರೆ ಕರೆ/WhatsApp ಮಾಡಿ: 74837 59960.',
 ];
 
 export const PRIVACY_SECTIONS: Section[] = [
@@ -74,7 +74,7 @@ export const PRIVACY_SECTIONS: Section[] = [
     title: 'Your rights and grievance',
     clauses: [
       {
-        text: 'For access, correction, deletion, or complaints: Grievance Officer — Mounesh Tegginamani, founder@kalbantt.in, +91 91085 40960. Acknowledgement within 48 hours; resolution target 15 days.',
+        text: 'For access, correction, deletion, or complaints: Grievance Officer — Mounesh Tegginamani, founder@kalbantt.in, +91 74837 59960. Acknowledgement within 48 hours; resolution target 15 days.',
       },
     ],
   },

@@ -128,7 +128,7 @@ export default function Support() {
         <section className={styles.contactSection}>
           <div className={styles.contactCard}>
             <a
-              href="tel:+919108540960"
+              href="tel:+917483759960"
               className={`${styles.contactRow} ${styles.contactRowDivided}`}
             >
               <span className={styles.contactEmoji} role="img" aria-label="phone">
@@ -139,7 +139,7 @@ export default function Support() {
                   <T kn="Call · ಕರೆ ಮಾಡಿ" en="Call · ಕರೆ ಮಾಡಿ" />
                 </span>
                 <span className={`${styles.contactNumber} ${styles.numberCall}`}>
-                  +91 91085 40960
+                  +91 74837 59960
                 </span>
               </span>
               <span className={`${styles.contactArrow} ${styles.arrowCall}`} aria-hidden="true">
@@ -148,7 +148,7 @@ export default function Support() {
             </a>
 
             <a
-              href="https://wa.me/919108540960"
+              href="https://wa.me/917483759960"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.contactRow}
@@ -161,7 +161,7 @@ export default function Support() {
                   <T kn="WhatsApp · ಮೆಸೇಜ್ ಮಾಡಿ" en="WhatsApp · ಮೆಸೇಜ್ ಮಾಡಿ" />
                 </span>
                 <span className={`${styles.contactNumber} ${styles.numberWhatsApp}`}>
-                  +91 91085 40960
+                  +91 74837 59960
                 </span>
               </span>
               <span
