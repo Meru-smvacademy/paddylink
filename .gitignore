@@ -39,9 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-!.env.example
 
 .vercel
 
 # scratch files — never let a secret or dump surface in git status
 *.tmp
+
+# Supabase CLI scratch — local link state, never anyone else's business.
+supabase/.temp/
+
+# Added by `vercel link`. The negation has to sit BELOW .env* : a later
+# pattern re-excludes what an earlier one allowed, so !.env.example above
+# .env* does nothing. .env.example carries the NAMES of the variables and
+# no values, and is the file every comment in src/lib points a new
+# developer at, so it is the one .env the repo must keep.
+.env*
+!.env.example
