@@ -28,14 +28,24 @@ import styles from './OtpFlow.module.css';
  * buyers to the door chooser, calling it a placeholder; per CEO ruling they
  * now land on /buyer/listings, the private listings browser.
  *
- * AWAITING-BACKEND applies to the OTP itself and nothing else now: no SMS is
- * dispatched, no code is validated and no session is created. The states are
- * driven by local input length so the screens can be reviewed, and every
- * point needing a real call is marked below.
+ * THE OTP IS REAL NOW. /api/otp/send puts a code on the phone through MSG91
+ * and /api/otp/verify checks it; the session cookie is minted by the verify
+ * route, from the number it just proved. This component no longer tells the
+ * server who anybody is — the two fetches to /api/farmer/session and
+ * /api/buyer/session that used to do exactly that are gone, because a screen
+ * that can name its own user is not a login.
  *
- * The listing form beyond it IS wired — it writes real rows. Which means the
- * number typed here is the only thing identifying a farmer, and nothing yet
- * proves it is his. That is the hole real OTP closes.
+ * EVERY RULE IS THE SERVER'S. Ten minutes, five attempts, three sends per
+ * fifteen minutes, one live code per door — all of it lives in migration 016
+ * and is enforced there. The countdown below is a courtesy so the resend
+ * button does not invite a refusal; it is not the limit, and shortening it in
+ * the browser buys nothing.
+ *
+ * FAIL CLOSED (CEO ruling). When the code cannot be sent — provider down,
+ * timed out, MSG91 wallet empty — this screen says login is temporarily
+ * unavailable, prints a number to call, and does NOT advance to the code
+ * boxes. There is no path through this file that reaches a session without a
+ * verified code.
  *
  * LANGUAGE: the frame prints Kannada with a smaller English line beneath and
  * has no working toggle of its own. That stack is preserved and the site
@@ -53,8 +63,86 @@ const OTP_LENGTH = 6;
 const PHONE_LENGTH = 10;
 const RESEND_SECONDS = 30;
 
+/** The number a farmer calls when the SMS cannot be sent. Printed on the
+ *  fail-closed notice, and the same constant the send route exports. */
+const SUPPORT_MOBILE = '7483759960';
+
 type Door = 'farmer' | 'buyer';
 type Phase = 'phone' | 'verify' | 'form' | 'success';
+
+/**
+ * Everything this screen may need to say, in the frame's own stack: Kannada
+ * first, English beneath. Held as a pair rather than a boolean because there
+ * are now six distinct things that can go wrong and telling a farmer "wrong
+ * OTP" when his code expired, or when the SMS was never sent, is a lie.
+ */
+type Notice = { kn: string; en: string };
+
+const NOTICES = {
+  wrongCode: (left?: number): Notice => ({
+    kn:
+      left && left > 0
+        ? `ತಪ್ಪು OTP — ಇನ್ನು ${left} ಪ್ರಯತ್ನ ಉಳಿದಿದೆ`
+        : 'ತಪ್ಪು OTP — ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    en:
+      left && left > 0
+        ? `Wrong OTP — ${left} ${left === 1 ? 'try' : 'tries'} left`
+        : 'Wrong OTP — try again',
+  }),
+  expired: {
+    kn: 'OTP ಅವಧಿ ಮುಗಿದಿದೆ — ಮತ್ತೆ ಕಳುಹಿಸಿ',
+    en: 'OTP expired — send a new one',
+  },
+  tooManyAttempts: {
+    kn: 'ಹಲವು ತಪ್ಪು ಪ್ರಯತ್ನಗಳು — ಹೊಸ OTP ಕಳುಹಿಸಿ',
+    en: 'Too many wrong attempts — send a new OTP',
+  },
+  noChallenge: {
+    kn: 'OTP ಸಿಂಧುವಾಗಿಲ್ಲ — ಮತ್ತೆ ಕಳುಹಿಸಿ',
+    en: 'That OTP is no longer valid — send a new one',
+  },
+  rateLimited: (minutes: number): Notice => ({
+    kn: `ಹಲವು ಬಾರಿ ಕಳುಹಿಸಲಾಗಿದೆ — ${minutes} ನಿಮಿಷಗಳ ನಂತರ ಪ್ರಯತ್ನಿಸಿ`,
+    en: `Too many requests — try again in ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`,
+  }),
+  /* The fail-closed notice. It never blames the farmer and always gives him
+     somewhere to go, because on this path there is nothing he can do alone. */
+  unavailable: {
+    kn: `ಲಾಗಿನ್ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಕರೆ ಮಾಡಿ: ${SUPPORT_MOBILE}`,
+    en: `Login is temporarily unavailable. Please call ${SUPPORT_MOBILE}`,
+  },
+  network: {
+    kn: 'ಸಂಪರ್ಕ ಸಿಗಲಿಲ್ಲ — ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ',
+    en: 'Could not reach PaddyLink — try again',
+  },
+} as const;
+
+/**
+ * The frame's error treatment, now carrying whatever the server said rather
+ * than one hardcoded sentence. role="alert" so a farmer using a screen reader
+ * hears it without hunting for what changed, and the same panel serves both
+ * the phone screen and the code screen so a failure never looks like a
+ * different kind of event depending on which step it happened on.
+ */
+function NoticePanel({ notice }: { notice: Notice }) {
+  return (
+    <div className={styles.errorPanel} role="alert">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <circle cx="9" cy="9" r="8" stroke="var(--kemmannu-600)" strokeWidth="1.5" />
+        <path d="M9 5.5V9.5" stroke="var(--kemmannu-600)" strokeWidth="1.8" strokeLinecap="round" />
+        <circle cx="9" cy="12.5" r="1" fill="var(--kemmannu-600)" />
+      </svg>
+      <div>
+        <span className={styles.errorKn}>
+          <T kn={notice.kn} en={notice.kn} />
+        </span>
+        <span className={styles.errorEn}>
+          <T kn={`/ ${notice.en}`} en={`/ ${notice.en}`} />
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function OtpFlow({
   door,
@@ -69,7 +157,13 @@ export default function OtpFlow({
   const [listing, setListing] = useState<CreatedListing | null>(null);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
-  const [error, setError] = useState(false);
+  /** What went wrong, in both languages, or null. */
+  const [notice, setNotice] = useState<Notice | null>(null);
+  /** Drives the red boxes. A send failure is a notice but not a bad code. */
+  const [codeError, setCodeError] = useState(false);
+  /** In flight. Both guard against a double submit and drive the labels. */
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [countdown, setCountdown] = useState(RESEND_SECONDS);
   const [canResend, setCanResend] = useState(false);
 
@@ -99,56 +193,146 @@ export default function OtpFlow({
     [],
   );
 
-  function handleSendOtp() {
-    if (phone.length !== PHONE_LENGTH) return;
-    // AWAITING-BACKEND: this is where the send-OTP request goes.
-    setPhase('verify');
-    startCountdown();
-    setTimeout(() => inputRefs.current[0]?.focus(), 100);
-  }
+  /**
+   * Ask for a code. Used by the send button and by resend — one function,
+   * because the two differ only in what is already on the screen.
+   *
+   * THE PHASE ONLY ADVANCES ON A CONFIRMED SEND. A farmer is never shown six
+   * empty boxes for a code that was not dispatched; that is the whole of the
+   * fail-closed ruling as it appears on this screen.
+   */
+  async function requestCode(isResend: boolean) {
+    if (phone.length !== PHONE_LENGTH || sending) return;
+    setSending(true);
+    setNotice(null);
+    setCodeError(false);
 
-  function check(next: string[]) {
-    const code = next.join('');
-    // AWAITING-BACKEND: this is where the verify-OTP request goes. Until then
-    // a full six digits walks on. The length guard below is the instructed
-    // wrong-length error; the frame's own rule was the literal code "000000",
-    // which is kept so the error state stays reachable.
-    if (code.length !== OTP_LENGTH || code === '0'.repeat(OTP_LENGTH)) {
-      setError(true);
-      setOtp(Array(OTP_LENGTH).fill(''));
-      inputRefs.current[0]?.focus();
-      return;
-    }
-    // The frame's verified(): farmers reach the listing form. Buyers go to
-    // the private listings browser, per CEO ruling.
-    if (door === 'farmer') {
-      // TEMP-PRE-AUTH: remember the number server-side so /farmer/listings
-      // knows whose listings to show. Not proof of identity — see the route.
-      // Failure is not fatal here: the listing form works without it, and the
-      // farmer would only be sent back to this screen from his listings page.
-      void fetch('/api/farmer/session', {
+    try {
+      const res = await fetch('/api/otp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mobile: phone }),
-      }).catch(() => {});
-      setPhase('form');
-      return;
+        body: JSON.stringify({ mobile: phone, door }),
+      });
+
+      if (res.ok) {
+        setOtp(Array(OTP_LENGTH).fill(''));
+        setPhase('verify');
+        startCountdown();
+        setTimeout(() => inputRefs.current[0]?.focus(), 100);
+        return;
+      }
+
+      const body = await res.json().catch(() => ({}) as Record<string, unknown>);
+
+      if (res.status === 429) {
+        const seconds = Number(body?.retryAfterSeconds ?? 900);
+        setNotice(NOTICES.rateLimited(Math.max(1, Math.ceil(seconds / 60))));
+        /* A blocked resend must not restart the clock — the countdown would
+           promise a retry the server has already refused. */
+        if (!isResend) setPhase('phone');
+        return;
+      }
+
+      if (res.status === 503) {
+        /* MSG91 is down, timed out, or the wallet is empty. The server has
+           already logged its own words; the farmer gets a number to call. */
+        setNotice(NOTICES.unavailable);
+        if (!isResend) setPhase('phone');
+        return;
+      }
+
+      setNotice(NOTICES.network);
+      if (!isResend) setPhase('phone');
+    } catch {
+      /* Offline, or the request never landed. Never advances. */
+      setNotice(NOTICES.network);
+    } finally {
+      setSending(false);
     }
-    // TEMP-PRE-AUTH: remember the number server-side so /buyer/listings and
-    // /buyer/wallet know whose balance to show. Not proof of identity — see
-    // the route. The twin of the farmer call above, with one difference: the
-    // navigation waits for the request to settle rather than firing and
-    // forgetting. The buyer lands on a page that reads the cookie immediately,
-    // so pushing first would race the Set-Cookie and show a wallet that says
-    // it does not know who this is. .finally, not .then, because a failed
-    // write must still let him through to the listings.
-    fetch('/api/buyer/session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: phone }),
-    })
-      .catch(() => {})
-      .finally(() => router.push('/buyer/listings'));
+  }
+
+  function handleSendOtp() {
+    void requestCode(false);
+  }
+
+  /**
+   * Send the typed code to be checked. Nothing here decides whether it is
+   * right — the server does, and this reports what it said.
+   *
+   * THE COOKIE IS SET BY THE RESPONSE, not by this file: /api/otp/verify
+   * returns Set-Cookie for the door it verified. Navigation therefore has to
+   * wait for the response to land, which it does — the old buyer branch
+   * already had to learn this, and it now applies to both doors.
+   */
+  async function check(next: string[]) {
+    const code = next.join('');
+    if (code.length !== OTP_LENGTH || verifying) return;
+
+    setVerifying(true);
+    setNotice(null);
+    setCodeError(false);
+
+    const clear = () => {
+      setOtp(Array(OTP_LENGTH).fill(''));
+      inputRefs.current[0]?.focus();
+    };
+
+    try {
+      const res = await fetch('/api/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: phone, code, door }),
+      });
+      const body = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        hasListings?: boolean;
+        attemptsLeft?: number;
+      };
+
+      if (!res.ok || !body.ok) {
+        setCodeError(true);
+        clear();
+        switch (body.error) {
+          case 'expired':
+            setNotice(NOTICES.expired);
+            break;
+          case 'too_many_attempts':
+            setNotice(NOTICES.tooManyAttempts);
+            break;
+          case 'no_challenge':
+            setNotice(NOTICES.noChallenge);
+            break;
+          case 'wrong_code':
+            setNotice(NOTICES.wrongCode(body.attemptsLeft));
+            break;
+          default:
+            setNotice(NOTICES.network);
+        }
+        return;
+      }
+
+      /* Verified. The session cookie is already on this response. */
+      if (door === 'farmer') {
+        /* A farmer who already has listings came back for them, not to post
+           another — the server counted, because this screen cannot. A farmer
+           with none goes on to the form, which is where the frame sent
+           everyone. */
+        if (body.hasListings) {
+          router.push('/farmer/listings');
+        } else {
+          setPhase('form');
+        }
+        return;
+      }
+      router.push('/buyer/listings');
+    } catch {
+      setCodeError(true);
+      clear();
+      setNotice(NOTICES.network);
+    } finally {
+      setVerifying(false);
+    }
   }
 
   function handleOtpChange(i: number, raw: string) {
@@ -157,9 +341,10 @@ export default function OtpFlow({
     const next = [...otp];
     next[i] = val;
     setOtp(next);
-    setError(false);
+    setNotice(null);
+    setCodeError(false);
     if (val && i < OTP_LENGTH - 1) inputRefs.current[i + 1]?.focus();
-    if (val && next.every((d) => d)) setTimeout(() => check(next), 300);
+    if (val && next.every((d) => d)) setTimeout(() => void check(next), 300);
   }
 
   function handleOtpKeyDown(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
@@ -178,12 +363,11 @@ export default function OtpFlow({
   }
 
   function handleResend() {
-    if (!canResend) return;
-    // AWAITING-BACKEND: this is where the resend-OTP request goes.
-    setOtp(Array(OTP_LENGTH).fill(''));
-    setError(false);
-    startCountdown();
-    inputRefs.current[0]?.focus();
+    if (!canResend || sending) return;
+    /* The same request the send button makes. The server supersedes the
+       previous code, so the one in the first SMS stops working the moment
+       this one is issued. */
+    void requestCode(true);
   }
 
   const ready = phone.length === PHONE_LENGTH;
@@ -267,16 +451,31 @@ export default function OtpFlow({
                   />
                 </div>
 
+                {/* Send failures and rate limits land here, on the screen the
+                    farmer is still looking at. The phase does not advance. */}
+                {notice && <NoticePanel notice={notice} />}
+
                 <button
                   type="button"
                   onClick={handleSendOtp}
-                  disabled={!ready}
-                  className={`${styles.sendBtn} ${ready ? styles.sendBtnReady : ''}`}
+                  disabled={!ready || sending}
+                  className={`${styles.sendBtn} ${ready && !sending ? styles.sendBtnReady : ''}`}
                 >
-                  <T kn="OTP ಕಳುಹಿಸಿ" en="OTP ಕಳುಹಿಸಿ" />
-                  <span className={styles.sendBtnEn}>
-                    <T kn="/ Send OTP" en="/ Send OTP" />
-                  </span>
+                  {sending ? (
+                    <>
+                      <T kn="ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ…" en="ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ…" />
+                      <span className={styles.sendBtnEn}>
+                        <T kn="/ Sending…" en="/ Sending…" />
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <T kn="OTP ಕಳುಹಿಸಿ" en="OTP ಕಳುಹಿಸಿ" />
+                      <span className={styles.sendBtnEn}>
+                        <T kn="/ Send OTP" en="/ Send OTP" />
+                      </span>
+                    </>
+                  )}
                 </button>
               </>
             ) : (
@@ -305,11 +504,12 @@ export default function OtpFlow({
                       onChange={(e) => handleOtpChange(i, e.target.value)}
                       onKeyDown={(e) => handleOtpKeyDown(i, e)}
                       aria-label={`OTP digit ${i + 1}`}
-                      aria-invalid={error}
+                      aria-invalid={codeError}
+                      disabled={verifying}
                       className={[
                         styles.box,
                         d ? styles.boxFilled : '',
-                        error ? styles.boxError : '',
+                        codeError ? styles.boxError : '',
                       ]
                         .filter(Boolean)
                         .join(' ')}
@@ -317,35 +517,14 @@ export default function OtpFlow({
                   ))}
                 </div>
 
-                {error && (
-                  <div className={styles.errorPanel} role="alert">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                      <circle cx="9" cy="9" r="8" stroke="var(--kemmannu-600)" strokeWidth="1.5" />
-                      <path
-                        d="M9 5.5V9.5"
-                        stroke="var(--kemmannu-600)"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                      />
-                      <circle cx="9" cy="12.5" r="1" fill="var(--kemmannu-600)" />
-                    </svg>
-                    <div>
-                      <span className={styles.errorKn}>
-                        <T kn="ತಪ್ಪು OTP — ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ" en="ತಪ್ಪು OTP — ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ" />
-                      </span>
-                      <span className={styles.errorEn}>
-                        <T kn="/ Wrong OTP — try again" en="/ Wrong OTP — try again" />
-                      </span>
-                    </div>
-                  </div>
-                )}
+                {notice && <NoticePanel notice={notice} />}
 
                 <div className={styles.resendRow}>
                   <button
                     type="button"
                     onClick={handleResend}
-                    disabled={!canResend}
-                    className={`${styles.resendBtn} ${canResend ? styles.resendBtnActive : ''}`}
+                    disabled={!canResend || sending}
+                    className={`${styles.resendBtn} ${canResend && !sending ? styles.resendBtnActive : ''}`}
                   >
                     <T kn="ಮತ್ತೆ ಕಳುಹಿಸಿ" en="ಮತ್ತೆ ಕಳುಹಿಸಿ" />
                     {!canResend && ` ${clock}`}
