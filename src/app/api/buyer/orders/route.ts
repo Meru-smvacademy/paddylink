@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createRazorpayOrder, razorpayCredentials } from '@/lib/razorpay';
-import { BUYER_MOBILE_COOKIE } from '@/app/api/buyer/session/route';
+import { buyerMobile } from '@/lib/otpSession';
 
 /**
  * POST /api/buyer/orders — start a token purchase.
@@ -30,9 +29,11 @@ import { BUYER_MOBILE_COOKIE } from '@/app/api/buyer/session/route';
  * from config.token_packs on the server. A request body claiming a different
  * amount changes nothing — there is no code path here that reads one.
  *
- * TEMP-PRE-AUTH: the buyer comes from a cookie, not a verified session. Real
- * money must not run through this until OTP is in front of it; the keys in
- * use are Razorpay TEST keys.
+ * TEMP-PRE-AUTH (narrowed): the buyer IS verified now — a signed session
+ * token minted by /api/otp/verify, which OTP is in front of. What is still
+ * temporary is that this runs on the service-role client with RLS bypassed,
+ * for want of an auth.uid(). The keys in use remain Razorpay TEST keys, and
+ * going live is a separate decision from this one.
  */
 
 /**
@@ -44,7 +45,7 @@ import { BUYER_MOBILE_COOKIE } from '@/app/api/buyer/session/route';
  * a balance it supplied, and never supplies one.
  */
 export async function GET() {
-  const mobile = (await cookies()).get(BUYER_MOBILE_COOKIE)?.value;
+  const mobile = await buyerMobile();
   if (!mobile || !/^\d{10}$/.test(mobile)) {
     return NextResponse.json({ error: 'not_signed_in' }, { status: 401 });
   }
@@ -86,7 +87,7 @@ export async function GET() {
 }
 
 export async function POST() {
-  const mobile = (await cookies()).get(BUYER_MOBILE_COOKIE)?.value;
+  const mobile = await buyerMobile();
   if (!mobile || !/^\d{10}$/.test(mobile)) {
     return NextResponse.json({ error: 'not_signed_in' }, { status: 401 });
   }

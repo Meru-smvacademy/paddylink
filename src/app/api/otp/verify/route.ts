@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { hashCode, isDoor, MOBILE_RE, OTP_LENGTH } from '@/lib/otpCode';
-import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
-import { BUYER_MOBILE_COOKIE, BUYER_COOKIE_OPTIONS } from '@/app/api/buyer/session/route';
+import { cookieNameFor, createSessionToken, SESSION_COOKIE_OPTIONS } from '@/lib/otpSession';
 
 /**
  * POST /api/otp/verify — check a code, and mint the session if it was right.
@@ -27,6 +26,11 @@ import { BUYER_MOBILE_COOKIE, BUYER_COOKIE_OPTIONS } from '@/app/api/buyer/sessi
  * what he came for was the one he already has. `hasListings` is computed here
  * rather than guessed in the browser because the browser cannot see the table.
  *
+ * THE COOKIE IT SETS IS SIGNED. The value is a token carrying the mobile, the
+ * door and an expiry under an HMAC keyed with SESSION_SECRET, so a cookie
+ * that did not come from this route does not verify and is treated as no
+ * session at all. See src/lib/otpSession.ts.
+ *
  * ATTEMPTS AND EXPIRY ARE NOT THIS FILE'S BUSINESS. Every rule — five
  * attempts, single use, ten minutes, one live code per door — is inside
  * otp_verify() in migration 016, under a row lock, because two tabs
@@ -38,10 +42,6 @@ import { BUYER_MOBILE_COOKIE, BUYER_COOKIE_OPTIONS } from '@/app/api/buyer/sessi
  * gets the same 401 as a wrong one, so the endpoint cannot be used to ask
  * which mobiles have accounts.
  */
-
-/** Long enough for one sitting, short enough not to linger on a shared phone.
- *  The same twelve hours both session routes have always used. */
-const MAX_AGE_SECONDS = 12 * 60 * 60;
 
 export async function POST(request: Request) {
   let mobile = '';
@@ -113,19 +113,8 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({ ok: true, door, hasListings });
-
-    if (door === 'farmer') {
-      response.cookies.set(FARMER_MOBILE_COOKIE, mobile, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-        maxAge: MAX_AGE_SECONDS,
-      });
-    } else {
-      response.cookies.set(BUYER_MOBILE_COOKIE, mobile, BUYER_COOKIE_OPTIONS);
-    }
-
+    const { value } = createSessionToken(mobile, door);
+    response.cookies.set(cookieNameFor(door), value, SESSION_COOKIE_OPTIONS);
     return response;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);

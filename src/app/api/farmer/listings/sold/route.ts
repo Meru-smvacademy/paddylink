@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
+import { farmerMobile } from '@/lib/otpSession';
 
 /**
  * POST /api/farmer/listings/sold — the farmer's ಮಾರಾಟವಾಗಿದೆ toggle.
@@ -9,9 +8,10 @@ import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
  * Body: { listing_id: uuid, sold: boolean }. `sold: false` puts a sold
  * listing back on the market; there is no limit on how often either way.
  *
- * TEMP-PRE-AUTH. Real OTP auth is not live yet (MSG91/DLT pending), so this
- * runs on the service-role client and RLS is bypassed. That makes THIS
- * HANDLER the security boundary, exactly as /api/farmer/listings documents.
+ * TEMP-PRE-AUTH (narrowed). The farmer is proven — a signed session token
+ * from /api/otp/verify — but there is no auth.uid(), so this still runs on
+ * the service-role client with RLS bypassed, which keeps THIS HANDLER the
+ * security boundary, exactly as /api/farmer/listings documents.
  *
  * WHOSE LISTING IT IS, and why the client is never asked
  * The request body carries a listing id and nothing else that matters. The
@@ -39,7 +39,7 @@ type Action = 'sold' | 'active';
 export async function POST(request: Request) {
   /* The farmer, from the cookie. A body that claims a mobile number is
      ignored entirely — there is no code path here that reads one. */
-  const mobile = (await cookies()).get(FARMER_MOBILE_COOKIE)?.value;
+  const mobile = await farmerMobile();
   if (!mobile || !/^\d{10}$/.test(mobile)) {
     return NextResponse.json({ error: 'not_signed_in' }, { status: 401 });
   }

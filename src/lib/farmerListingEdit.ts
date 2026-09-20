@@ -11,10 +11,10 @@ import { createAdminClient } from '@/lib/supabase/admin';
  * nothing and this returns null, so the caller renders a 404 and the farmer
  * cannot tell a foreign listing from one that does not exist.
  *
- * TEMP-PRE-AUTH: the mobile comes from the cookie set at the OTP step, not a
- * verified session, and the read runs on the service-role client because
- * there is no authenticated role to run it as. The mobile is only ever used
- * as an equality filter, never interpolated.
+ * TEMP-PRE-AUTH (narrowed): the mobile comes from a SIGNED session token
+ * minted by /api/otp/verify, so it is proven. The read still runs on the
+ * service-role client because there is no authenticated role to run it as.
+ * The mobile is used only as an equality filter, never interpolated.
  *
  * Village, taluk and the farmer's name live on public.farmers, not on the
  * listing — one farmer, one address — so they are read from there. Editing

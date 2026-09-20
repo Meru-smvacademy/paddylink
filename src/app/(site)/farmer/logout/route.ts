@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
+import { FARMER_MOBILE_COOKIE, SESSION_COOKIE_OPTIONS } from '@/lib/otpSession';
 
 /**
  * /farmer/logout — clears the farmer session cookie and returns to the farmer
@@ -16,7 +16,7 @@ import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
 
 function clearAndRedirect(request: Request) {
   const response = NextResponse.redirect(new URL('/login/farmer', request.url), 303);
-  response.cookies.set(FARMER_MOBILE_COOKIE, '', { path: '/', maxAge: 0 });
+  response.cookies.set(FARMER_MOBILE_COOKIE, '', { ...SESSION_COOKIE_OPTIONS, maxAge: 0 });
   return response;
 }
 

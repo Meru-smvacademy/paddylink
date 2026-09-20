@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import BuyerWallet from '@/components/BuyerWallet';
 import { getBuyerWallet } from '@/lib/buyerWallet';
-import { BUYER_MOBILE_COOKIE } from '@/app/api/buyer/session/route';
+import { buyerMobile } from '@/lib/otpSession';
 import styles from '@/components/BuyerWallet.module.css';
 
 /* Private route, reached from /buyer/listings. Nothing public links here and
@@ -17,10 +16,12 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function BuyerWalletPage() {
-  /* TEMP-PRE-AUTH: the buyer comes from the httpOnly cookie, set at
-     registration. There is no session to ask, and guessing whose wallet to
-     show would be worse than saying we do not know. */
-  const mobile = (await cookies()).get(BUYER_MOBILE_COOKIE)?.value;
+  /* TEMP-PRE-AUTH (narrowed): the buyer is PROVEN — this is a signed session
+     token minted by /api/otp/verify, and a forged or stale cookie verifies to
+     null. What is still temporary is what happens next: getBuyerWallet runs on
+     the service-role client with RLS bypassed, because there is no auth.uid()
+     to run it as. Supabase Auth rows, not OTP, are what retire this. */
+  const mobile = await buyerMobile();
   const wallet = mobile && /^\d{10}$/.test(mobile) ? await getBuyerWallet(mobile) : null;
 
   if (!wallet) {

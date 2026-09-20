@@ -5,10 +5,10 @@ import { getReferenceData } from '@/lib/reference';
 /**
  * Reads one farmer's listings for /farmer/listings.
  *
- * TEMP-PRE-AUTH: the mobile comes from the cookie set at the OTP step, not a
- * verified session, and the read runs on the service-role client because
- * there is no authenticated role to run it as. The caller must therefore
- * treat the mobile as untrusted input — it is only ever used as an equality
+ * TEMP-PRE-AUTH (narrowed): the mobile comes from a SIGNED session token
+ * minted by /api/otp/verify, so it is proven rather than merely claimed. The
+ * read still runs on the service-role client because there is no
+ * authenticated role to run it as. The mobile is used only as an equality
  * filter here, never interpolated.
  *
  * Reference data is joined in JS rather than by PostgREST: listings.variety_id

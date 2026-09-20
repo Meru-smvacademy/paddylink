@@ -17,9 +17,10 @@ import styles from './FarmerListings.module.css';
  * stood in for an empty state — a farmer with no listings now reaches the
  * real one.
  *
- * TEMP-PRE-AUTH: which farmer this is comes from the httpOnly cookie set at
- * the OTP step, not from a verified session. Nothing proves the number
- * belongs to whoever is looking.
+ * TEMP-PRE-AUTH (narrowed): which farmer this is comes from a SIGNED session
+ * token minted by /api/otp/verify, so the number is proven. What is still
+ * temporary is that the page behind it reads on the service-role client with
+ * RLS bypassed, for want of an auth.uid().
  *
  * CEO-approved deviations, each marked at its site:
  * - DEV-ICON         the frame's 📞 and ⚠ emoji replaced with line icons in

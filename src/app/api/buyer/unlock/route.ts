@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getUnlockCost } from '@/lib/unlockPricing';
-import { BUYER_MOBILE_COOKIE } from '@/app/api/buyer/session/route';
+import { buyerMobile } from '@/lib/otpSession';
 
 /**
  * POST /api/buyer/unlock — spend a token, release a farmer's contact.
@@ -39,10 +38,13 @@ import { BUYER_MOBILE_COOKIE } from '@/app/api/buyer/session/route';
  * nothing and returns the same contact, with already: true. That is the
  * function's guarantee, backed by UNIQUE (buyer_id, listing_id) on unlocks.
  *
- * TEMP-PRE-AUTH: the buyer comes from a cookie, not a verified session —
- * the same hole /api/buyer/orders documents. Nothing here verifies the
- * number belongs to whoever is holding it. Real money and real farmer
- * contacts must not run through this until OTP is in front of it.
+ * TEMP-PRE-AUTH (narrowed): the buyer is resolved from a SIGNED session
+ * token that only /api/otp/verify can mint, so the number is proven and a
+ * forged cookie verifies to null. The hole this paragraph used to describe
+ * is closed. What remains temporary: no auth.uid(), so this runs on the
+ * service-role client with RLS bypassed and calls the
+ * unlock_contact_for_buyer() sibling from 015 rather than unlock_contact().
+ * Both retire together when buyers have auth.users rows.
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -58,7 +60,7 @@ const ERROR_STATUS: Record<string, number> = {
 };
 
 export async function POST(request: Request) {
-  const mobile = (await cookies()).get(BUYER_MOBILE_COOKIE)?.value;
+  const mobile = await buyerMobile();
   if (!mobile || !/^\d{10}$/.test(mobile)) {
     return NextResponse.json({ error: 'not_signed_in' }, { status: 401 });
   }

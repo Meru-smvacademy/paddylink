@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { harvestMonthToDate, OTHER_VARIETY_EN } from '@/lib/reference';
-import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
+import { farmerMobile } from '@/lib/otpSession';
 
 /**
  * POST /api/farmer/listings/edit — correct an existing listing.
  *
- * TEMP-PRE-AUTH. Real OTP auth is not live yet (MSG91/DLT pending), so this
- * runs on the service-role client and RLS is bypassed. That makes THIS
- * HANDLER the security boundary, exactly as the create route documents:
- * nothing from the request body is trusted without validation here.
+ * TEMP-PRE-AUTH (narrowed). The farmer is proven — a signed session token
+ * from /api/otp/verify — but there is no auth.uid(), so this still runs on
+ * the service-role client with RLS bypassed. That keeps THIS HANDLER the
+ * security boundary, exactly as the create route documents: nothing from the
+ * request body is trusted without validation here.
  *
  * OWNERSHIP, and why the client is never asked whose listing this is
  * The body carries a listing id and nothing else that decides access. The
@@ -57,7 +57,7 @@ function int(form: FormData, key: string): number | null {
 export async function POST(request: Request) {
   /* The farmer, from the cookie. A body that claims a mobile is ignored
      entirely — nothing below reads one. */
-  const mobile = (await cookies()).get(FARMER_MOBILE_COOKIE)?.value;
+  const mobile = await farmerMobile();
   if (!mobile || !/^\d{10}$/.test(mobile)) {
     return NextResponse.json({ error: 'not_signed_in' }, { status: 401 });
   }

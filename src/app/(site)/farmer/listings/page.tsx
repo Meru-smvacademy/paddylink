@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import FarmerListings from '@/components/FarmerListings';
 import { getFarmerListings } from '@/lib/farmerListings';
-import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
+import { farmerMobile } from '@/lib/otpSession';
 
 /* Private route: part of the farmer path, reached from the success screen
    after a listing is submitted. Nothing public links here, and it stays out
@@ -17,10 +16,12 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function FarmerListingsPage() {
-  /* TEMP-PRE-AUTH: the OTP step puts the farmer's number in an httpOnly
-     cookie because there is no session yet. No cookie means we do not know
-     whose listings to show, so the flow starts over rather than guessing. */
-  const mobile = (await cookies()).get(FARMER_MOBILE_COOKIE)?.value;
+  /* TEMP-PRE-AUTH (narrowed): the farmer is PROVEN — a signed session token
+     from /api/otp/verify, which is the only thing that can mint one. No valid
+     token means the flow starts over rather than guessing. What remains
+     temporary is the read below: service-role, RLS bypassed, because there is
+     no auth.uid() yet. */
+  const mobile = await farmerMobile();
   if (!mobile || !/^\d{10}$/.test(mobile)) {
     redirect('/login/farmer');
   }

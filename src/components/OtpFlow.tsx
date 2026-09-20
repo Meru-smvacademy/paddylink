@@ -400,8 +400,9 @@ export default function OtpFlow({
         {phase === 'form' && reference && (
           <FarmerListingFormV2
             reference={reference}
-            /* TEMP-PRE-AUTH: the number the farmer typed at the OTP step,
-               carried in component state. No session proves it is his. */
+            /* Display only. The number has been verified by this point, and
+               the create route takes it from the signed session rather than
+               from this prop — see FarmerListingFormV2. */
             mobile={phone}
             onSubmitted={(created) => {
               setListing(created);

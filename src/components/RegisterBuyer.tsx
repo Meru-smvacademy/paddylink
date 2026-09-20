@@ -19,8 +19,10 @@ import styles from './RegisterBuyer.module.css';
  * Nothing here can approve anyone: approval is a human decision made in the
  * admin portal, and only an approved buyer ever reaches a farmer's contact.
  *
- * TEMP-PRE-AUTH: there is no session, so nothing proves the mobile number
- * belongs to whoever is typing. The route says the same at its own boundary.
+ * THE NUMBER ON THIS FORM IS NOT PROVEN, deliberately: registering is not
+ * signing in, and this screen mints no session. It buys a pending KYC row a
+ * human must approve. To reach a wallet or a farmer's contact the buyer signs
+ * in at /login/buyer and receives an SMS. The route says the same.
  *
  * LANGUAGE: the frame prints a Kannada label over a small uppercase English
  * one and has no working toggle. That stack is preserved and the site ಕ|EN

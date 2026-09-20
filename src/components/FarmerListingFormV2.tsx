@@ -22,9 +22,10 @@ import styles from './FarmerListingFormV2.module.css';
  * 005's reference views), so the spellings are canonical and the district
  * list is the one PaddyLink actually operates in.
  *
- * TEMP-PRE-AUTH: the mobile number arrives from the OTP step in component
- * state, not from a verified session — real OTP is not live yet. The route
- * says the same at its own boundary.
+ * The mobile shown here is display state carried from the OTP step. The
+ * create route IGNORES it and attributes the listing to the number in the
+ * signed session instead, so what this field says cannot change whose listing
+ * it becomes.
  *
  * DEV-KN-ONLY: this screen carries no English at all, by CEO decision — it is
  * the farmer's screen and speaks his language. The ಕ|EN toggle leaves it
@@ -150,9 +151,9 @@ export default function FarmerListingFormV2({
   onSaved,
 }: {
   reference: ReferenceData;
-  /** TEMP-PRE-AUTH: carried from the OTP step in component state, not a
-      verified session. The server route re-validates the shape but cannot
-      yet prove the number belongs to whoever is typing. In edit mode it is
+  /** Display only. Carried from the OTP step so the farmer can see which
+      number he is posting under; /api/farmer/listings reads the number from
+      the signed session and ignores this field entirely. In edit mode it is
       the stored number, shown read-only and never submitted. */
   mobile: string;
   onSubmitted?: (listing: CreatedListing) => void;

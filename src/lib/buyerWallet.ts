@@ -15,12 +15,14 @@ import { createAdminClient } from '@/lib/supabase/admin';
  * No price is written down in the app; change the config row and the wallet
  * follows without a deploy, exactly as the unlock cost does.
  *
- * TEMP-PRE-AUTH: the buyer is resolved from the httpOnly cookie, not a
- * verified session, and these reads run on the service-role client because
- * there is no authenticated role to run them as. The mobile is only ever used
- * as an equality filter, never interpolated. When OTP lands these move behind
- * the buyer's own RLS policies, which 001 already wrote (wallet_self,
- * ledger_self, unlocks_self, and recredits_self from 011).
+ * TEMP-PRE-AUTH (narrowed): the caller resolves the buyer from a SIGNED
+ * session token that only /api/otp/verify can mint, so the mobile handed to
+ * this function is proven. What is still temporary is that these reads run on
+ * the service-role client, because there is no authenticated role to run them
+ * as. The mobile is used only as an equality filter, never interpolated.
+ * Moving behind the buyer's own RLS policies — wallet_self, ledger_self,
+ * unlocks_self from 001 and recredits_self from 011, all written and all
+ * unused — needs auth.users rows, which OTP alone does not create.
  */
 
 export interface TokenPack {

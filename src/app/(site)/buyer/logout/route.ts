@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { BUYER_MOBILE_COOKIE, BUYER_COOKIE_OPTIONS } from '@/app/api/buyer/session/route';
+import { BUYER_MOBILE_COOKIE, SESSION_COOKIE_OPTIONS } from '@/lib/otpSession';
 
 /**
  * /buyer/logout — clears the buyer session cookie and returns to the buyer
@@ -15,7 +15,7 @@ import { BUYER_MOBILE_COOKIE, BUYER_COOKIE_OPTIONS } from '@/app/api/buyer/sessi
 
 function clearAndRedirect(request: Request) {
   const response = NextResponse.redirect(new URL('/login/buyer', request.url), 303);
-  response.cookies.set(BUYER_MOBILE_COOKIE, '', { ...BUYER_COOKIE_OPTIONS, maxAge: 0 });
+  response.cookies.set(BUYER_MOBILE_COOKIE, '', { ...SESSION_COOKIE_OPTIONS, maxAge: 0 });
   return response;
 }
 

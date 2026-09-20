@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import FarmerListingEdit from '@/components/FarmerListingEdit';
 import FarmerLogoutControl from '@/components/FarmerLogoutControl';
 import { getEditableListing } from '@/lib/farmerListingEdit';
 import { getReferenceData } from '@/lib/reference';
-import { FARMER_MOBILE_COOKIE } from '@/app/api/farmer/session/route';
+import { farmerMobile } from '@/lib/otpSession';
 import shell from '@/components/OtpFlow.module.css';
 
 /* Private route, reached only from a card on /farmer/listings. Nothing
@@ -26,11 +25,11 @@ export default async function FarmerListingEditPage({
 }) {
   const { id } = await params;
 
-  /* TEMP-PRE-AUTH: the OTP step puts the farmer's number in an httpOnly
-     cookie because there is no session yet. No cookie means we do not know
-     whose listing this would be, so the flow starts over rather than
-     guessing — exactly as /farmer/listings does. */
-  const mobile = (await cookies()).get(FARMER_MOBILE_COOKIE)?.value;
+  /* TEMP-PRE-AUTH (narrowed): the farmer is PROVEN — a signed session token
+     from /api/otp/verify. No valid token means the flow starts over rather
+     than guessing, exactly as /farmer/listings does. The read below is still
+     service-role with RLS bypassed, pending auth.uid(). */
+  const mobile = await farmerMobile();
   if (!mobile || !/^\d{10}$/.test(mobile)) {
     redirect('/login/farmer');
   }

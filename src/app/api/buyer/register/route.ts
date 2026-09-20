@@ -1,14 +1,19 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { BUYER_MOBILE_COOKIE, BUYER_COOKIE_OPTIONS } from '@/app/api/buyer/session/route';
 
 /**
  * POST /api/buyer/register — create a buyer's KYC registration.
  *
- * TEMP-PRE-AUTH. Real OTP auth is not live yet, so this route runs on the
- * service-role client and RLS is bypassed. THIS HANDLER is therefore the
- * security boundary: nothing from the request body is trusted without
- * validation here, whatever the form already checked.
+ * TEMP-PRE-AUTH (narrowed). OTP is live, but registering is not signing in:
+ * this route deliberately requires no session and mints none — see the note
+ * where the buyer row is created. It runs on the service-role client with RLS
+ * bypassed, so THIS HANDLER is the security boundary: nothing from the
+ * request body is trusted without validation here, whatever the form checked.
+ *
+ * THE MOBILE ON THIS FORM IS NOT PROVEN, and does not need to be. It buys
+ * nothing but a pending KYC row that a human must approve, and the buyer
+ * cannot reach a wallet, a token or a farmer's contact without signing in at
+ * /login/buyer and receiving an SMS on that number.
  *
  * The buyer is created with kyc_status 'pending'. Nothing in this route can
  * approve anyone — approval is a human decision made in the admin portal, and
@@ -168,17 +173,16 @@ export async function POST(request: Request) {
     });
     if (docErr) throw docErr;
 
-    /* TEMP-PRE-AUTH: remember this buyer server-side, so the wallet knows
-       whose balance to show without a second step. Same httpOnly cookie the
-       farmer flow uses, and the same caveat — it is a convenience, not proof
-       of identity. The buyer branch of the OTP flow should set it too; that
-       file is out of scope here, so a buyer arriving on a fresh device has no
-       session and the wallet says so rather than guessing. */
-    const response = NextResponse.json({
+    /* NO SESSION IS MINTED HERE, and that is the point. This route used to
+       set the buyer session cookie for whoever had just filled in the form,
+       which meant registration was a way to become any number without ever
+       receiving an SMS — a hole straight through the OTP door now that there
+       is one. Filling in a form is not proving a number. The success screen
+       needs no session, and the buyer signs in at /login/buyer like everyone
+       else, which is also where he would land on a new device. */
+    return NextResponse.json({
       buyer: { id: buyer.id, kyc_status: buyer.kyc_status },
     });
-    response.cookies.set(BUYER_MOBILE_COOKIE, mobile, BUYER_COOKIE_OPTIONS);
-    return response;
   } catch (e) {
     // Supabase errors are plain objects, not Error instances — String(e) on
     // one yields "[object Object]" and hides the cause. Pull the fields out.

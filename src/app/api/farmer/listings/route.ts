@@ -1,20 +1,22 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { harvestMonthToDate, OTHER_VARIETY_EN } from '@/lib/reference';
+import { farmerMobile } from '@/lib/otpSession';
 
 /**
  * POST /api/farmer/listings — create a farmer's paddy listing.
  *
- * TEMP-PRE-AUTH. Real OTP auth is not live yet (MSG91/DLT pending), so this
- * route runs on the service-role client and RLS is bypassed. That makes THIS
- * HANDLER the security boundary: nothing from the request body is trusted
- * without validation here.
+ * THE NUMBER COMES FROM THE SESSION, never from the form. The form still
+ * posts a `mobile` field and this route ignores it: it is display state the
+ * farmer's own browser filled in, and honouring it would let anyone create a
+ * listing attributed to any number — the hole this route carried for as long
+ * as there was no OTP to close it. The listing is attributed to the number
+ * /api/otp/verify proved, and a request without a valid session is refused.
  *
- * The specific hole that closes when OTP lands: the mobile number arrives
- * from the client, unverified. Anyone can post any number and create a
- * listing attributed to it. That is acceptable only because no real farmers
- * are on the platform yet. When OTP is live, the number must come from the
- * session and this route re-points at an authenticated RLS flow.
+ * TEMP-PRE-AUTH, still, and narrower than it was: the farmer is now proven,
+ * but this route runs on the service-role client with RLS bypassed because
+ * there is no auth.uid() to run it as, so THIS HANDLER remains the security
+ * boundary and nothing from the body is trusted without validation here.
  *
  * Everything else is validated server-side regardless of what the form did:
  * the form's checks are for the farmer's benefit, these are for the data's.
@@ -46,11 +48,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'expected_form_data' }, { status: 400 });
   }
 
+  /* The farmer, as proved at the OTP door. The form's own mobile field is
+     read by nothing below. */
+  const mobile = await farmerMobile();
+  if (!mobile) {
+    return NextResponse.json({ error: 'not_signed_in' }, { status: 401 });
+  }
+
   const errors: Errors = {};
 
   // ── Field validation ─────────────────────────────────────────────────────
-  const mobile = str(form, 'mobile');
-  if (!/^\d{10}$/.test(mobile)) errors.mobile = 'invalid';
 
   const name = str(form, 'name');
   if (name.length < 1 || name.length > 100) errors.name = 'invalid';
