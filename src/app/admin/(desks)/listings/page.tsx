@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { requireRole } from '@/lib/adminAuth';
 import {
   CAN_APPROVE,
@@ -10,13 +9,24 @@ import {
   SIGNED_URL_TTL_SECONDS,
   type ListingStatus,
 } from '@/lib/adminListings';
-import styles from '../buyers/buyers.module.css';
-import own from './listings.module.css';
+import {
+  Bi,
+  DeskHead,
+  DetailsToggle,
+  Flash,
+  LISTING_WORD,
+  Pill,
+  Segments,
+  fmtDate,
+  fmtMonth,
+  varietyLabel,
+} from '../deskUi';
+import styles from '../desk.module.css';
 
 /**
- * DESK 2 — Listings. Same shape as the KYC desk: server-rendered master
- * table + detail panel, tabs/selection/flash in the query string, decisions
- * as plain form posts to /admin/api/listings. No client JS.
+ * DESK 2 — Listings. Same shape as the KYC desk: one list, the decision on
+ * the row, the status filter / open row / flash in the query string,
+ * decisions as plain form posts to /admin/api/listings. No client JS.
  *
  * Approve puts a listing on the market ('active'); Reject takes it off
  * ('removed', internal reason required). listings.status has no
@@ -30,15 +40,6 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-const STATUS_LABEL: Record<ListingStatus, string> = {
-  draft: 'Draft',
-  active: 'Active',
-  flagged: 'Flagged',
-  sold: 'Sold',
-  expired: 'Expired',
-  removed: 'Removed',
-};
-
 const FLASH: Record<string, { kind: 'ok' | 'err'; text: string }> = {
   approved: { kind: 'ok', text: 'Listing approved — status is now active (on the market).' },
   rejected: { kind: 'ok', text: 'Listing rejected — status is now removed. Reason recorded internally.' },
@@ -48,25 +49,21 @@ const FLASH: Record<string, { kind: 'ok' | 'err'; text: string }> = {
   error: { kind: 'err', text: 'The decision failed to save — check the server log and retry.' },
 };
 
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function fmtMonth(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
-}
-
-function varietyLabel(l: { variety_en: string | null; variety_other: string | null }): string {
-  const base = l.variety_en ?? '—';
-  return l.variety_other ? `${base}: ${l.variety_other}` : base;
-}
+const TONE: Record<ListingStatus, 'wait' | 'ok' | 'bad' | 'quiet'> = {
+  draft: 'wait',
+  flagged: 'bad',
+  active: 'ok',
+  sold: 'quiet',
+  expired: 'quiet',
+  removed: 'quiet',
+};
 
 export default async function AdminListingsPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Admin-only: the listings table carries approve/remove. The route-list
+  // Admin-only: the listings desk carries approve/remove. The route-list
   // child (/admin/listings/routes) is separately open to staff.
   await requireRole(['admin']);
 
@@ -83,198 +80,194 @@ export default async function AdminListingsPage({
     sel ? getListingDetail(sel) : Promise.resolve(null),
   ]);
 
-  const tabHref = (s?: ListingStatus) =>
-    `/admin/listings${s ? `?status=${s}` : ''}${sel ? `${s ? '&' : '?'}sel=${sel}` : ''}`;
-  const rowHref = (id: string) =>
-    `/admin/listings?${status ? `status=${status}&` : ''}sel=${id}`;
+  const href = (opts: { status?: ListingStatus; sel?: string }) => {
+    const q = new URLSearchParams();
+    if (opts.status) q.set('status', opts.status);
+    if (opts.sel) q.set('sel', opts.sel);
+    const s = q.toString();
+    return `/admin/listings${s ? `?${s}` : ''}${opts.sel ? `#row-${opts.sel}` : ''}`;
+  };
 
   return (
-    <div className={styles.desk}>
-      <div className={styles.listPane}>
-        <div className={styles.headRow}>
-          <h1 className={styles.title}>Listings</h1>
-          <nav className={styles.tabs} aria-label="Filter by status">
-            <Link href={tabHref()} className={!status ? styles.tabActive : styles.tab}>
-              All
-            </Link>
-            {LISTING_STATUSES.map((s) => (
-              <Link
-                key={s}
-                href={tabHref(s)}
-                className={status === s ? styles.tabActive : styles.tab}
-              >
-                {STATUS_LABEL[s]}
-              </Link>
-            ))}
-          </nav>
-        </div>
+    <>
+      <DeskHead
+        kn="ಪಟ್ಟಿಗಳು"
+        en="Listings"
+        sub={`${listings.length} listing${listings.length === 1 ? '' : 's'}${status ? ` · ${LISTING_WORD[status].en}` : ''}`}
+      />
 
-        {flash && (
-          <p className={flash.kind === 'ok' ? styles.flashOk : styles.flashErr} role="status">
-            {flash.text}
-          </p>
-        )}
+      <Segments
+        label={{ kn: 'ಸ್ಥಿತಿ', en: 'Status' }}
+        active={status ?? 'all'}
+        items={[
+          { key: 'all', kn: 'ಎಲ್ಲಾ', en: 'All', href: href({}) },
+          ...LISTING_STATUSES.map((s) => ({ key: s, ...LISTING_WORD[s], href: href({ status: s }) })),
+        ]}
+      />
 
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Variety</th>
-              <th>Qty (q)</th>
-              <th>Harvest</th>
-              <th>Farmer</th>
-              <th>Village</th>
-              <th>Taluk / District</th>
-              <th>Checked</th>
-              <th>Status</th>
-              <th>Posted</th>
-            </tr>
-          </thead>
-          <tbody>
-            {listings.length === 0 && (
-              <tr>
-                <td colSpan={9} className={styles.empty}>
-                  No listings{status ? ` with status ${STATUS_LABEL[status]}` : ''}.
-                </td>
-              </tr>
-            )}
-            {listings.map((l) => (
-              <tr key={l.id} className={l.id === sel ? styles.rowSel : undefined}>
-                <td>
-                  <Link href={rowHref(l.id)} className={styles.rowLink}>
-                    {varietyLabel(l)}
-                  </Link>
-                </td>
-                <td className={styles.mono}>{l.quantity_quintals}</td>
-                <td>{fmtMonth(l.harvest_month)}</td>
-                <td>{l.farmer?.full_name ?? '—'}</td>
-                <td>{l.farmer?.village ?? '—'}</td>
-                <td>
-                  {l.taluk_en ?? '—'}
-                  {l.district_en ? ` / ${l.district_en}` : ''}
-                </td>
-                <td>{l.quality_checked_at ? `✓ ${l.moisture_pct ?? '—'}%` : '—'}</td>
-                <td>
-                  <span className={own[`ls_${l.status}`]}>{STATUS_LABEL[l.status]}</span>
-                </td>
-                <td>{fmtDate(l.created_at)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Flash flash={flash} />
 
-      {sel && (
-        <aside className={styles.panel} aria-label="Listing detail">
-          {!detail ? (
-            <p className={styles.empty}>Listing not found.</p>
-          ) : (
-            <>
-              <div className={styles.panelHead}>
-                <h2 className={styles.panelTitle}>{varietyLabel(detail.listing)}</h2>
-                <Link
-                  href={`/admin/listings${status ? `?status=${status}` : ''}`}
-                  className={styles.panelClose}
-                  aria-label="Close panel"
-                >
-                  ✕
-                </Link>
-              </div>
-              <span className={own[`ls_${detail.listing.status}`]}>
-                {STATUS_LABEL[detail.listing.status]}
-              </span>
-
-              <dl className={styles.fields}>
-                <dt>Quantity</dt>
-                <dd>{detail.listing.quantity_quintals} quintals</dd>
-                <dt>Harvest month</dt>
-                <dd>{fmtMonth(detail.listing.harvest_month)}</dd>
-                <dt>Farmer</dt>
-                <dd>{detail.listing.farmer?.full_name ?? '—'}</dd>
-                <dt>Mobile</dt>
-                <dd className={styles.mono}>{detail.listing.farmer?.mobile ?? '—'}</dd>
-                <dt>Village</dt>
-                <dd>{detail.listing.farmer?.village ?? '—'}</dd>
-                <dt>Taluk</dt>
-                <dd>{detail.listing.taluk_en ?? '—'}</dd>
-                <dt>District</dt>
-                <dd>{detail.listing.district_en ?? '—'}</dd>
-                <dt>Created by</dt>
-                <dd>{detail.listing.created_by}</dd>
-                <dt>Quality check</dt>
-                <dd>
-                  {detail.listing.quality_checked_at
-                    ? `${detail.listing.moisture_pct ?? '—'}% moisture · ${fmtDate(detail.listing.quality_checked_at)}${detail.listing.quality_checked_by ? ` · ${detail.listing.quality_checked_by}` : ''}`
-                    : 'Not checked yet'}
-                </dd>
-                <dt>Expires</dt>
-                <dd>{fmtDate(detail.listing.expires_at)}</dd>
-                <dt>Posted</dt>
-                <dd>{fmtDate(detail.listing.created_at)}</dd>
-              </dl>
-
-              <h3 className={styles.docsTitle}>Crop photo</h3>
-              {detail.listing.photo_path ? (
-                detail.photo_url ? (
-                  /* Server-signed link into the private listing-photos
-                     bucket; dies after SIGNED_URL_TTL_SECONDS. */
-                  <a
-                    href={detail.photo_url}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    className={styles.docLink}
-                  >
-                    Open photo ({Math.round(SIGNED_URL_TTL_SECONDS / 60)}-min link)
-                  </a>
-                ) : (
-                  <span className={styles.docBroken}>
-                    Signing failed for {detail.listing.photo_path}
-                  </span>
-                )
-              ) : (
-                <p className={styles.empty}>No photo uploaded.</p>
-              )}
-
-              {(CAN_APPROVE.includes(detail.listing.status) ||
-                CAN_REJECT.includes(detail.listing.status)) && (
-                <div className={styles.actions}>
-                  {CAN_APPROVE.includes(detail.listing.status) && (
-                    <form method="post" action="/admin/api/listings" className={styles.approveForm}>
-                      <input type="hidden" name="listing_id" value={detail.listing.id} />
-                      <input type="hidden" name="decision" value="approve" />
-                      <button type="submit" className={styles.approveBtn}>
-                        Approve — put on market
-                      </button>
-                      {/* MSG91 pending: no farmer/buyer notification is sent. */}
-                      <span className={styles.noNotify}>No SMS is sent yet (MSG91 pending).</span>
-                    </form>
-                  )}
-                  {CAN_REJECT.includes(detail.listing.status) && (
-                    <form method="post" action="/admin/api/listings" className={styles.rejectForm}>
-                      <input type="hidden" name="listing_id" value={detail.listing.id} />
-                      <input type="hidden" name="decision" value="reject" />
-                      <label htmlFor="listing-reject-reason" className={styles.rejectLabel}>
-                        Internal reason (required to reject)
-                      </label>
-                      <textarea
-                        id="listing-reject-reason"
-                        name="reason"
-                        rows={3}
-                        maxLength={500}
-                        required
-                        className={styles.reasonBox}
-                        placeholder="e.g. duplicate of an earlier listing from the same farmer"
-                      />
-                      <button type="submit" className={styles.rejectBtn}>
-                        Reject — remove from market
-                      </button>
-                    </form>
-                  )}
+      {listings.length === 0 ? (
+        <p className={styles.empty}>
+          No listings{status ? ` with status ${LISTING_WORD[status].en}` : ''}.
+        </p>
+      ) : (
+        <ul className={styles.rows}>
+          {listings.map((l) => {
+            const open = l.id === sel;
+            const canApprove = CAN_APPROVE.includes(l.status);
+            const canReject = CAN_REJECT.includes(l.status);
+            return (
+              <li key={l.id} id={`row-${l.id}`} className={open ? styles.rowOpen : styles.row}>
+                <div className={styles.rowMain}>
+                  <h2 className={styles.rowTitle}>
+                    {l.variety_kn && (
+                      <span className={styles.rowTitleKn} lang="kn">
+                        {l.variety_kn}
+                      </span>
+                    )}
+                    {varietyLabel(l)} · {l.quantity_quintals} q
+                  </h2>
+                  <Pill word={LISTING_WORD[l.status]} tone={TONE[l.status]} />
+                  <p className={styles.rowMeta}>
+                    {l.farmer?.full_name ?? 'Unnamed farmer'}
+                    {l.farmer?.village ? ` · ${l.farmer.village}` : ''}
+                  </p>
+                  <p className={styles.rowMetaMuted}>
+                    {[l.taluk_en, l.district_en].filter(Boolean).join(', ') || 'No taluk'} ·
+                    Harvest {fmtMonth(l.harvest_month)}
+                  </p>
+                  <p className={styles.rowMetaMuted}>
+                    Posted {fmtDate(l.created_at)} ·{' '}
+                    {l.quality_checked_at
+                      ? `✓ checked, ${l.moisture_pct ?? '—'}% moisture`
+                      : 'Not quality-checked'}
+                  </p>
                 </div>
-              )}
-            </>
-          )}
-        </aside>
+
+                <div className={styles.rowActions}>
+                  {canApprove && (
+                    <form method="post" action="/admin/api/listings" className={styles.form}>
+                      <input type="hidden" name="listing_id" value={l.id} />
+                      <input type="hidden" name="decision" value="approve" />
+                      <button type="submit" className={styles.btnPrimary}>
+                        <Bi kn="ಅನುಮೋದಿಸಿ" en="Approve — put on market" />
+                      </button>
+                    </form>
+                  )}
+                  {canReject && (
+                    <form method="post" action="/admin/api/listings" className={styles.form}>
+                      <input type="hidden" name="listing_id" value={l.id} />
+                      <input type="hidden" name="decision" value="reject" />
+                      <label className={styles.field}>
+                        <span className={styles.fieldLabel}>
+                          <span lang="kn">ಕಾರಣ</span> · Reason (required to reject)
+                        </span>
+                        <input
+                          name="reason"
+                          type="text"
+                          maxLength={500}
+                          required
+                          className={styles.input}
+                          placeholder="e.g. duplicate listing"
+                        />
+                      </label>
+                      <button type="submit" className={styles.btnDanger}>
+                        <Bi kn="ತಿರಸ್ಕರಿಸಿ" en="Reject — remove from market" />
+                      </button>
+                    </form>
+                  )}
+                  {!canApprove && !canReject && (
+                    <p className={styles.actionNote}>Settled history — no action from this desk.</p>
+                  )}
+                  <DetailsToggle
+                    open={open}
+                    openHref={href({ status, sel: l.id })}
+                    closeHref={href({ status })}
+                  />
+                </div>
+
+                {open && (
+                  <div className={styles.detail}>
+                    {!detail ? (
+                      <p className={styles.empty}>Listing not found.</p>
+                    ) : (
+                      <>
+                        <dl className={styles.fields}>
+                          <div>
+                            <dt>Farmer</dt>
+                            <dd>{detail.listing.farmer?.full_name ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>Mobile</dt>
+                            <dd className={styles.mono}>{detail.listing.farmer?.mobile ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>Village</dt>
+                            <dd>{detail.listing.farmer?.village ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>Taluk / District</dt>
+                            <dd>
+                              {[detail.listing.taluk_en, detail.listing.district_en]
+                                .filter(Boolean)
+                                .join(', ') || '—'}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Created by</dt>
+                            <dd>{detail.listing.created_by}</dd>
+                          </div>
+                          <div>
+                            <dt>Quality check</dt>
+                            <dd>
+                              {detail.listing.quality_checked_at
+                                ? `${detail.listing.moisture_pct ?? '—'}% moisture · ${fmtDate(detail.listing.quality_checked_at)}${detail.listing.quality_checked_by ? ` · ${detail.listing.quality_checked_by}` : ''}`
+                                : 'Not checked yet'}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Expires</dt>
+                            <dd>{fmtDate(detail.listing.expires_at)}</dd>
+                          </div>
+                          <div>
+                            <dt>Posted</dt>
+                            <dd>{fmtDate(detail.listing.created_at)}</dd>
+                          </div>
+                        </dl>
+
+                        <h3 className={styles.subhead}>
+                          <Bi kn="ಬೆಳೆ ಫೋಟೋ" en="Crop photo" />
+                        </h3>
+                        {detail.listing.photo_path ? (
+                          detail.photo_url ? (
+                            /* Server-signed link into the private listing-photos
+                               bucket; dies after SIGNED_URL_TTL_SECONDS. */
+                            <a
+                              href={detail.photo_url}
+                              target="_blank"
+                              rel="noreferrer noopener"
+                              className={styles.docLink}
+                            >
+                              Open photo ({Math.round(SIGNED_URL_TTL_SECONDS / 60)}-min link)
+                            </a>
+                          ) : (
+                            <span className={styles.docBroken}>
+                              Signing failed for {detail.listing.photo_path}
+                            </span>
+                          )
+                        ) : (
+                          <p className={styles.empty}>No photo uploaded.</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       )}
-    </div>
+    </>
   );
 }

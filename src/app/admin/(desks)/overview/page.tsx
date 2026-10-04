@@ -1,13 +1,21 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { requireRole } from '@/lib/adminAuth';
 import { getOverview } from '@/lib/adminOverview';
-import styles from './overview.module.css';
+import { getStalePendingOrders } from '@/lib/adminOrders';
+import { listBuyers } from '@/lib/adminKyc';
+import { getQualityQueue } from '@/lib/adminQuality';
+import { PENDING_STALE_MINUTES } from '@/lib/buyerWallet';
+import { Bi, DeskHead, age, fmtDate, rupees, varietyLabel } from '../deskUi';
+import styles from '../desk.module.css';
 
 /**
- * DESK 4 — Overview. STRICTLY READ-ONLY oversight: live counts, recent
- * audit trail, and the money/unlock sections shown honestly (all empty
- * today). No action buttons, no forms, no write route anywhere on this
- * desk.
+ * DESK 4 — Overview. STRICTLY READ-ONLY: four live counts, each one the way
+ * into its desk, and one list of what needs a human. No action buttons, no
+ * forms, no write route anywhere on this desk.
+ *
+ * Every number is read through the existing desk loaders on each request —
+ * nothing here is cached or pre-aggregated.
  */
 
 export const metadata: Metadata = {
@@ -17,277 +25,136 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-const LISTING_LABEL: Record<string, string> = {
-  draft: 'Draft',
-  active: 'Active',
-  flagged: 'Flagged',
-  sold: 'Sold',
-  expired: 'Expired',
-  removed: 'Removed',
-};
-const KYC_LABEL: Record<string, string> = {
-  pending: 'Pending',
-  under_review: 'Under review',
-  approved: 'Verified',
-  rejected: 'Rejected',
-};
-
-function fmtDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
-}
-
-/** A compact one-line summary of an audit row's meta jsonb. */
-function metaSummary(meta: unknown): string {
-  if (!meta || typeof meta !== 'object') return '';
-  const o = meta as Record<string, unknown>;
-  const parts: string[] = [];
-  if (o.reason) parts.push(`reason: ${String(o.reason)}`);
-  if (o.from_status) parts.push(`from ${String(o.from_status)}`);
-  if (o.moisture_pct != null) parts.push(`${Number(o.moisture_pct).toFixed(1)}%`);
-  if (o.quality_checked_by) parts.push(`by ${String(o.quality_checked_by)}`);
-  if (o.previous) parts.push('(edit)');
-  return parts.join(' · ');
-}
-
-/** paise → ₹ string. */
-function rupees(paise: number): string {
-  return `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+/** KYC still waiting on a decision — the states the buyers desk can act on. */
+const AWAITING_KYC = new Set(['pending', 'under_review']);
 
 export default async function AdminOverviewPage() {
   // Admin-only oversight desk. Staff are bounced to their own landing.
   await requireRole(['admin']);
-  const { counts, audit, wallets, ledger, unlocks, payments } = await getOverview();
+  const [{ counts }, staleOrders, buyers, quality] = await Promise.all([
+    getOverview(),
+    getStalePendingOrders(),
+    listBuyers(),
+    getQualityQueue({ state: 'pending' }),
+  ]);
+
+  const kycWaiting = buyers.filter((b) => AWAITING_KYC.has(b.kyc_status));
+  const nothingToDo =
+    kycWaiting.length === 0 && staleOrders.length === 0 && quality.rows.length === 0;
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>Overview</h1>
+    <>
+      <DeskHead kn="ಅವಲೋಕನ" en="Overview" />
 
-      {/* ── Counts bar ─────────────────────────────────────────────────── */}
-      <section className={styles.section}>
-        <div className={styles.countGrid}>
-          <div className={styles.statBig}>
-            <span className={styles.statNum}>{counts.farmers}</span>
-            <span className={styles.statLabel}>Farmers</span>
-          </div>
-          <div className={styles.statBig}>
-            <span className={styles.statNum}>{counts.listingsTotal}</span>
-            <span className={styles.statLabel}>Listings</span>
-          </div>
-          <div className={styles.statBig}>
-            <span className={styles.statNum}>{counts.buyersTotal}</span>
-            <span className={styles.statLabel}>Buyers</span>
-          </div>
-          <div className={styles.statBig}>
-            <span className={styles.statNum}>
-              {counts.qualityChecked}
-              <span className={styles.statOf}>/{counts.qualityChecked + counts.qualityPending}</span>
-            </span>
-            <span className={styles.statLabel}>Active checked</span>
-          </div>
-        </div>
+      <div className={styles.tiles}>
+        {/* There is no farmer desk; a farmer is reached through their
+            listings, so the tile opens the listings desk. */}
+        <Link href="/admin/listings" className={styles.tile}>
+          <span className={styles.tileLabel}>
+            <Bi kn="ರೈತರು" en="Farmers" />
+          </span>
+          <span className={styles.tileNum}>{counts.farmers}</span>
+          <span className={styles.tileSub}>Total registered</span>
+        </Link>
 
-        <div className={styles.breakdowns}>
-          <div className={styles.breakdown}>
-            <h2 className={styles.breakdownTitle}>Listings by status</h2>
-            <ul className={styles.chips}>
-              {Object.entries(counts.listingsByStatus).map(([s, n]) => (
-                <li key={s} className={styles.chip}>
-                  <span className={styles.chipLabel}>{LISTING_LABEL[s] ?? s}</span>
-                  <span className={styles.chipNum}>{n}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.breakdown}>
-            <h2 className={styles.breakdownTitle}>Buyers by KYC status</h2>
-            <ul className={styles.chips}>
-              {Object.entries(counts.buyersByKyc).map(([s, n]) => (
-                <li key={s} className={styles.chip}>
-                  <span className={styles.chipLabel}>{KYC_LABEL[s] ?? s}</span>
-                  <span className={styles.chipNum}>{n}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className={styles.breakdown}>
-            <h2 className={styles.breakdownTitle}>Quality (active listings)</h2>
-            <ul className={styles.chips}>
-              <li className={styles.chip}>
-                <span className={styles.chipLabel}>Checked</span>
-                <span className={styles.chipNum}>{counts.qualityChecked}</span>
-              </li>
-              <li className={styles.chip}>
-                <span className={styles.chipLabel}>Pending</span>
-                <span className={styles.chipNum}>{counts.qualityPending}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
+        <Link href="/admin/listings?status=active" className={styles.tile}>
+          <span className={styles.tileLabel}>
+            <Bi kn="ಪಟ್ಟಿಗಳು" en="Listings" />
+          </span>
+          <span className={styles.tileNum}>{counts.listingsByStatus.active ?? 0}</span>
+          <span className={styles.tileSub}>
+            Active · {counts.listingsByStatus.sold ?? 0} sold · {counts.listingsTotal} in all
+          </span>
+        </Link>
 
-      {/* ── Recent activity ────────────────────────────────────────────── */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Recent activity</h2>
-        {audit.length === 0 ? (
-          <p className={styles.empty}>No activity recorded yet.</p>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>Actor</th>
-                <th>Action</th>
-                <th>Entity</th>
-                <th>Detail</th>
-              </tr>
-            </thead>
-            <tbody>
-              {audit.map((a) => (
-                <tr key={a.id}>
-                  <td className={styles.mono}>{fmtDateTime(a.created_at)}</td>
-                  <td>{a.actor_role ?? '—'}</td>
-                  <td>{a.action}</td>
-                  <td>{a.entity}</td>
-                  <td className={styles.detail}>{metaSummary(a.meta) || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-        <p className={styles.note}>Latest {audit.length} of the audit trail, newest first.</p>
-      </section>
+        <Link href="/admin/buyers" className={styles.tile}>
+          <span className={styles.tileLabel}>
+            <Bi kn="ಖರೀದಿದಾರರು" en="Buyers" />
+          </span>
+          <span className={styles.tileNum}>{counts.buyersTotal}</span>
+          <span className={styles.tileSub}>{kycWaiting.length} KYC pending</span>
+        </Link>
 
-      {/* ── Wallets & tokens ───────────────────────────────────────────── */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Wallets &amp; tokens</h2>
-        <div className={styles.twoCol}>
-          <div>
-            <h3 className={styles.subTitle}>Buyer wallets</h3>
-            {wallets.length === 0 ? (
-              <p className={styles.empty}>
-                No wallets yet. Wallets open when buyers first purchase tokens.
-              </p>
-            ) : (
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Buyer</th>
-                    <th>Balance</th>
-                    <th>Updated</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {wallets.map((w) => (
-                    <tr key={w.buyer_id}>
-                      <td>{w.business_name ?? w.buyer_id.slice(0, 8)}</td>
-                      <td className={styles.mono}>{w.balance}</td>
-                      <td className={styles.mono}>{fmtDateTime(w.updated_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-          <div>
-            <h3 className={styles.subTitle}>Recent token ledger</h3>
-            {ledger.length === 0 ? (
-              <p className={styles.empty}>
-                No token movements yet. The ledger fills as tokens are purchased and spent.
-              </p>
-            ) : (
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Buyer</th>
-                    <th>Delta</th>
-                    <th>Reason</th>
-                    <th>When</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {ledger.map((l) => (
-                    <tr key={l.id}>
-                      <td>{l.business_name ?? l.buyer_id.slice(0, 8)}</td>
-                      <td className={styles.mono}>{l.delta > 0 ? `+${l.delta}` : l.delta}</td>
-                      <td>{l.reason}</td>
-                      <td className={styles.mono}>{fmtDateTime(l.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-      </section>
+        <Link href="/admin/orders" className={styles.tile}>
+          <span className={styles.tileLabel}>
+            <Bi kn="ಪಾವತಿಗಳು" en="Payments" />
+          </span>
+          <span className={styles.tileNum}>{staleOrders.length}</span>
+          <span className={styles.tileSub}>
+            Pending orders · older than {PENDING_STALE_MINUTES} min
+          </span>
+        </Link>
+      </div>
 
-      {/* ── Unlocks ────────────────────────────────────────────────────── */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Unlocks</h2>
-        {unlocks.length === 0 ? (
-          <p className={styles.empty}>No unlocks yet. Unlocks begin after OTP launch.</p>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Buyer</th>
-                <th>Listing</th>
-                <th>Status</th>
-                <th>When</th>
-              </tr>
-            </thead>
-            <tbody>
-              {unlocks.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.business_name ?? '—'}</td>
-                  <td className={styles.mono}>{u.listing_id.slice(0, 8)}</td>
-                  <td>{u.status}</td>
-                  <td className={styles.mono}>{fmtDateTime(u.created_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+      <section aria-labelledby="needs-action">
+        <h2 id="needs-action" className={styles.sectionTitle}>
+          <Bi kn="ಕ್ರಮ ಬೇಕು" en="Needs action" />
+        </h2>
 
-      {/* ── Payments ───────────────────────────────────────────────────── */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Payments</h2>
-        {payments.length === 0 ? (
+        {nothingToDo ? (
           <p className={styles.empty}>
-            No payments yet. Payments appear here once Razorpay is activated.
+            Nothing needs action. No KYC is waiting, no order is stuck, and every active listing
+            is quality-checked.
           </p>
         ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Buyer</th>
-                <th>Amount</th>
-                <th>Tokens</th>
-                <th>Status</th>
-                <th>When</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments.map((p) => (
-                <tr key={p.id}>
-                  <td>{p.business_name ?? '—'}</td>
-                  <td className={styles.mono}>{rupees(p.amount)}</td>
-                  <td className={styles.mono}>{p.tokens}</td>
-                  <td>{p.status}</td>
-                  <td className={styles.mono}>{fmtDateTime(p.created_at)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className={styles.rows}>
+            {kycWaiting.map((b) => (
+              <li key={`b-${b.id}`}>
+                <Link href={`/admin/buyers?sel=${b.id}#row-${b.id}`} className={styles.actionRow}>
+                  <span className={styles.actionText}>
+                    <span className={styles.actionKind}>
+                      <span lang="kn">ಕೆವೈಸಿ ಪರಿಶೀಲನೆ</span> · KYC to review
+                    </span>
+                    <span className={styles.actionWhat}>{b.business_name ?? b.name}</span>
+                    <span className={styles.actionKind}>Registered {fmtDate(b.created_at)}</span>
+                  </span>
+                  <span className={styles.chev} aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              </li>
+            ))}
+            {staleOrders.map((o) => (
+              <li key={`o-${o.id}`}>
+                <Link href={`/admin/orders?sel=${o.id}#row-${o.id}`} className={styles.actionRow}>
+                  <span className={styles.actionText}>
+                    <span className={styles.actionKind}>
+                      <span lang="kn">ಪಾವತಿ ಬಾಕಿ</span> · Order stuck
+                    </span>
+                    <span className={styles.actionWhat}>
+                      {o.businessName ?? o.buyerName ?? '—'} · {rupees(o.amount)}
+                    </span>
+                    <span className={styles.actionKind}>Pending {age(o.ageMinutes)}</span>
+                  </span>
+                  <span className={styles.chev} aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              </li>
+            ))}
+            {quality.rows.map((l) => (
+              <li key={`q-${l.id}`}>
+                <Link href={`/admin/quality?sel=${l.id}#row-${l.id}`} className={styles.actionRow}>
+                  <span className={styles.actionText}>
+                    <span className={styles.actionKind}>
+                      <span lang="kn">ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ</span> · Quality check due
+                    </span>
+                    <span className={styles.actionWhat}>
+                      {varietyLabel(l)} · {l.quantity_quintals} q
+                    </span>
+                    <span className={styles.actionKind}>
+                      {[l.farmer?.village, l.district_en].filter(Boolean).join(', ') || '—'}
+                    </span>
+                  </span>
+                  <span className={styles.chev} aria-hidden="true">
+                    ›
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
-    </div>
+    </>
   );
 }

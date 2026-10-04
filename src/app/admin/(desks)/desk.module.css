@@ -1,0 +1,807 @@
+/* Admin portal — one stylesheet for the chrome and every desk.
+
+   Mobile-first: the base rules are the phone, the one breakpoint at 768px
+   widens the frame. Admin is checked from a phone, so a 360px screen is the
+   canvas this was drawn for.
+
+   Colour comes only from the brand ramp in src/styles/tokens.css — gadde
+   green, bhatta gold, hottu cream, kemmannu red, masi ink. Nothing new.
+   Poppins via --font-nav; Kannada falls through to Noto Sans Kannada.
+
+   Every tap target is at least 48px tall. */
+
+.shell {
+  --a-green: var(--gadde-700);
+  --a-green-deep: var(--gadde-900);
+  --a-green-tint: color-mix(in srgb, var(--gadde-300) 30%, var(--hottu-50));
+  --a-gold: var(--bhatta-600);
+  --a-gold-tint: var(--bhatta-200);
+  --a-cream: var(--hottu-50);
+  --a-bg: var(--hottu-100);
+  --a-line: var(--hottu-200);
+  --a-line-strong: var(--hottu-300);
+  --a-red: var(--kemmannu-600);
+  --a-red-tint: color-mix(in srgb, var(--kemmannu-400) 18%, var(--hottu-50));
+  --a-ink: var(--masi-900);
+  --a-muted: var(--masi-500);
+  --tap: 48px;
+
+  min-height: 100vh;
+  background: var(--a-bg);
+  color: var(--a-ink);
+  font-family: var(--font-nav);
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.shell h1,
+.shell h2,
+.shell h3 {
+  font-family: var(--font-nav);
+}
+
+/* ── Bilingual label: Kannada on top, English beneath ─────────────────── */
+
+.bi {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.25;
+}
+
+.kn {
+  font-weight: 600;
+}
+
+.en {
+  font-size: 0.8em;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+/* ── Chrome ───────────────────────────────────────────────────────────── */
+
+.bar {
+  background: var(--a-green-deep);
+  color: var(--a-cream);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mark {
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+
+.wordmark {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The role chip already says who is signed in; on a phone the tag would
+   only crowd it. */
+.portalTag {
+  display: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--a-green-deep);
+  background: var(--a-gold);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.barEnd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.identity {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  border: 1px solid color-mix(in srgb, var(--a-cream) 40%, transparent);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.logout {
+  min-height: var(--tap);
+  padding: 4px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--a-cream) 50%, transparent);
+  background: transparent;
+  color: var(--a-cream);
+  font-size: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.nav {
+  background: var(--a-cream);
+  border-bottom: 1px solid var(--a-line);
+  padding: 12px 16px;
+}
+
+.navList {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 1040px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.navListTwo {
+  composes: navList;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.navLink,
+.navLinkActive {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px 4px;
+  border-radius: 12px;
+  font-size: 15px;
+  border: 1px solid var(--a-line);
+  background: var(--a-bg);
+  color: var(--a-green-deep);
+}
+
+.navLinkActive {
+  background: var(--a-green);
+  border-color: var(--a-green);
+  color: var(--a-cream);
+}
+
+.main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 16px 64px;
+}
+
+/* ── Desk heading ─────────────────────────────────────────────────────── */
+
+.deskHead {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--a-green-deep);
+}
+
+.title .en {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--a-muted);
+  opacity: 1;
+}
+
+.deskSub {
+  margin: 8px 0 0;
+  font-size: 17px;
+  color: var(--a-muted);
+}
+
+.note {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--a-cream);
+  border: 1px solid var(--a-line);
+  font-size: 16px;
+  color: var(--a-muted);
+}
+
+/* ── Segmented filter ─────────────────────────────────────────────────── */
+
+.segGroup {
+  margin-bottom: 16px;
+}
+
+.segLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--a-muted);
+  margin-bottom: 8px;
+}
+
+.segments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.seg,
+.segActive {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px 8px;
+  border-radius: 12px;
+  font-size: 16px;
+  border: 2px solid var(--a-line-strong);
+  background: var(--a-cream);
+  color: var(--a-green-deep);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.segActive {
+  background: var(--a-green);
+  border-color: var(--a-green);
+  color: var(--a-cream);
+}
+
+/* ── Flash ────────────────────────────────────────────────────────────── */
+
+.flashOk,
+.flashErr {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.flashOk {
+  background: var(--a-green-tint);
+  color: var(--a-green-deep);
+  border: 1px solid var(--a-green);
+}
+
+.flashErr {
+  background: var(--a-red-tint);
+  color: var(--a-red);
+  border: 1px solid var(--a-red);
+}
+
+/* ── Rows ─────────────────────────────────────────────────────────────── */
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row,
+.rowOpen {
+  background: var(--a-cream);
+  border: 1px solid var(--a-line);
+  border-radius: 16px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-margin-top: 16px;
+}
+
+.rowOpen {
+  border: 2px solid var(--a-green);
+}
+
+.rowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.rowTitle {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--a-green-deep);
+  overflow-wrap: anywhere;
+}
+
+.rowTitleKn {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--a-muted);
+}
+
+.rowMeta {
+  margin: 0;
+  font-size: 17px;
+  color: var(--a-ink);
+  overflow-wrap: anywhere;
+}
+
+.rowMetaMuted {
+  composes: rowMeta;
+  color: var(--a-muted);
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.tel {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--a-green);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rowActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.actionNote {
+  margin: 0;
+  font-size: 15px;
+  color: var(--a-muted);
+}
+
+/* ── Pills ────────────────────────────────────────────────────────────── */
+
+.pillWait,
+.pillOk,
+.pillBad,
+.pillQuiet {
+  align-self: flex-start;
+  display: inline-block;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.pillWait {
+  background: var(--a-gold-tint);
+  color: var(--a-green-deep);
+}
+
+.pillOk {
+  background: var(--a-green-tint);
+  color: var(--a-green-deep);
+}
+
+.pillBad {
+  background: var(--a-red-tint);
+  color: var(--a-red);
+}
+
+.pillQuiet {
+  background: var(--a-bg);
+  color: var(--a-muted);
+}
+
+/* ── Buttons and forms ────────────────────────────────────────────────── */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.btnPrimary,
+.btnDanger,
+.detailsBtn,
+.detailsBtnOpen {
+  min-height: 56px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  background: var(--a-green);
+  border: 2px solid var(--a-green);
+  color: var(--a-cream);
+}
+
+.btnDanger {
+  background: var(--a-cream);
+  border: 2px solid var(--a-red);
+  color: var(--a-red);
+}
+
+.detailsBtn,
+.detailsBtnOpen {
+  background: transparent;
+  border: 2px solid var(--a-line-strong);
+  color: var(--a-green-deep);
+}
+
+.detailsBtnOpen {
+  border-color: var(--a-green);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--a-muted);
+}
+
+.input {
+  min-height: 52px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--a-line-strong);
+  background: var(--a-bg);
+  font-size: 18px;
+}
+
+.input:focus,
+.btnPrimary:focus-visible,
+.btnDanger:focus-visible,
+.seg:focus-visible,
+.segActive:focus-visible,
+.navLink:focus-visible,
+.navLinkActive:focus-visible,
+.detailsBtn:focus-visible,
+.detailsBtnOpen:focus-visible,
+.tile:focus-visible,
+.actionRow:focus-visible {
+  outline: 3px solid var(--a-gold);
+  outline-offset: 2px;
+}
+
+.confirmRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--a-gold-tint);
+  font-size: 16px;
+}
+
+.confirmRow input {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  margin-top: 2px;
+}
+
+.qFields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* ── Detail (opened only by the Details tap) ──────────────────────────── */
+
+.detail {
+  border-top: 1px solid var(--a-line);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fields {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px 16px;
+}
+
+.fields dt {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--a-muted);
+  margin-top: 10px;
+}
+
+.fields dd {
+  margin: 0;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.subhead {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--a-green-deep);
+}
+
+.docs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.doc {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.docLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--a-green);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.docBroken {
+  color: var(--a-red);
+  font-size: 16px;
+}
+
+.empty {
+  margin: 0;
+  padding: 20px 16px;
+  border-radius: 16px;
+  background: var(--a-cream);
+  border: 1px dashed var(--a-line-strong);
+  font-size: 17px;
+  color: var(--a-muted);
+}
+
+/* ── Overview ─────────────────────────────────────────────────────────── */
+
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.tile {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--a-cream);
+  border: 1px solid var(--a-line);
+  border-left: 6px solid var(--a-green);
+  color: var(--a-green-deep);
+}
+
+.tileLabel {
+  font-size: 20px;
+}
+
+.tileNum {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.tileSub {
+  font-size: 16px;
+  color: var(--a-muted);
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--a-green-deep);
+}
+
+.actionRow {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--a-cream);
+  border: 1px solid var(--a-line);
+  border-left: 6px solid var(--a-gold);
+}
+
+.actionText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.actionKind {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--a-muted);
+}
+
+.actionWhat {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--a-green-deep);
+  overflow-wrap: anywhere;
+}
+
+.chev {
+  flex: none;
+  font-size: 24px;
+  color: var(--a-green);
+}
+
+/* ── Field routes ─────────────────────────────────────────────────────── */
+
+.district {
+  margin-top: 28px;
+}
+
+.districtHead {
+  margin: 0 0 4px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--a-green-deep);
+}
+
+.talukHead {
+  margin: 20px 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--a-green-deep);
+}
+
+.villageHead {
+  margin: 16px 0 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--a-muted);
+}
+
+.headMeta {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--a-muted);
+}
+
+/* ── Wider screens ────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .portalTag {
+    display: inline-block;
+  }
+
+  .bar {
+    padding: 14px 32px;
+    gap: 12px;
+  }
+
+  .mark {
+    width: 28px;
+    height: 28px;
+  }
+
+  .wordmark {
+    font-size: 20px;
+  }
+
+  .identity {
+    font-size: 14px;
+    padding: 4px 12px;
+  }
+
+  .nav {
+    padding: 12px 32px;
+  }
+
+  .navList {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .navListTwo {
+    grid-template-columns: repeat(2, minmax(0, 220px));
+  }
+
+  .main {
+    padding: 32px 32px 80px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .segments {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .row,
+  .rowOpen {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: 16px 24px;
+    padding: 20px 24px;
+  }
+
+  .detail {
+    grid-column: 1 / -1;
+  }
+
+  .fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .qFields {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .qFields > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media print {
+  .bar,
+  .nav,
+  .segGroup {
+    display: none;
+  }
+
+  .shell {
+    background: #fff;
+  }
+}

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { requireRole } from '@/lib/adminAuth';
 import {
   getBuyerDetail,
@@ -8,13 +7,23 @@ import {
   SIGNED_URL_TTL_SECONDS,
   type KycStatus,
 } from '@/lib/adminKyc';
-import styles from './buyers.module.css';
+import {
+  Bi,
+  DeskHead,
+  DetailsToggle,
+  Flash,
+  KYC_WORD,
+  Pill,
+  Segments,
+  fmtDate,
+} from '../deskUi';
+import styles from '../desk.module.css';
 
 /**
- * DESK 1 — Buyer KYC verification. Master table + detail panel, fully
- * server-rendered; tabs, selection and flash messages all travel in the
- * query string, decisions are plain form posts to /admin/api/kyc. No client
- * JS at all: dense and fast.
+ * DESK 1 — Buyer KYC verification. One list, one large row per buyer, the
+ * decision buttons on the row itself. Fully server-rendered: the status
+ * filter, the open row and flash messages all travel in the query string,
+ * decisions are plain form posts to /admin/api/kyc. No client JS.
  *
  * The schema's approved state is 'approved'; the desk labels it "Verified"
  * (the product word). See src/lib/adminKyc.ts.
@@ -28,13 +37,6 @@ export const metadata: Metadata = {
 /* A review queue is live data — never cache it. */
 export const dynamic = 'force-dynamic';
 
-const STATUS_LABEL: Record<KycStatus, string> = {
-  pending: 'Pending',
-  under_review: 'Under review',
-  approved: 'Verified',
-  rejected: 'Rejected',
-};
-
 const FLASH: Record<string, { kind: 'ok' | 'err'; text: string }> = {
   approved: { kind: 'ok', text: 'Buyer approved — kyc_status is now approved (Verified).' },
   rejected: { kind: 'ok', text: 'Buyer rejected. The reason is recorded internally.' },
@@ -43,13 +45,14 @@ const FLASH: Record<string, { kind: 'ok' | 'err'; text: string }> = {
   error: { kind: 'err', text: 'The decision failed to save — check the server log and retry.' },
 };
 
-function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+const TONE: Record<KycStatus, 'wait' | 'ok' | 'bad' | 'quiet'> = {
+  pending: 'wait',
+  under_review: 'wait',
+  approved: 'ok',
+  rejected: 'bad',
+};
+
+const DECIDABLE: readonly KycStatus[] = ['pending', 'under_review'];
 
 export default async function AdminBuyersPage({
   searchParams,
@@ -73,198 +76,194 @@ export default async function AdminBuyersPage({
     sel ? getBuyerDetail(sel) : Promise.resolve(null),
   ]);
 
-  const tabHref = (s?: KycStatus) =>
-    `/admin/buyers${s ? `?status=${s}` : ''}${sel ? `${s ? '&' : '?'}sel=${sel}` : ''}`;
-  const rowHref = (id: string) =>
-    `/admin/buyers?${status ? `status=${status}&` : ''}sel=${id}`;
+  const href = (opts: { status?: KycStatus; sel?: string }) => {
+    const q = new URLSearchParams();
+    if (opts.status) q.set('status', opts.status);
+    if (opts.sel) q.set('sel', opts.sel);
+    const s = q.toString();
+    return `/admin/buyers${s ? `?${s}` : ''}${opts.sel ? `#row-${opts.sel}` : ''}`;
+  };
 
   return (
-    <div className={styles.desk}>
-      <div className={styles.listPane}>
-        <div className={styles.headRow}>
-          <h1 className={styles.title}>Buyer KYC</h1>
-          <nav className={styles.tabs} aria-label="Filter by status">
-            <Link href={tabHref()} className={!status ? styles.tabActive : styles.tab}>
-              All
-            </Link>
-            {KYC_STATUSES.map((s) => (
-              <Link
-                key={s}
-                href={tabHref(s)}
-                className={status === s ? styles.tabActive : styles.tab}
-              >
-                {STATUS_LABEL[s]}
-              </Link>
-            ))}
-          </nav>
-        </div>
+    <>
+      <DeskHead
+        kn="ಖರೀದಿದಾರರ ಕೆವೈಸಿ"
+        en="Buyer KYC"
+        sub={`${buyers.length} buyer${buyers.length === 1 ? '' : 's'}${status ? ` · ${KYC_WORD[status].en}` : ''}`}
+      />
 
-        {flash && (
-          <p className={flash.kind === 'ok' ? styles.flashOk : styles.flashErr} role="status">
-            {flash.text}
-          </p>
-        )}
+      <Segments
+        label={{ kn: 'ಸ್ಥಿತಿ', en: 'Status' }}
+        active={status ?? 'all'}
+        items={[
+          { key: 'all', kn: 'ಎಲ್ಲಾ', en: 'All', href: href({}) },
+          ...KYC_STATUSES.map((s) => ({ key: s, ...KYC_WORD[s], href: href({ status: s }) })),
+        ]}
+      />
 
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Business</th>
-              <th>Contact</th>
-              <th>Mobile</th>
-              <th>GST</th>
-              <th>PAN</th>
-              <th>District</th>
-              <th>Status</th>
-              <th>Registered</th>
-            </tr>
-          </thead>
-          <tbody>
-            {buyers.length === 0 && (
-              <tr>
-                <td colSpan={8} className={styles.empty}>
-                  No buyers{status ? ` with status ${STATUS_LABEL[status]}` : ''}.
-                </td>
-              </tr>
-            )}
-            {buyers.map((b) => (
-              <tr key={b.id} className={b.id === sel ? styles.rowSel : undefined}>
-                <td>
-                  <Link href={rowHref(b.id)} className={styles.rowLink}>
-                    {b.business_name ?? '—'}
-                  </Link>
-                </td>
-                <td>{b.name}</td>
-                <td className={styles.mono}>{b.mobile}</td>
-                <td className={styles.mono}>{b.gstin ?? '—'}</td>
-                <td className={styles.mono}>{b.pan ?? '—'}</td>
-                <td>{b.district_en ?? '—'}</td>
-                <td>
-                  <span className={styles[`st_${b.kyc_status}`]}>
-                    {STATUS_LABEL[b.kyc_status]}
-                  </span>
-                </td>
-                <td>{fmtDate(b.created_at)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Flash flash={flash} />
 
-      {sel && (
-        <aside className={styles.panel} aria-label="Buyer detail">
-          {!detail ? (
-            <p className={styles.empty}>Buyer not found.</p>
-          ) : (
-            <>
-              <div className={styles.panelHead}>
-                <h2 className={styles.panelTitle}>{detail.buyer.business_name ?? detail.buyer.name}</h2>
-                <Link
-                  href={`/admin/buyers${status ? `?status=${status}` : ''}`}
-                  className={styles.panelClose}
-                  aria-label="Close panel"
-                >
-                  ✕
-                </Link>
-              </div>
-              <span className={styles[`st_${detail.buyer.kyc_status}`]}>
-                {STATUS_LABEL[detail.buyer.kyc_status]}
-              </span>
+      {/* NOTE: approval sends NO SMS/email yet — buyer notification waits for
+          MSG91. Flagged, not faked. */}
+      <p className={styles.note}>Approving a buyer sends no SMS yet (MSG91 pending).</p>
 
-              <dl className={styles.fields}>
-                <dt>Contact person</dt>
-                <dd>{detail.buyer.name}</dd>
-                <dt>Mobile</dt>
-                <dd className={styles.mono}>{detail.buyer.mobile}</dd>
-                <dt>Email</dt>
-                <dd>{detail.buyer.email ?? '—'}</dd>
-                <dt>Business type</dt>
-                <dd>{detail.buyer.business_type ?? '—'}</dd>
-                <dt>GSTIN</dt>
-                <dd className={styles.mono}>{detail.buyer.gstin ?? '—'}</dd>
-                <dt>PAN</dt>
-                <dd className={styles.mono}>{detail.buyer.pan ?? '—'}</dd>
-                <dt>APMC licence</dt>
-                <dd className={styles.mono}>{detail.buyer.apmc_license_no ?? '—'}</dd>
-                <dt>District</dt>
-                <dd>{detail.buyer.district_en ?? '—'}</dd>
-                <dt>Address</dt>
-                <dd>{detail.buyer.business_address ?? '—'}</dd>
-                <dt>Registered</dt>
-                <dd>{fmtDate(detail.buyer.created_at)}</dd>
-              </dl>
-
-              <h3 className={styles.docsTitle}>Documents</h3>
-              {detail.documents.length === 0 && (
-                <p className={styles.empty}>No documents uploaded.</p>
-              )}
-              <ul className={styles.docs}>
-                {detail.documents.map((doc) => (
-                  <li key={doc.id} className={styles.doc}>
-                    <span className={styles.docType}>{doc.doc_type.toUpperCase()}</span>
-                    {doc.signed_url ? (
-                      /* Server-signed link into the private kyc-docs bucket;
-                         dies after SIGNED_URL_TTL_SECONDS. Never a public URL. */
-                      <a
-                        href={doc.signed_url}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        className={styles.docLink}
-                      >
-                        Open certificate ({Math.round(SIGNED_URL_TTL_SECONDS / 60)}-min link)
-                      </a>
-                    ) : (
-                      <span className={styles.docBroken}>
-                        Signing failed for {doc.storage_path}
-                      </span>
-                    )}
-                    <span className={styles.docMeta}>
-                      {doc.status}
-                      {doc.reviewed_at ? ` · reviewed ${fmtDate(doc.reviewed_at)}` : ''}
-                      {doc.reject_reason ? ` · reason: ${doc.reject_reason}` : ''}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              {(detail.buyer.kyc_status === 'pending' ||
-                detail.buyer.kyc_status === 'under_review') && (
-                <div className={styles.actions}>
-                  {/* NOTE: approval sends NO SMS/email yet — buyer notification
-                      waits for MSG91. Flagged, not faked. */}
-                  <form method="post" action="/admin/api/kyc" className={styles.approveForm}>
-                    <input type="hidden" name="buyer_id" value={detail.buyer.id} />
-                    <input type="hidden" name="decision" value="approve" />
-                    <button type="submit" className={styles.approveBtn}>
-                      Approve — mark Verified
-                    </button>
-                    <span className={styles.noNotify}>No SMS is sent yet (MSG91 pending).</span>
-                  </form>
-
-                  <form method="post" action="/admin/api/kyc" className={styles.rejectForm}>
-                    <input type="hidden" name="buyer_id" value={detail.buyer.id} />
-                    <input type="hidden" name="decision" value="reject" />
-                    <label htmlFor="reject-reason" className={styles.rejectLabel}>
-                      Internal reason (required to reject)
-                    </label>
-                    <textarea
-                      id="reject-reason"
-                      name="reason"
-                      rows={3}
-                      maxLength={500}
-                      required
-                      className={styles.reasonBox}
-                      placeholder="e.g. GST certificate name does not match business name"
-                    />
-                    <button type="submit" className={styles.rejectBtn}>
-                      Reject
-                    </button>
-                  </form>
+      {buyers.length === 0 ? (
+        <p className={styles.empty}>
+          No buyers{status ? ` with status ${KYC_WORD[status].en}` : ''}.
+        </p>
+      ) : (
+        <ul className={styles.rows}>
+          {buyers.map((b) => {
+            const open = b.id === sel;
+            return (
+              <li key={b.id} id={`row-${b.id}`} className={open ? styles.rowOpen : styles.row}>
+                <div className={styles.rowMain}>
+                  <h2 className={styles.rowTitle}>{b.business_name ?? b.name}</h2>
+                  <Pill word={KYC_WORD[b.kyc_status]} tone={TONE[b.kyc_status]} />
+                  <p className={styles.rowMeta}>
+                    {b.name} · <span className={styles.mono}>{b.mobile}</span>
+                  </p>
+                  <p className={styles.rowMetaMuted}>
+                    {b.district_en ?? 'No district'} · Registered {fmtDate(b.created_at)}
+                  </p>
                 </div>
-              )}
-            </>
-          )}
-        </aside>
+
+                <div className={styles.rowActions}>
+                  {DECIDABLE.includes(b.kyc_status) ? (
+                    <>
+                      <form method="post" action="/admin/api/kyc" className={styles.form}>
+                        <input type="hidden" name="buyer_id" value={b.id} />
+                        <input type="hidden" name="decision" value="approve" />
+                        <button type="submit" className={styles.btnPrimary}>
+                          <Bi kn="ಅನುಮೋದಿಸಿ" en="Approve — mark Verified" />
+                        </button>
+                      </form>
+                      <form method="post" action="/admin/api/kyc" className={styles.form}>
+                        <input type="hidden" name="buyer_id" value={b.id} />
+                        <input type="hidden" name="decision" value="reject" />
+                        <label className={styles.field}>
+                          <span className={styles.fieldLabel}>
+                            <span lang="kn">ಕಾರಣ</span> · Reason (required to reject)
+                          </span>
+                          <input
+                            name="reason"
+                            type="text"
+                            maxLength={500}
+                            required
+                            className={styles.input}
+                            placeholder="e.g. GST name does not match"
+                          />
+                        </label>
+                        <button type="submit" className={styles.btnDanger}>
+                          <Bi kn="ತಿರಸ್ಕರಿಸಿ" en="Reject" />
+                        </button>
+                      </form>
+                    </>
+                  ) : (
+                    <p className={styles.actionNote}>Decided — no action needed.</p>
+                  )}
+                  <DetailsToggle
+                    open={open}
+                    openHref={href({ status, sel: b.id })}
+                    closeHref={href({ status })}
+                  />
+                </div>
+
+                {open && (
+                  <div className={styles.detail}>
+                    {!detail ? (
+                      <p className={styles.empty}>Buyer not found.</p>
+                    ) : (
+                      <>
+                        <dl className={styles.fields}>
+                          <div>
+                            <dt>Contact person</dt>
+                            <dd>{detail.buyer.name}</dd>
+                          </div>
+                          <div>
+                            <dt>Mobile</dt>
+                            <dd className={styles.mono}>{detail.buyer.mobile}</dd>
+                          </div>
+                          <div>
+                            <dt>Email</dt>
+                            <dd>{detail.buyer.email ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>Business type</dt>
+                            <dd>{detail.buyer.business_type ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>GSTIN</dt>
+                            <dd className={styles.mono}>{detail.buyer.gstin ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>PAN</dt>
+                            <dd className={styles.mono}>{detail.buyer.pan ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>APMC licence</dt>
+                            <dd className={styles.mono}>{detail.buyer.apmc_license_no ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>District</dt>
+                            <dd>{detail.buyer.district_en ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>Address</dt>
+                            <dd>{detail.buyer.business_address ?? '—'}</dd>
+                          </div>
+                          <div>
+                            <dt>Registered</dt>
+                            <dd>{fmtDate(detail.buyer.created_at)}</dd>
+                          </div>
+                        </dl>
+
+                        <h3 className={styles.subhead}>
+                          <Bi kn="ದಾಖಲೆಗಳು" en="Documents" />
+                        </h3>
+                        {detail.documents.length === 0 ? (
+                          <p className={styles.empty}>No documents uploaded.</p>
+                        ) : (
+                          <ul className={styles.docs}>
+                            {detail.documents.map((doc) => (
+                              <li key={doc.id} className={styles.doc}>
+                                <strong>{doc.doc_type.toUpperCase()}</strong>
+                                {doc.signed_url ? (
+                                  /* Server-signed link into the private kyc-docs
+                                     bucket; dies after SIGNED_URL_TTL_SECONDS.
+                                     Never a public URL. */
+                                  <a
+                                    href={doc.signed_url}
+                                    target="_blank"
+                                    rel="noreferrer noopener"
+                                    className={styles.docLink}
+                                  >
+                                    Open certificate ({Math.round(SIGNED_URL_TTL_SECONDS / 60)}-min
+                                    link)
+                                  </a>
+                                ) : (
+                                  <span className={styles.docBroken}>
+                                    Signing failed for {doc.storage_path}
+                                  </span>
+                                )}
+                                <span className={styles.rowMetaMuted}>
+                                  {doc.status}
+                                  {doc.reviewed_at ? ` · reviewed ${fmtDate(doc.reviewed_at)}` : ''}
+                                  {doc.reject_reason ? ` · reason: ${doc.reject_reason}` : ''}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
       )}
-    </div>
+    </>
   );
 }
